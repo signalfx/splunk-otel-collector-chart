@@ -1,0 +1,375 @@
+suite: splunk-otel-collector.logsRoutingValidation
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - validate-platform-logs-routing.yaml
+
+tests:
+  - it: requires a routing attribute
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          routes:
+            application:
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "logsRouting.attribute is required"
+
+  - it: rejects a whitespace-only routing attribute
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: "  "
+          routes:
+            application:
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "logsRouting.attribute is required"
+
+  - it: requires route credentials
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              index: application
+    asserts:
+      - failedTemplate: {}
+
+  - it: rejects duplicate effective match values
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              value: shared-value
+              tokenFile: /var/run/application
+            security:
+              value: shared-value
+              tokenFile: /var/run/security
+    asserts:
+      - failedTemplate:
+          errorPattern: "duplicate effective match value"
+
+  - it: reserves the default route name for fallback
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            default:
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "route name \"default\" is reserved"
+
+  - it: requires pre-routing processors to exist
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          preRoutingProcessors:
+            - transform/missing
+          routes:
+            application:
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "transform/missing.*not defined in agent.config.processors"
+
+  - it: requires default-route processors to exist
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          defaultProcessors:
+            - resource/missing
+          routes:
+            application:
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "defaultProcessors references.*resource/missing.*not defined in agent.config.processors"
+
+  - it: requires named-route processors to exist
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              processors:
+                - resource/missing
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "routes.application.processors references.*resource/missing.*not defined in agent.config.processors"
+
+  - it: rejects a referenced processor disabled with null
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              processors:
+                - resource/disabled
+              tokenFile: /var/run/token
+      agent:
+        config:
+          processors:
+            resource/disabled: null
+    asserts:
+      - failedTemplate:
+          errorPattern: "routes.application.processors references.*resource/disabled.*not defined in agent.config.processors"
+
+  - it: validates processor references against the gateway owner
+    set:
+      splunkObservability.realm: ""
+      gateway.enabled: true
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          defaultProcessors:
+            - resource/agent-only
+          routes:
+            application:
+              tokenFile: /var/run/token
+      agent:
+        config:
+          processors:
+            resource/agent-only: {}
+    asserts:
+      - failedTemplate:
+          errorPattern: "resource/agent-only.*not defined in gateway.config.processors"
+
+  - it: rejects an agent-only pre-routing processor when the gateway owns routing
+    set:
+      splunkObservability.realm: ""
+      gateway.enabled: true
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          preRoutingProcessors:
+            - transform/agent-only
+          routes:
+            application:
+              tokenFile: /var/run/token
+      agent:
+        config:
+          processors:
+            transform/agent-only: {}
+    asserts:
+      - failedTemplate:
+          errorPattern: "preRoutingProcessors references.*transform/agent-only.*not defined in gateway.config.processors"
+
+  - it: rejects an agent-only route processor when the gateway owns routing
+    set:
+      splunkObservability.realm: ""
+      gateway.enabled: true
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              processors:
+                - resource/agent-only
+              tokenFile: /var/run/token
+      agent:
+        config:
+          processors:
+            resource/agent-only: {}
+    asserts:
+      - failedTemplate:
+          errorPattern: "routes.application.processors references.*resource/agent-only.*not defined in gateway.config.processors"
+
+  - it: requires Splunk Platform HEC logs
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsEnabled: false
+        metricsEnabled: true
+        metricsIndex: metrics
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires Splunk Platform logs over HEC"
+
+  - it: rejects routing when both possible owners are disabled
+    set:
+      splunkObservability.realm: ""
+      agent.enabled: false
+      gateway.enabled: false
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires gateway.enabled=true or an enabled non-Fargate agent"
+
+  - it: requires the gateway as routing owner on EKS Fargate
+    set:
+      splunkObservability.realm: ""
+      distribution: eks/fargate
+      gateway.enabled: false
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires gateway.enabled=true or an enabled non-Fargate agent"
+
+  - it: rejects routing with platform OTLP log ingest
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsEnabled: true
+        metricsEnabled: false
+        tracesEnabled: false
+        otlpIngest:
+          enabled: true
+          endpoint: otlp.example.com:4317
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/token
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot be combined with splunkPlatform.otlpIngest.enabled"
+
+  - it: rejects persistence when the route queue is disabled
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/token
+              sendingQueue:
+                enabled: false
+                persistentQueue:
+                  enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot enable persistence when its sending queue is disabled"
+
+  - it: reserves generated route metadata processor names
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              index: application
+              tokenFile: /var/run/token
+      agent:
+        config:
+          processors:
+            transform/platform_logs_route_metadata_application: {}
+    asserts:
+      - failedTemplate:
+          errorPattern: "reserves processor.*transform/platform_logs_route_metadata_application.*remove it from agent.config.processors"
+
+  - it: rejects route persistence in gateway mode
+    set:
+      splunkObservability.realm: ""
+      gateway.enabled: true
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/token
+              sendingQueue:
+                persistentQueue:
+                  enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot enable persistence in gateway mode"
+
+  - it: ignores agent-only global persistence for gateway route queues
+    set:
+      splunkObservability.realm: ""
+      gateway.enabled: true
+      splunkPlatform:
+        endpoint: https://default.example.com
+        token: default-token
+        sendingQueue:
+          persistentQueue:
+            enabled: true
+        logsRouting:
+          attribute: product
+          routes:
+            application:
+              tokenFile: /var/run/token
+              sendingQueue:
+                enabled: false
+    asserts:
+      - notFailedTemplate: {}

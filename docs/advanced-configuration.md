@@ -194,6 +194,96 @@ the chart stores them in the Splunk Platform Secret, mounts that Secret at
 `/otel/etc`, and renders the corresponding Collector `tls.ca_file`,
 `tls.cert_file`, and `tls.key_file` paths.
 
+## Route logs to multiple Splunk Platform destinations
+
+> [!WARNING]
+> Multi-destination log routing is experimental. Its configuration contract and
+> generated Collector topology may change.
+
+`splunkPlatform.logsRouting.routes` sends normal logs to additional HEC
+destinations by exact resource-attribute value. Missing or unmatched values use
+the default `splunkPlatform` exporter; an empty `routes` map preserves the
+existing single-destination behavior.
+
+For example, extract the `product` pod label and route directly on the generated
+`k8s.pod.labels.product` resource attribute:
+
+```yaml
+extraAttributes:
+  fromLabels:
+    - key: product
+      from: pod
+
+splunkPlatform:
+  endpoint: https://default.example.com:8088/services/collector/event
+  token: default-token
+  index: shared-logs
+  logsRouting:
+    attribute: k8s.pod.labels.product
+    routes:
+      application:
+        index: application-logs
+        tokenSecret:
+          name: application-hec
+          key: token
+```
+
+`extraAttributes.fromLabels` adds only listed labels; `tag_name` changes the
+generated key. Use `preRoutingProcessors` to derive or normalize a key from
+multiple attributes, such as preferring a pod label over a namespace label.
+
+### Routing owner and processor placement
+
+Routing has one owner. Enabling the gateway still deploys the agent by default,
+but moves routing and HEC export to the gateway:
+
+| `gateway.enabled` | Routing owner | Define referenced processors in | Mount route `tokenFile` with |
+| --- | --- | --- | --- |
+| `false` | Agent (must be enabled and is unavailable on EKS Fargate) | `agent.config.processors` | `agent.extraVolumes` and `agent.extraVolumeMounts` |
+| `true` | Gateway | `gateway.config.processors` | `gateway.extraVolumes` and `gateway.extraVolumeMounts` |
+
+In gateway mode, agents retain enriched resource attributes when forwarding
+logs over OTLP. All routing processor references resolve only against
+`gateway.config.processors`; an agent processor with the same name is not used.
+Logs sent directly to the gateway must contain the routing attribute or enough
+K8s metadata for gateway enrichment to add it.
+
+### Parameters
+
+| Parameter | Behavior |
+| --- | --- |
+| `attribute` | Required with routes. Exact resource-attribute key used for selection, for example `k8s.pod.labels.product`; log attributes are not inspected. |
+| `preRoutingProcessors` | Ordered component IDs run after enrichment, immediately before selection. Use them to create or normalize the routing key. |
+| `defaultProcessors` | Ordered component IDs run after selection only on missing or unmatched values; they cannot change the selected route. |
+| `routes.<name>` / `value` | Defines one HEC destination. The name is the match value unless `value` is set; values must be unique and `default` is reserved. |
+| `routes.<name>.tokenSecret` / `tokenFile` | Exactly one is required: an existing Secret in the release namespace, or an absolute path mounted in the routing owner. |
+| `routes.<name>.endpoint` | HEC endpoint override; inherits `splunkPlatform.endpoint`. |
+| `routes.<name>.index`, `source`, `sourcetype` | Configured fields override matching resource and log attributes after route processors. Omitted fields preserve metadata; global values remain exporter fallbacks. |
+| `routes.<name>.processors` | Ordered component IDs run after selection only on that route. |
+| `routes.<name>.retryOnFailure` / `sendingQueue` | Partial overrides of the matching `splunkPlatform` settings; unspecified fields inherit global values. |
+| `routes.<name>.sendingQueue.persistentQueue.enabled` | Per-route persistence override for direct-agent export. Explicitly enabling it in gateway mode is rejected. |
+
+For Secret-backed `tokenFile` mounts, use `defaultMode: 0440`. The default
+`fsGroup: 999` for agents and gateways grants the non-root Collector read
+access; preserve access if you override the pod security context.
+
+### Behavior and limitations
+
+- Route queues are independent, but isolation ends when a failed route's queue
+  fills. A full queue can affect the shared router; `noDropLogsPipeline` can
+  backpressure all routes. Route-local drop-on-overflow is not supported.
+- Persistent queues require direct agent export. Gateway routes use memory
+  queues.
+- Routing covers normal container, OTLP, journald, and extra file logs. Secure
+  Application and entity events, plus cluster-receiver events and objects, keep
+  their existing destinations.
+- Routing is automatically attached only to the chart's built-in normal log
+  pipelines. A custom log pipeline can opt in by exporting to
+  `routing/platform_logs`; it must also run any required pre-routing processors.
+
+See the [multi-tenant example](../examples/multi-tenant-platform-logs/) for a
+complete configuration.
+
 ## Provide tokens as a secret from environment variables or mounted files
 
 Instead of having tokens and TLS PEM content as clear text in the values, those

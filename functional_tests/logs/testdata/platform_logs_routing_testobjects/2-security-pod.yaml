@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-precedence
+  namespace: platform-logs-routing-precedence
+  labels:
+    test: platform-logs-routing-precedence
+    product: security
+  annotations:
+    splunk.com/index: pod-index
+    splunk.com/sourcetype: pod:sourcetype
+spec:
+  automountServiceAccountToken: false
+  containers:
+    - name: security-precedence
+      image: busybox:1.37
+      env:
+        - name: RUN_ID
+          valueFrom:
+            configMapKeyRef:
+              name: platform-logs-routing-run
+              key: run-id
+      command: ["sh", "-c", "echo ${RUN_ID}:K8S_SECURITY_ROUTE_MARKER; sleep 3600"]
+  nodeSelector:
+    kubernetes.io/os: "linux"

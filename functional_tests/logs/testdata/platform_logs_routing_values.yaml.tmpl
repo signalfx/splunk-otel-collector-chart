@@ -1,0 +1,119 @@
+clusterName: platform-logs-routing-test
+
+splunkObservability:
+  realm: ""
+
+clusterReceiver:
+  enabled: false
+
+extraAttributes:
+  fromLabels:
+    - key: product
+      from: pod
+
+gateway:
+  enabled: {{ .GatewayEnabled }}
+  replicaCount: 1
+  config:
+    processors:
+      resource/routing-default:
+        attributes:
+          - action: upsert
+            key: routing.destination
+            value: default
+      resource/routing-application:
+        attributes:
+          - action: upsert
+            key: routing.destination
+            value: application
+          - action: upsert
+            key: com.splunk.index
+            value: processor-index
+          - action: upsert
+            key: com.splunk.source
+            value: processor-source
+          - action: upsert
+            key: com.splunk.sourcetype
+            value: processor:sourcetype
+      resource/routing-security:
+        attributes:
+          - action: upsert
+            key: routing.destination
+            value: security
+  resources:
+    limits:
+      cpu: 200m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 200Mi
+
+splunkPlatform:
+  endpoint: {{ .DefaultURL }}
+  token: test-token
+  index: global-index
+  source: global-source
+  sourcetype: global:sourcetype
+  logsEnabled: true
+  metricsEnabled: false
+  tracesEnabled: false
+  logsRouting:
+    attribute: k8s.pod.labels.product
+    defaultProcessors:
+      - resource/routing-default
+    routes:
+      application:
+        endpoint: {{ .ApplicationURL }}
+        index: application
+        source: application-source
+        sourcetype: application:sourcetype
+        processors:
+          - resource/routing-application
+        tokenSecret:
+          name: sock-splunk-otel-collector
+          key: splunk_platform_hec_token
+      security:
+        endpoint: {{ .SecurityURL }}
+        index: security
+        processors:
+          - resource/routing-security
+        tokenSecret:
+          name: sock-splunk-otel-collector
+          key: splunk_platform_hec_token
+        retryOnFailure:
+          initialInterval: 1s
+          maxInterval: 2s
+        sendingQueue:
+          queueSize: 100
+          {{ if not .GatewayEnabled }}
+          persistentQueue:
+            enabled: true
+          {{ end }}
+
+agent:
+  config:
+    processors:
+      resource/routing-default:
+        attributes:
+          - action: upsert
+            key: routing.destination
+            value: default
+      resource/routing-application:
+        attributes:
+          - action: upsert
+            key: routing.destination
+            value: application
+          - action: upsert
+            key: com.splunk.index
+            value: processor-index
+          - action: upsert
+            key: com.splunk.source
+            value: processor-source
+          - action: upsert
+            key: com.splunk.sourcetype
+            value: processor:sourcetype
+      resource/routing-security:
+        attributes:
+          - action: upsert
+            key: routing.destination
+            value: security

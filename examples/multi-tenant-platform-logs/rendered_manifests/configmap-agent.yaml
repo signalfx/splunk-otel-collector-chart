@@ -1,0 +1,414 @@
+---
+# Source: splunk-otel-collector/templates/configmap-agent.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-splunk-otel-collector-otel-agent
+  namespace: default
+  labels:
+    app.kubernetes.io/name: splunk-otel-collector
+    helm.sh/chart: splunk-otel-collector-0.158.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/version: "0.158.0"
+    app: splunk-otel-collector
+    chart: splunk-otel-collector-0.158.0
+    release: default
+data:
+  relay: |
+    connectors:
+      routing/platform_logs:
+        default_pipelines:
+        - logs/platform/default
+        table:
+        - condition: resource.attributes["product"] == "application"
+          context: log
+          pipelines:
+          - logs/platform/application
+        - condition: resource.attributes["product"] == "security"
+          context: log
+          pipelines:
+          - logs/platform/security
+    exporters:
+      splunk_hec/platform_logs:
+        disable_compression: false
+        endpoint: https://default.example.com:8088/services/collector/event
+        idle_conn_timeout: 10s
+        index: shared-logs
+        max_idle_conns: 200
+        max_idle_conns_per_host: 200
+        profiling_data_enabled: false
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 0s
+          max_interval: 30s
+        sending_queue:
+          batch:
+            flush_timeout: 200ms
+            min_size: 2048
+          block_on_overflow: true
+          enabled: true
+          num_consumers: 10
+          queue_size: 10000
+          sizer: items
+        source: kubernetes
+        splunk_app_name: splunk-otel-collector-chart
+        splunk_app_version: 0.158.0
+        timeout: 10s
+        tls:
+          insecure_skip_verify: false
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN}
+      splunk_hec/platform_logs/application:
+        disable_compression: false
+        endpoint: https://default.example.com:8088/services/collector/event
+        idle_conn_timeout: 10s
+        index: application-logs
+        max_idle_conns: 200
+        max_idle_conns_per_host: 200
+        profiling_data_enabled: false
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 0s
+          max_interval: 30s
+        sending_queue:
+          batch:
+            flush_timeout: 200ms
+            min_size: 2048
+          block_on_overflow: true
+          enabled: true
+          num_consumers: 10
+          queue_size: 10000
+          sizer: items
+        source: kubernetes
+        splunk_app_name: splunk-otel-collector-chart
+        splunk_app_version: 0.158.0
+        timeout: 10s
+        tls:
+          insecure_skip_verify: false
+        token: ${SPLUNK_PLATFORM_HEC_TOKEN_APPLICATION}
+      splunk_hec/platform_logs/security:
+        disable_compression: false
+        endpoint: https://default.example.com:8088/services/collector/event
+        idle_conn_timeout: 10s
+        index: security-logs
+        max_idle_conns: 200
+        max_idle_conns_per_host: 200
+        profiling_data_enabled: false
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_elapsed_time: 0s
+          max_interval: 30s
+        sending_queue:
+          batch:
+            flush_timeout: 200ms
+            min_size: 2048
+          block_on_overflow: true
+          enabled: true
+          num_consumers: 10
+          queue_size: 10000
+          sizer: items
+          storage: file_storage/persistent_queue_security
+        source: kubernetes
+        splunk_app_name: splunk-otel-collector-chart
+        splunk_app_version: 0.158.0
+        timeout: 10s
+        tls:
+          insecure_skip_verify: false
+        token: ${file:/var/run/splunk-route-tokens/security}
+    extensions:
+      file_storage:
+        directory: /var/addon/splunk/otel_pos
+      file_storage/persistent_queue_security:
+        compaction:
+          cleanup_on_start: true
+          directory: /var/addon/splunk/exporter_queue/agent/security
+          on_rebound: true
+          rebound_needed_threshold_mib: 200
+          rebound_trigger_threshold_mib: 100
+        create_directory: true
+        directory: /var/addon/splunk/exporter_queue/agent/security
+        timeout: 0
+      health_check:
+        endpoint: 0.0.0.0:13133
+      k8s_observer:
+        auth_type: serviceAccount
+        node: ${K8S_NODE_NAME}
+      zpages: null
+    processors:
+      batch:
+        metadata_keys:
+        - X-SF-Token
+      filter/logs:
+        logs:
+          exclude:
+            match_type: strict
+            resource_attributes:
+            - key: splunk.com/exclude
+              value: "true"
+      k8s_attributes:
+        extract:
+          annotations:
+          - from: pod
+            key: splunk.com/sourcetype
+          - from: namespace
+            key: splunk.com/exclude
+            tag_name: splunk.com/exclude
+          - from: pod
+            key: splunk.com/exclude
+            tag_name: splunk.com/exclude
+          - from: namespace
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          - from: pod
+            key: splunk.com/index
+            tag_name: com.splunk.index
+          labels:
+          - from: pod
+            key: product
+            tag_name: routing.product.pod
+          - from: namespace
+            key: product
+            tag_name: routing.product.namespace
+          metadata:
+          - k8s.namespace.name
+          - k8s.node.name
+          - k8s.pod.name
+          - k8s.pod.uid
+          - container.id
+          - container.image.name
+          - container.image.tag
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: ip
+        - sources:
+          - from: connection
+      memory_limiter:
+        check_interval: 2s
+        limit_mib: ${SPLUNK_MEMORY_LIMIT_MIB}
+      resource:
+        attributes:
+        - action: insert
+          key: k8s.node.name
+          value: ${K8S_NODE_NAME}
+        - action: upsert
+          key: k8s.cluster.name
+          value: CHANGEME
+      resource/add_agent_k8s:
+        attributes:
+        - action: insert
+          key: k8s.pod.name
+          value: ${K8S_POD_NAME}
+        - action: insert
+          key: k8s.pod.uid
+          value: ${K8S_POD_UID}
+        - action: insert
+          key: k8s.namespace.name
+          value: ${K8S_NAMESPACE}
+      resource/logs:
+        attributes:
+        - action: upsert
+          from_attribute: k8s.pod.annotations.splunk.com/sourcetype
+          key: com.splunk.sourcetype
+        - action: delete
+          key: k8s.pod.annotations.splunk.com/sourcetype
+        - action: delete
+          key: splunk.com/exclude
+      resource/mark-application-route:
+        attributes:
+        - action: upsert
+          key: routing.destination
+          value: application
+      resource/mark-default-route:
+        attributes:
+        - action: upsert
+          key: routing.destination
+          value: default
+      resource/mark-security-route:
+        attributes:
+        - action: upsert
+          key: routing.destination
+          value: security
+      resource_detection:
+        detectors:
+        - env
+        - system
+        override: true
+        timeout: 15s
+      transform/derive-product:
+        error_mode: ignore
+        log_statements:
+        - context: resource
+          statements:
+          - set(attributes["product"], attributes["routing.product.pod"]) where attributes["routing.product.pod"]
+            != nil
+          - set(attributes["product"], attributes["routing.product.namespace"]) where
+            attributes["product"] == nil and attributes["routing.product.namespace"] !=
+            nil
+      transform/platform_logs_route_metadata_application:
+        log_statements:
+        - context: log
+          statements:
+          - set(resource.attributes["com.splunk.index"], "application-logs")
+          - set(attributes["com.splunk.index"], "application-logs")
+      transform/platform_logs_route_metadata_security:
+        log_statements:
+        - context: log
+          statements:
+          - set(resource.attributes["com.splunk.index"], "security-logs")
+          - set(attributes["com.splunk.index"], "security-logs")
+    receivers:
+      file_log:
+        encoding: utf-8
+        exclude:
+        - /var/log/pods/default_default-splunk-otel-collector*_*/otel-collector/*.log
+        fingerprint_size: 1kb
+        force_flush_period: "0"
+        include:
+        - /var/log/pods/*/*/*.log
+        include_file_name: false
+        include_file_path: true
+        max_concurrent_files: 1024
+        max_log_size: 1MiB
+        operators:
+        - add_metadata_from_filepath: true
+          id: container-parser
+          max_log_size: 1048576
+          type: container
+        - combine_field: body
+          combine_with: ""
+          id: docker-recombine
+          if: attributes.logtag == nil
+          is_last_entry: body endsWith "\n"
+          max_log_size: 1048576
+          source_identifier: attributes["log.file.path"]
+          type: recombine
+        - field: body
+          id: handle_empty_log
+          if: body == nil
+          type: add
+          value: ""
+        - field: resource["com.splunk.sourcetype"]
+          type: add
+          value: EXPR("kube:container:"+resource["k8s.container.name"])
+        - from: attributes["log.file.path"]
+          to: resource["com.splunk.source"]
+          type: move
+        poll_interval: 200ms
+        retry_on_failure:
+          enabled: true
+          max_elapsed_time: 0s
+        start_at: beginning
+        storage: file_storage
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+            include_metadata: false
+          http:
+            endpoint: 0.0.0.0:4318
+            include_metadata: false
+      prometheus/agent:
+        config:
+          scrape_configs:
+          - job_name: otel-agent
+            metric_relabel_configs:
+            - action: drop
+              regex: promhttp_metric_handler_errors.*
+              source_labels:
+              - __name__
+            - action: drop
+              regex: otelcol_processor_batch_.*
+              source_labels:
+              - __name__
+            - action: drop
+              regex: .*otelcol\.k8s\.pod\.association
+              source_labels:
+              - __name__
+            scrape_interval: 10s
+            static_configs:
+            - targets:
+              - localhost:8889
+    service:
+      extensions:
+      - file_storage
+      - file_storage/persistent_queue_security
+      - health_check
+      - k8s_observer
+      - zpages
+      pipelines:
+        logs:
+          exporters:
+          - routing/platform_logs
+          processors:
+          - memory_limiter
+          - k8s_attributes
+          - filter/logs
+          - resource_detection
+          - resource
+          - resource/logs
+          - transform/derive-product
+          receivers:
+          - file_log
+          - otlp
+        logs/platform/application:
+          exporters:
+          - splunk_hec/platform_logs/application
+          processors:
+          - resource/mark-application-route
+          - transform/platform_logs_route_metadata_application
+          receivers:
+          - routing/platform_logs
+        logs/platform/default:
+          exporters:
+          - splunk_hec/platform_logs
+          processors:
+          - resource/mark-default-route
+          receivers:
+          - routing/platform_logs
+        logs/platform/security:
+          exporters:
+          - splunk_hec/platform_logs/security
+          processors:
+          - resource/mark-security-route
+          - transform/platform_logs_route_metadata_security
+          receivers:
+          - routing/platform_logs
+      telemetry:
+        metrics:
+          readers:
+          - pull:
+              exporter:
+                prometheus:
+                  host: localhost
+                  port: 8889
+                  without_scope_info: true
+                  without_type_suffix: true
+                  without_units: true
+        resource:
+          attributes:
+          - name: service.name
+            value: otel-agent
+          - name: otelcol.service.mode
+            value: agent
+          - name: k8s.pod.name
+            value: ${K8S_POD_NAME}
+          - name: k8s.namespace.name
+            value: ${K8S_NAMESPACE}
+          - name: k8s.pod.uid
+            value: ${K8S_POD_UID}
+          - name: k8s.node.name
+            value: ${K8S_NODE_NAME}
+          - name: k8s.cluster.name
+            value: CHANGEME

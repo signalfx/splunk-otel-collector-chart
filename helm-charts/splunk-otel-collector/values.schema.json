@@ -195,6 +195,187 @@
               "type": "string"
             }
           }
+        },
+        "logsRouting": {
+          "description": "Route normal Splunk Platform logs to additional HEC destinations by resource attribute.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "attribute": {
+              "description": "Exact resource-attribute key used for route matching, for example k8s.pod.labels.product. The attribute must exist when routing runs; log-record attributes are not inspected.",
+              "type": "string"
+            },
+            "preRoutingProcessors": {
+              "description": "Ordered non-null Collector processor component IDs to run immediately before routing. Define them in gateway.config.processors when gateway.enabled is true; otherwise use agent.config.processors.",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "defaultProcessors": {
+              "description": "Ordered Collector processor component IDs to run after routing for unmatched logs sent to the default destination. Component ownership follows preRoutingProcessors.",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "routes": {
+              "description": "Additional HEC destinations keyed by route name.",
+              "type": "object",
+              "additionalProperties": false,
+              "patternProperties": {
+                "^[a-z][a-z0-9-]{0,62}$": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "value": {
+                      "description": "Exact attribute value matched by this route. Defaults to the route name.",
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "endpoint": {
+                      "description": "HEC endpoint override. Inherits splunkPlatform.endpoint.",
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "index": {
+                      "description": "Explicit HEC index for this route. Overrides existing com.splunk.index metadata, including pod and namespace annotations. When omitted, existing metadata is preserved and splunkPlatform.index remains the exporter fallback.",
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "source": {
+                      "description": "Explicit HEC source for this route. Overrides existing com.splunk.source metadata. When omitted, existing metadata is preserved and splunkPlatform.source remains the exporter fallback.",
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "sourcetype": {
+                      "description": "Explicit HEC sourcetype for this route. Overrides existing com.splunk.sourcetype metadata, including pod annotations. When omitted, existing metadata is preserved and splunkPlatform.sourcetype remains the exporter fallback.",
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "tokenSecret": {
+                      "description": "Existing K8s Secret containing the route HEC token.",
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "name",
+                        "key"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    },
+                    "tokenFile": {
+                      "description": "Absolute path of a file containing the route HEC token, already mounted into the gateway when gateway.enabled is true or the agent otherwise.",
+                      "type": "string",
+                      "pattern": "^/"
+                    },
+                    "processors": {
+                      "description": "Ordered Collector processor component IDs to run after routing for this route. Component ownership follows preRoutingProcessors.",
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "uniqueItems": true
+                    },
+                    "retryOnFailure": {
+                      "description": "Partial override of splunkPlatform.retryOnFailure.",
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "enabled": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "initialInterval": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "maxInterval": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "maxElapsedTime": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    },
+                    "sendingQueue": {
+                      "description": "Partial override of splunkPlatform.sendingQueue.",
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "enabled": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "numConsumers": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "queueSize": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "persistentQueue": {
+                          "description": "Direct-agent persistence override. Omit or use null to inherit the global setting.",
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "enabled": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "oneOf": [
+                    {
+                      "required": [
+                        "tokenSecret"
+                      ],
+                      "not": {
+                        "required": [
+                          "tokenFile"
+                        ]
+                      }
+                    },
+                    {
+                      "required": [
+                        "tokenFile"
+                      ],
+                      "not": {
+                        "required": [
+                          "tokenSecret"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
         }
       },
       "anyOf": [
