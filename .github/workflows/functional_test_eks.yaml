@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: eks-rotel-eks
+      group: functional-tests-eks
       queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: eks-rotel-eks
+      group: functional-tests-eks
       queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -134,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: eks-gdi-github-eks-fargate
+      group: functional-tests-eks-fargate
       queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -164,7 +164,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: eks-gdi-github-eks-fargate
+      group: functional-tests-eks-fargate
       queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -196,7 +196,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: eks-rotel-eks-autotest
+      group: functional-tests-eks-auto-mode
       queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
@@ -225,7 +225,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: eks-rotel-eks-autotest
+      group: functional-tests-eks-auto-mode
       queue: max
     continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
