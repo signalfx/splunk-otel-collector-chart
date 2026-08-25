@@ -22,11 +22,12 @@ env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
 
 jobs:
-  eks-run-policy:
-    name: Determine whether EKS tests should run
+  collector-image-config:
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
     runs-on: ubuntu-latest
     outputs:
+      cloud-tests-enabled: ${{ steps.config.outputs.cloud-tests-enabled }}
+      otelcol-image: ${{ steps.config.outputs.otelcol-image }}
       release-required: ${{ steps.policy.outputs.release-required }}
       run-eks-tests: ${{ steps.policy.outputs.run-eks-tests }}
     steps:
@@ -44,13 +45,6 @@ jobs:
             echo "run-eks-tests=false" >> "$GITHUB_OUTPUT"
           fi
 
-  collector-image-config:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
-    runs-on: ubuntu-latest
-    outputs:
-      cloud-tests-enabled: ${{ steps.config.outputs.cloud-tests-enabled }}
-      otelcol-image: ${{ steps.config.outputs.otelcol-image }}
-    steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Resolve collector image and cloud-test gating
@@ -66,17 +60,17 @@ jobs:
 
   eks-test:
     name: Test helm install in EKS - credentials needed
-    needs: [ collector-image-config, eks-run-policy ]
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: functional-tests-eks
+      group: eks-cluster-rotel-eks
       queue: max
-    continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -95,17 +89,17 @@ jobs:
 
   eks-upgrade-test:
     name: Test helm upgrade in EKS - credentials needed
-    needs: [ collector-image-config, eks-run-policy ]
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: functional-tests-eks
+      group: eks-cluster-rotel-eks
       queue: max
-    continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -126,17 +120,17 @@ jobs:
 
   eks-fargate-test:
     name: Test helm install in EKS Fargate - credentials needed
-    needs: [ collector-image-config, eks-run-policy ]
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: functional-tests-eks-fargate
+      group: eks-cluster-gdi-github-eks-fargate
       queue: max
-    continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -156,17 +150,17 @@ jobs:
 
   eks-fargate-upgrade-test:
     name: Test helm upgrade in EKS Fargate - credentials needed
-    needs: [ collector-image-config, eks-run-policy ]
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: functional-tests-eks-fargate
+      group: eks-cluster-gdi-github-eks-fargate
       queue: max
-    continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -188,17 +182,17 @@ jobs:
 
   eks-auto-mode-test:
     name: Test helm install in EKS Auto Mode - credentials needed
-    needs: [ collector-image-config, eks-run-policy ]
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: functional-tests-eks-auto-mode
+      group: eks-cluster-rotel-eks-autotest
       queue: max
-    continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -217,17 +211,17 @@ jobs:
 
   eks-auto-mode-upgrade-test:
     name: Test helm upgrade in EKS Auto Mode - credentials needed
-    needs: [ collector-image-config, eks-run-policy ]
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.eks-run-policy.outputs.run-eks-tests == 'true' }}
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.run-eks-tests == 'true' }}
     environment:
       name: aws-eks-functional-tests
       deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 60
     concurrency:
-      group: functional-tests-eks-auto-mode
+      group: eks-cluster-rotel-eks-autotest
       queue: max
-    continue-on-error: ${{ needs.eks-run-policy.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -249,13 +243,13 @@ jobs:
   release-eks-gate:
     name: EKS release gate
     needs:
-      - eks-run-policy
       - eks-test
       - eks-upgrade-test
       - eks-fargate-test
       - eks-fargate-upgrade-test
       - eks-auto-mode-test
       - eks-auto-mode-upgrade-test
+    # Evaluate every test result so release PRs fail closed on failures, skips, or cancellation.
     if: ${{ always() }}
     runs-on: ubuntu-latest
     env:

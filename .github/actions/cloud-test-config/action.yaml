@@ -56,6 +56,12 @@ runs:
         # which is keyed on the quay.io/signalfx/splunk-otel-collector
         # repository.
         gke_autopilot_allowed=true
+        if [[ -n "$COLLECTOR_IMAGE" ]] && \
+          [[ "$COLLECTOR_IMAGE" == *$'\n'* || "$COLLECTOR_IMAGE" == *$'\r'* ]]; then
+          echo "::error::COLLECTOR_IMAGE must be a single-line image reference"
+          exit 1
+        fi
+
         collector_repo="$COLLECTOR_IMAGE"
         collector_repo="${collector_repo%%@*}"
         image_name="${collector_repo##*/}"
@@ -66,10 +72,6 @@ runs:
         case "$EVENT_NAME" in
           workflow_dispatch)
             if [[ -n "$COLLECTOR_IMAGE" ]]; then
-              if [[ "$COLLECTOR_IMAGE" == *$'\n'* || "$COLLECTOR_IMAGE" == *$'\r'* ]]; then
-                echo "::error::COLLECTOR_IMAGE must be a single-line image reference"
-                exit 1
-              fi
               case "$collector_repo" in
                 quay.io/signalfx/splunk-otel-collector | \
                   quay.io/signalfx/splunk-otel-collector-dev | \

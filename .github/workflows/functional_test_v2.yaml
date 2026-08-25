@@ -23,7 +23,7 @@ on:
           - false
           - true
       COLLECTOR_IMAGE:
-        description: 'COLLECTOR_IMAGE: Optional collector image override for kind functional tests. Must be a quay.io/signalfx/* image.'
+        description: 'COLLECTOR_IMAGE: Optional collector image override for kind functional tests. Must use an approved Splunk collector repository on quay.io.'
         required: false
         default: 'quay.io/signalfx/splunk-otel-collector-dev:latest'
         type: string
