@@ -1,0 +1,86 @@
+name: functional-tests-rosa
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      COLLECTOR_IMAGE:
+        description: 'COLLECTOR_IMAGE: Optional collector image override for cloud functional tests. Must be a quay.io/signalfx/* image.'
+        required: false
+        default: 'quay.io/signalfx/splunk-otel-collector-dev:latest'
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: 1.26.6
+  # Make sure to exit early if cache segment download times out after 2 minutes.
+  # We limit cache download as a whole to 5 minutes.
+  SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
+
+jobs:
+  collector-image-config:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
+    runs-on: ubuntu-latest
+    outputs:
+      cloud-tests-enabled: ${{ steps.config.outputs.cloud-tests-enabled }}
+      otelcol-image: ${{ steps.config.outputs.otelcol-image }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Resolve collector image and cloud-test gating
+        id: config
+        uses: ./.github/actions/cloud-test-config
+        with:
+          collector-image: ${{ github.event.inputs.COLLECTOR_IMAGE || '' }}
+          event-name: ${{ github.event_name }}
+          pr-repo-full-name: ${{ github.event.pull_request.head.repo.full_name || '' }}
+          pr-user-login: ${{ github.event.pull_request.user.login || '' }}
+          ref: ${{ github.ref }}
+          repository: ${{ github.repository }}
+
+  rosa-test:
+    name: Test helm install in ROSA - credentials needed
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/kubeconfig-secret-context
+        with:
+          certificate-authority-file: /etc/ssl/certs/ca-certificates.crt
+          kubeconfig-content: ${{ secrets.ROSA_KUBECONFIG }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          kube-test-env: rosa
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+
+  rosa-upgrade-test:
+    name: Test helm upgrade in ROSA - credentials needed
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/kubeconfig-secret-context
+        with:
+          certificate-authority-file: /etc/ssl/certs/ca-certificates.crt
+          kubeconfig-content: ${{ secrets.ROSA_KUBECONFIG }}
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-rosa
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          kube-test-env: rosa
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          upgrade-from-values: rosa_upgrade_from_previous_release_values.yaml

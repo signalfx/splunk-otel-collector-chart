@@ -1,0 +1,176 @@
+name: functional-tests-eks
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      COLLECTOR_IMAGE:
+        description: 'COLLECTOR_IMAGE: Optional collector image override for cloud functional tests. Must be a quay.io/signalfx/* image.'
+        required: false
+        default: 'quay.io/signalfx/splunk-otel-collector-dev:latest'
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: 1.26.6
+  # Make sure to exit early if cache segment download times out after 2 minutes.
+  # We limit cache download as a whole to 5 minutes.
+  SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
+
+jobs:
+  collector-image-config:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
+    runs-on: ubuntu-latest
+    outputs:
+      cloud-tests-enabled: ${{ steps.config.outputs.cloud-tests-enabled }}
+      otelcol-image: ${{ steps.config.outputs.otelcol-image }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Resolve collector image and cloud-test gating
+        id: config
+        uses: ./.github/actions/cloud-test-config
+        with:
+          collector-image: ${{ github.event.inputs.COLLECTOR_IMAGE || '' }}
+          event-name: ${{ github.event_name }}
+          pr-repo-full-name: ${{ github.event.pull_request.head.repo.full_name || '' }}
+          pr-user-login: ${{ github.event.pull_request.user.login || '' }}
+          ref: ${{ github.ref }}
+          repository: ${{ github.repository }}
+
+  eks-test:
+    name: Test helm install in EKS - credentials needed
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    environment: aws-eks-functional-tests
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/eks-functional-test
+        with:
+          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
+          aws-cluster-name: rotel-eks
+          aws-region: us-west-1
+          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          go-version: ${{ env.GO_VERSION }}
+          kube-test-env: eks
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+
+  eks-upgrade-test:
+    name: Test helm upgrade in EKS - credentials needed
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    environment: aws-eks-functional-tests
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/eks-functional-test
+        with:
+          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
+          aws-cluster-name: rotel-eks
+          aws-region: us-west-1
+          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          go-version: ${{ env.GO_VERSION }}
+          kube-test-env: eks
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          upgrade-from-values: eks_upgrade_from_previous_release_values.yaml
+
+  eks-fargate-test:
+    name: Test helm install in EKS Fargate - credentials needed
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    environment: aws-eks-functional-tests
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/eks-functional-test
+        with:
+          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
+          aws-cluster-name: gdi-github-eks-fargate
+          aws-region: us-west-2
+          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          go-version: ${{ env.GO_VERSION }}
+          kube-test-env: eks/fargate
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          skip-tests: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
+
+  eks-fargate-upgrade-test:
+    name: Test helm upgrade in EKS Fargate - credentials needed
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    environment: aws-eks-functional-tests
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/eks-functional-test
+        with:
+          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
+          aws-cluster-name: gdi-github-eks-fargate
+          aws-region: us-west-2
+          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          go-version: ${{ env.GO_VERSION }}
+          kube-test-env: eks/fargate
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          skip-tests: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
+          upgrade-from-values: eks_fargate_upgrade_from_previous_release_values.yaml
+
+  eks-auto-mode-test:
+    name: Test helm install in EKS Auto Mode - credentials needed
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    environment: aws-eks-functional-tests
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/eks-functional-test
+        with:
+          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
+          aws-cluster-name: rotel-eks-autotest
+          aws-region: us-west-2
+          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          go-version: ${{ env.GO_VERSION }}
+          kube-test-env: eks/auto-mode
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+
+  eks-auto-mode-upgrade-test:
+    name: Test helm upgrade in EKS Auto Mode - credentials needed
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' }}
+    environment: aws-eks-functional-tests
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/eks-functional-test
+        with:
+          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
+          aws-cluster-name: rotel-eks-autotest
+          aws-region: us-west-2
+          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          go-version: ${{ env.GO_VERSION }}
+          kube-test-env: eks/auto-mode
+          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
+          mode: upgrade
+          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+          upgrade-from-values: eks_auto_mode_upgrade_from_previous_release_values.yaml
