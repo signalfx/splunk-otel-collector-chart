@@ -24,8 +24,8 @@ env:
 jobs:
   collector-image-config:
     # Keep the required check fast on ordinary PRs; release PRs get the same check name
-    # from release-eks-gate only after all EKS jobs finish.
-    name: ${{ github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.ref != 'update-release') && 'EKS release gate' || 'Resolve EKS test configuration' }}
+    # from chart-release-gate only after all EKS jobs finish.
+    name: ${{ github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.ref != 'update-release') && 'Chart release gate' || 'Resolve EKS test configuration' }}
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
     runs-on: ubuntu-latest
     outputs:
@@ -228,9 +228,9 @@ jobs:
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
           upgrade-from-values: eks_auto_mode_upgrade_from_previous_release_values.yaml
 
-  release-eks-gate:
+  chart-release-gate:
     # Only release PRs expose the required check name here; other runs report optional results.
-    name: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'update-release' && 'EKS release gate' || 'EKS results (optional)' }}
+    name: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'update-release' && 'Chart release gate' || 'EKS results (optional)' }}
     needs:
       - eks-test
       - eks-upgrade-test
