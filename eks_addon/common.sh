@@ -58,6 +58,7 @@ EOF" > "${tmp_file}"
     "operator"
     "opentelemetry-operator"
     "instrumentation"
+    "remoteManagement"
     "targetallocator"
   )
   for prop in "${disabled_properties[@]}"; do

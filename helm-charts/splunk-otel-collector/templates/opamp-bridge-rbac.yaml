@@ -1,0 +1,62 @@
+{{- if .Values.remoteManagement.enabled }}
+{{- include "splunk-otel-collector.opampBridge.requireManagedWorkload" . }}
+{{- $namespace := include "splunk-otel-collector.namespace" . }}
+{{- $bridge := .Values.remoteManagement.opampBridge }}
+{{- $bridgeName := include "splunk-otel-collector.opampBridgeName" . }}
+{{- $serviceAccountName := include "splunk-otel-collector.opampBridgeServiceAccountName" . }}
+{{- if $bridge.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $bridgeName }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: opamp-bridge
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - apps
+    resources:
+      - daemonsets
+      - deployments
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $bridgeName }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: opamp-bridge
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $bridgeName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $serviceAccountName }}
+    namespace: {{ $namespace }}
+{{- end }}
+{{- end }}

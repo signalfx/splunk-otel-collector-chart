@@ -261,7 +261,8 @@ distribution: ""
 ################################################################################
 # Optional "environment" parameter that will be added to all the telemetry
 # data (traces/logs/metrics), including Collector internal telemetry, as the
-# "deployment.environment.name" resource attribute. It will allow Splunk Observability
+# "deployment.environment.name" resource attribute, and to OpAMP Bridge
+# descriptions as a non-identifying attribute. It will allow Splunk Observability
 # users to investigate data from different sources separately.
 # See: https://help.splunk.com/en/splunk-observability-cloud/monitor-application-performance/set-up-splunk-apm/set-up-deployment-environments-in-splunk-apm
 ################################################################################
@@ -867,7 +868,6 @@ image:
     # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
 
-
 ################################################################################
 # Extra system configuration
 ################################################################################
@@ -960,6 +960,131 @@ securityContextConstraints:
 # https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/templates/securityContextConstraints.yaml
 # NOTE: This config will only be used when distribution=openshift
 securityContextConstraintsOverwrite: {}
+
+################################################################################
+# Splunk Remote Management configuration.
+# When enabled, the chart deploys an OpAMP Bridge instance that connects to
+# Splunk Observability Cloud and manages collector workloads created by this
+# Helm release. The default install path is a single value:
+# remoteManagement.enabled=true
+################################################################################
+
+remoteManagement:
+  # Deploy the OpAMP Bridge and configure it to manage chart-created collectors.
+  # Requires splunkObservability.realm and splunkObservability.accessToken.
+  enabled: false
+
+  opampBridge:
+    # OpAMP server endpoint for the bridge. When empty, the chart uses the
+    # Splunk Observability ingest OpAMP endpoint:
+    # https://ingest.<realm>.observability.splunkcloud.com/v1/opamp
+    endpoint: ""
+
+    image:
+      # The registry and name of the OpenTelemetry Operator OpAMP Bridge image to pull
+      repository: ghcr.io/open-telemetry/opentelemetry-operator/operator-opamp-bridge
+      # The tag of the OpenTelemetry Operator OpAMP Bridge image to pull
+      tag: v0.158.0
+      # The policy that specifies when the OpAMP Bridge image should be pulled
+      pullPolicy: IfNotPresent
+
+    # Optional bridge name reported to the OpAMP server and used for bridge resources.
+    name: ""
+
+    # OpAMP heartbeat interval.
+    heartbeatInterval: 30s
+
+    # Headers sent to the OpAMP server. When empty, the chart sets X-SF-Token
+    # from the Splunk Observability access token.
+    headers: {}
+
+    # TLS settings for the OpAMP server connection.
+    tls: {}
+      # insecure: false
+      # insecure_skip_verify: false
+
+    capabilities:
+      AcceptsRemoteConfig: true
+      ReportsEffectiveConfig: true
+      ReportsHealth: true
+      ReportsOwnMetrics: true
+      ReportsRemoteConfig: true
+
+    # Optional allowed OpenTelemetry components for remote config validation.
+    componentsAllowed: {}
+
+    description:
+      non_identifying_attributes: {}
+
+    workloads:
+      agent:
+        # Manage the DaemonSet created when agent.enabled=true.
+        enabled: true
+        type: otel-agent
+        configName: agent
+        serviceMode: agent
+        description:
+          non_identifying_attributes: {}
+      gateway:
+        # Manage the gateway Deployment/StatefulSet created when gateway.enabled=true.
+        enabled: true
+        type: otel-collector
+        configName: gateway
+        serviceMode: gateway
+        description:
+          non_identifying_attributes: {}
+      clusterReceiver:
+        # Manage the cluster receiver Deployment/StatefulSet created when clusterReceiver is active.
+        enabled: true
+        type: otel-collector
+        configName: cluster-receiver
+        serviceMode: clusterReceiver
+        description:
+          non_identifying_attributes: {}
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+    serviceAccount:
+      create: true
+      name: ""
+      annotations: {}
+
+    rbac:
+      create: true
+
+    podSecurityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    topologySpreadConstraints: []
+    priorityClassName: ""
+    podAnnotations: {}
+    podLabels: {}
+    extraEnvs: []
+    extraVolumes: []
+    extraVolumeMounts: []
+
+    # Additional standalone agents to add to the bridge config. Use this full
+    # standalone agent structure for workloads not created by this chart.
+    extraAgents: []
 
 ################################################################################
 # OpenTelemetry "collector" k8s deployment configuration.

@@ -145,11 +145,11 @@ processors:
     metric_statements:
     - context: resource
       statements:
-      - set(attributes["k8s.replicaset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+      - set(resource.attributes["k8s.replicaset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
         where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "ReplicaSet")
-      - set(attributes["k8s.statefulset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+      - set(resource.attributes["k8s.statefulset.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
         where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
-      - set(attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
+      - set(resource.attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
         where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
 
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
@@ -366,7 +366,7 @@ service:
                 without_type_suffix: true
   extensions:
     - health_check
-    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    {{- if (eq (include "splunk-otel-collector.directO11yOpampEnabled" .) "true") }}
     - opamp/splunk_o11y
     {{- end }}
   {{- if eq .Values.distribution "eks/fargate" }}
