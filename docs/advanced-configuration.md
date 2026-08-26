@@ -925,6 +925,132 @@ collection is multi-threaded and provides high throughput with efficient resourc
 
 Logs collection is configured using the `logsCollection` section in values.yaml.
 
+### Generate metrics from Kubernetes container logs
+
+The experimental Logs-to-Metrics catalog creates count and sum metrics from structured Kubernetes container logs
+collected by the built-in `file_log` receiver. It is disabled by default and requires the agent, container log
+collection, and both logs and metrics destinations. The source logs continue through the normal logs pipeline.
+
+The following example enables the error-count rule for a labeled Deployment and maps an application field to the
+catalog's `error.type` input:
+
+```yaml
+logsToMetrics:
+  enabled: true
+  rules:
+    - app.log.error.count
+  fieldMappings:
+    - from: app.error_code
+      to: error.type
+  scope:
+    namespaces:
+      - checkout
+    workloads:
+      - kind: Deployment
+        name: checkout-api
+    podLabels:
+      app.kubernetes.io/name: checkout-api
+```
+
+#### Rules and selectors
+
+When `rules` is omitted, the chart enables `app.log.error.count` and `http.server.error.count`. An explicit list is the
+complete desired rule set; an empty list enables all nine rules. Selecting only the required rules reduces evaluation
+work and the initial metric time-series impact.
+
+Scope is applied before field mapping and rule evaluation. Namespace names and workload selectors use OR semantics
+within their lists. Configured namespace, workload, and pod-label selector types must all match, and every pod-label
+pair must match; at most eight pairs are supported. Empty selectors include all container logs. Workload selectors
+require an exact `kind` and `name`; supported kinds are `Deployment`, `StatefulSet`, `DaemonSet`, `CronJob`, `Job`, and
+`ReplicaSet`. Ownerless pods can match namespace and pod-label scope, but cannot match a nonempty workload selector. In
+workload aggregation, a `service.name` that falls back to the pod name is removed to avoid pod-level cardinality. The
+chart's existing `splunk.com/include` and `splunk.com/exclude` annotation filtering also applies.
+
+Catalog inputs and `fieldMappings` sources are literal, case-sensitive, flat log attributes or top-level JSON keys; a
+dot is part of the key. Existing log attributes take precedence over fields parsed from the body, and canonical target
+fields take precedence over mappings. Mappings do not traverse nested objects or convert types, so numeric and boolean
+inputs must use JSON number and boolean types rather than quoted strings. Values with the wrong runtime type are removed
+before metric generation; optional dimensions use their documented default, while rules with an invalid required input
+do not match. At most 16 mappings can be configured, and each target can appear only once. Supported targets are:
+
+```text
+severity_number                severity_text
+error.type                     exception.type
+exception.escaped              http.response.status_code
+http.request.method            event.name
+event.outcome                  auth.mechanism
+job.type                       retry.exhausted
+request.throttled              business.transaction.value
+business.transaction.type      business.transaction.unit
+```
+
+The feature generates these metrics:
+
+| Metric | Required structured fields |
+| --- | --- |
+| `app.log.error.count` | OTel ERROR-or-higher severity, or `severity_number`, `severity_text`, `severity`, or `level` that can be normalized to OTel severity |
+| `http.server.error.count` | Numeric `http.response.status_code` from 500 through 599 |
+| `app.exception.unhandled.count` | Non-empty `exception.type` and boolean `exception.escaped=true` |
+| `app.authentication.failure.count` | `event.name=authentication` and `event.outcome=failure` |
+| `app.job.failure.count` | `event.name=job`, `event.outcome=failure`, and a non-empty bounded `job.type` |
+| `app.retry.exhausted.count` | Boolean `retry.exhausted=true` |
+| `app.request.throttled.count` | Numeric `http.response.status_code=429`, or boolean `request.throttled=true` with an existing `http.response.status_code` attribute |
+| `app.log.record.count` | Every record collected by the built-in Kubernetes container `file_log` receiver |
+| `business.transaction.value` | Numeric `business.transaction.value`, `event.outcome=success`, bounded `business.transaction.type`, and `business.transaction.unit` or `business.transaction.currency` |
+
+#### Examples
+
+With the `app.error_code` mapping shown above, this body matches `app.log.error.count`:
+
+```json
+{"message":"payment failed","severity_text":"ERROR","app.error_code":"payment_declined"}
+```
+
+Each matching record increments a data point equivalent to the following (resource attributes and aggregation details
+are omitted):
+
+```yaml
+name: app.log.error.count
+value: 1
+attributes:
+  error.type: payment_declined
+  log.severity: ERROR
+```
+
+This body matches the successful business transaction sum rule:
+
+```json
+{"event.outcome":"success","business.transaction.value":49.95,"business.transaction.type":"checkout","business.transaction.unit":"USD"}
+```
+
+The record contributes `49.95` to a data point equivalent to:
+
+```yaml
+name: business.transaction.value
+value: 49.95
+attributes:
+  business.transaction.type: checkout
+  business.transaction.unit: USD
+```
+
+Transaction type and unit values containing `|` are rejected.
+
+Generated metric names are custom metrics unless categorized otherwise. The default `workload` aggregation excludes
+unique pod, node, container ID, and service-instance identity; `instance` aggregation retains that identity and can
+create more MTS. Selector labels and arbitrary raw fields are not retained as dimensions.
+
+> [!IMPORTANT]
+> The chart does not restrict application-provided values used as metric dimensions. Keep values such as `error.type`,
+> `exception.type`, `auth.mechanism`, `job.type`, `business.transaction.type`, and transaction unit or currency to small,
+> stable vocabularies. Do not use request IDs, timestamps, or other per-event values, because each unique combination can
+> create another MTS.
+
+#### Destination and delivery behavior
+
+Generated metrics use the chart's existing metrics exporter and credentials. Logs-to-Metrics shares the normal logs
+pipeline's `file_log` receiver and checkpoint, and scope filtering happens after files are read, so it does not reduce
+receiver I/O. A retried batch can be delivered again to a branch that already accepted it; delivery is not exactly once.
+
 ### Add log files from Kubernetes host machines/volumes
 
 You can add additional log files to be ingested from Kubernetes host machines and Kubernetes volumes by configuring `agent.extraVolumes`, `agent.extraVolumeMounts` and `logsCollection.extraFileLogs` in the values.yaml file used to deploy Splunk OpenTelemetry Collector for Kubernetes.

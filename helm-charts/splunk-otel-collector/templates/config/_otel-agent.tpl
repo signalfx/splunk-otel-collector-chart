@@ -896,6 +896,8 @@ processors:
         value: "{{ .Values.environment }}"
   {{- end }}
 
+  {{- include "splunk-otel-collector.logsToMetricsAgentProcessors" . | nindent 2 }}
+
   {{- if .Values.isWindows }}
   metricstransform:
     transforms:
@@ -1049,19 +1051,7 @@ exporters:
   {{- end }}
   {{- end }}
 
-{{- if .Values.splunkObservability.secureAppEnabled }}
-connectors:
-  routing/logs:
-    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
-    default_pipelines: [logs]
-    {{- else }}
-    default_pipelines: []
-    {{- end }}
-    table:
-      - context: log
-        condition: instrumentation_scope.name == "secureapp"
-        pipelines: [logs/secureapp]
-{{- end }}
+{{- include "splunk-otel-collector.logsToMetricsAgentConnectors" . }}
 
 service:
   telemetry:
@@ -1210,6 +1200,8 @@ service:
         {{- end }}
         {{- end }}
 
+    {{- include "splunk-otel-collector.logsToMetricsAgentPipeline" . | nindent 4 }}
+
     {{- if or .Values.logsCollection.extraFileLogs .Values.logsCollection.journald.enabled }}
     logs/host:
       receivers:
@@ -1288,6 +1280,7 @@ service:
         - host_metrics
         - kubelet_stats
         - otlp
+        {{- include "splunk-otel-collector.logsToMetricsAgentMetricReceivers" . | nindent 8 }}
         {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator
         {{- end }}
@@ -1319,6 +1312,7 @@ service:
         - resource/metrics
         {{- end }}
         {{- end }}
+        {{- include "splunk-otel-collector.logsToMetricsAgentMetricProcessors" . | nindent 8 }}
       exporters:
         {{- if .Values.gateway.enabled }}
         - otlp_grpc

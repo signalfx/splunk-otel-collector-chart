@@ -792,6 +792,43 @@ logsCollection:
 
 
 ################################################################################
+# Experimental Logs-to-Metrics configuration.
+# This interface is experimental, is not guaranteed to be stable, and may change
+# at any time.
+################################################################################
+
+logsToMetrics:
+  # Generate selected metrics from Kubernetes container logs collected by the agent.
+  enabled: false
+  # Resource identity retained on generated metrics. Workload aggregation limits
+  # MTS by dropping unique pod, node, container ID, and service instance identity.
+  # Instance aggregation retains that identity for per-instance correlation.
+  aggregation: workload
+  # Map exact, flat log attribute or top-level JSON keys to supported catalog
+  # inputs. Canonical target fields take precedence over mapped source fields.
+  # A maximum of 16 mappings is supported; see the advanced configuration guide
+  # for the allowed targets and cardinality guidance.
+  fieldMappings: []
+  # Metric names to enable from the supported catalog. The defaults are the
+  # Recommended rules supported by the agent file_log receiver. Add Conditional,
+  # Optional, or Advanced rules explicitly. Kubernetes Event rules are not
+  # supported by this agent catalog. An empty list enables every supported rule.
+  rules:
+    - app.log.error.count
+    - http.server.error.count
+  # Exact-match allowlists applied before rule evaluation. Empty selectors match
+  # all values. Namespace lists and workload selectors use OR internally;
+  # configured scope types and every pod label must all match.
+  scope:
+    namespaces: []
+    # Exact Kubernetes workload kind/name pairs. Supported kinds are Deployment,
+    # StatefulSet, DaemonSet, CronJob, Job, and ReplicaSet.
+    workloads: []
+    # Exact pod label key/value pairs. All configured labels must match. Labels
+    # are used only for selection and are not retained on generated metrics.
+    podLabels: {}
+
+################################################################################
 # Docker image configuration
 ################################################################################
 

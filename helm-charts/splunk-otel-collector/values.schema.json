@@ -951,6 +951,151 @@
         }
       }
     },
+    "logsToMetrics": {
+      "description": "Experimental configuration for generating selected metrics from scoped Kubernetes container logs. Supports built-in rule selection, bounded exact field mappings, workload or instance resource aggregation, and exact namespace, workload kind/name, or pod-label scope. Integrations must not depend on generated Collector component names. This interface may change at any time.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "description": "Generate selected Logs-to-Metrics rules from Kubernetes container logs collected by the agent file_log receiver.",
+          "type": "boolean"
+        },
+        "aggregation": {
+          "description": "Resource identity retained on generated metrics. Workload drops unique instance identity to limit MTS; instance retains service instance, pod, node, and container ID attributes when available.",
+          "type": "string",
+          "enum": [
+            "workload",
+            "instance"
+          ]
+        },
+        "fieldMappings": {
+          "description": "Exact aliases from flat log attributes or top-level JSON keys to fixed catalog inputs. Canonical target fields take precedence. Mapping values are copied without type conversion.",
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "required": [
+              "from",
+              "to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "description": "Exact, case-sensitive, flat source log attribute or top-level JSON key.",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "to": {
+                "description": "Fixed Logs-to-Metrics catalog input field.",
+                "type": "string",
+                "enum": [
+                  "severity_number",
+                  "severity_text",
+                  "error.type",
+                  "exception.type",
+                  "exception.escaped",
+                  "http.response.status_code",
+                  "http.request.method",
+                  "event.name",
+                  "event.outcome",
+                  "auth.mechanism",
+                  "job.type",
+                  "retry.exhausted",
+                  "request.throttled",
+                  "business.transaction.value",
+                  "business.transaction.type",
+                  "business.transaction.unit"
+                ]
+              }
+            }
+          }
+        },
+        "rules": {
+          "description": "Metric rules to enable. The chart defaults to the Recommended rules supported by the agent file_log receiver. Add Conditional, Optional, or Advanced rules explicitly. Kubernetes Event rules are not supported by this agent catalog. An empty list enables every supported rule.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "app.log.error.count",
+              "http.server.error.count",
+              "app.exception.unhandled.count",
+              "app.authentication.failure.count",
+              "app.job.failure.count",
+              "app.retry.exhausted.count",
+              "app.request.throttled.count",
+              "app.log.record.count",
+              "business.transaction.value"
+            ]
+          }
+        },
+        "scope": {
+          "description": "Exact-match selectors applied before rule evaluation. Namespace lists and workload selectors use OR internally. Configured selector types and all pod label entries must all match.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "namespaces": {
+              "description": "Kubernetes namespace names to include. An empty list includes every namespace.",
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "workloads": {
+              "description": "Exact Kubernetes workload kind/name pairs to include. Entries use OR semantics. An empty list includes every workload.",
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "name"
+                ],
+                "properties": {
+                  "kind": {
+                    "description": "Kubernetes workload kind.",
+                    "type": "string",
+                    "enum": [
+                      "Deployment",
+                      "StatefulSet",
+                      "DaemonSet",
+                      "CronJob",
+                      "Job",
+                      "ReplicaSet"
+                    ]
+                  },
+                  "name": {
+                    "description": "Exact Kubernetes workload name.",
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "podLabels": {
+              "description": "Exact pod label key/value pairs to include. Every configured pair must match. Labels are selection-only and are not retained on generated metrics.",
+              "type": "object",
+              "maxProperties": 8,
+              "propertyNames": {
+                "minLength": 1,
+                "maxLength": 253,
+                "pattern": "^([a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?)*/)?[A-Za-z0-9]([-A-Za-z0-9_.]{0,61}[A-Za-z0-9])?$"
+              },
+              "additionalProperties": {
+                "type": "string",
+                "maxLength": 63,
+                "pattern": "^$|^[A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?$"
+              }
+            }
+          }
+        }
+      }
+    },
     "image": {
       "description": "Docker image configuration.",
       "type": "object",
