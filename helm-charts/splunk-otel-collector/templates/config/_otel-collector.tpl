@@ -110,6 +110,8 @@ processors:
         key: deployment.environment.name
   {{- end }}
 
+  {{- include "splunk-otel-collector.logsToMetricsGatewayProcessors" . | nindent 2 }}
+
 exporters:
   {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
   signalfx:
@@ -298,6 +300,7 @@ service:
         - resource/metrics
         {{- end }}
         {{- end }}
+        {{- include "splunk-otel-collector.logsToMetricsGatewayMetricProcessors" . | nindent 8 }}
       exporters:
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx

@@ -1,6 +1,7 @@
 {{/*
 Fargate doesn't support daemonsets so never use for that platform
 */}}
+{{- include "splunk-otel-collector.validateLogsToMetrics" . }}
 {{- if and .Values.agent.enabled (ne .Values.distribution "eks/fargate") }}
 apiVersion: v1
 kind: ConfigMap

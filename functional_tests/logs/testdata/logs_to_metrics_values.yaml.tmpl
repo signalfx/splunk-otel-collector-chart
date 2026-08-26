@@ -1,0 +1,47 @@
+clusterName: logs-to-metrics-test-cluster
+
+clusterReceiver:
+  enabled: false
+
+logsToMetrics:
+  enabled: true
+  aggregation: instance
+  rules:
+    - app.log.error.count
+    - app.request.throttled.count
+    - business.transaction.value
+  fieldMappings:
+    - from: app.level
+      to: severity_text
+    - from: app.error_code
+      to: error.type
+  scope:
+    namespaces:
+      - logs-to-metrics-test
+    workloads:
+      - kind: Deployment
+        name: logs-to-metrics-fixture
+      - kind: Deployment
+        name: logs-to-metrics-label-mismatch
+    podLabels:
+      logs-to-metrics-test: enabled
+
+splunkPlatform:
+  endpoint: {{ .LogHecEndpoint }}
+  token: "00000000-0000-0000-0000-000000000000"
+  logsEnabled: true
+  metricsEnabled: true
+  metricsIndex: metrics
+
+agent:
+  # Keep this fixture isolated from any Collector already using the Kind node's host ports.
+  hostNetwork: false
+  service:
+    enabled: false
+  ports:
+    otlp: null
+    otlp-http: null
+  config:
+    exporters:
+      splunk_hec/platform_metrics:
+        endpoint: {{ .MetricHecEndpoint }}
