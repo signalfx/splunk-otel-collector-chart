@@ -109,11 +109,18 @@ unittest: ## Run unittests on the Helm chart
 
 # Example Usage:
 #   make functionaltest
+#   make functionaltest GO_TEST_TAGS=helm3
 #   make functionaltest SKIP_SETUP=true SKIP_TEARDOWN=true SKIP_TESTS=true TEARDOWN_BEFORE_SETUP=true SUITE="functional" UPDATE_EXPECTED_RESULTS=true KUBE_TEST_ENV="kind" KUBECONFIG="/path/to/kubeconfig"
 .PHONY: functionaltest
 functionaltest: ## Run functional tests for this Helm chart with optional tags and environment variables
 	@echo "Running functional tests for this helm chart..."
-	cd functional_tests && go test -v -timeout 45m ./$(SUITE)/... || exit 1
+	@{ \
+	GO_TEST_ARGS="-v -timeout 45m"; \
+	if [ -n "$(GO_TEST_TAGS)" ]; then \
+		GO_TEST_ARGS="$$GO_TEST_ARGS -tags $(GO_TEST_TAGS)"; \
+	fi; \
+	cd functional_tests && go test $$GO_TEST_ARGS ./$(SUITE)/... || exit 1; \
+	}
 
 ##@ Changelog
 # Tasks related to changelog management

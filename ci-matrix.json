@@ -16,6 +16,16 @@
     ]
   },
   "functional_test_v2": {
+    "helm": [
+      {
+        "version": "v4.2.3",
+        "go-test-tags": ""
+      },
+      {
+        "version": "v3.21.4",
+        "go-test-tags": "helm3"
+      }
+    ],
     "k8s-kind-version": [
       "v1.36.1",
       "v1.35.5",
