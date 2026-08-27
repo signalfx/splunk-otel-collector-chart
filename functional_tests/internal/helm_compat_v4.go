@@ -19,6 +19,7 @@ import (
 	helmvalues "helm.sh/helm/v4/pkg/cli/values"
 	"helm.sh/helm/v4/pkg/getter"
 	"helm.sh/helm/v4/pkg/kube"
+	releasei "helm.sh/helm/v4/pkg/release"
 	releasev1 "helm.sh/helm/v4/pkg/release/v1"
 	"helm.sh/helm/v4/pkg/strvals"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -52,11 +53,6 @@ func newHelmInstallAction(t *testing.T, kubeConfig string, chartDir string) *hel
 	}
 }
 
-func runHelmInstall(install *helmInstallAction, values map[string]any) error {
-	_, err := install.action.Run(install.chart, values)
-	return err
-}
-
 func newHelmUpgradeAction(t *testing.T, kubeConfig string, chartDir string) *helmUpgradeAction {
 	t.Helper()
 	return &helmUpgradeAction{
@@ -70,11 +66,6 @@ func setExtraUpgradeOpts(action *action.Upgrade, options ChartOptions) {
 	action.ForceConflicts = options.ForceConflicts
 }
 
-func runHelmUpgrade(upgrade *helmUpgradeAction, releaseName string, values map[string]any) error {
-	_, err := upgrade.action.Run(releaseName, upgrade.chart, values)
-	return err
-}
-
 func newHelmListAction(t *testing.T, kubeConfig string) *action.List {
 	t.Helper()
 	return action.NewList(initHelmActionConfig(t, kubeConfig))
@@ -84,21 +75,12 @@ func setListStateMask(list *action.List) {
 	list.StateMask = action.ListAll
 }
 
-func runHelmList(list *action.List) ([]HelmRelease, error) {
-	releases, err := list.Run()
-	if err != nil {
-		return nil, err
+func helmReleaseInfo(release releasei.Releaser) (HelmRelease, error) {
+	r, ok := release.(*releasev1.Release)
+	if !ok {
+		return HelmRelease{}, fmt.Errorf("expected *releasev1.Release, got %T", release)
 	}
-
-	result := make([]HelmRelease, 0, len(releases))
-	for _, rel := range releases {
-		r, ok := rel.(*releasev1.Release)
-		if !ok {
-			return nil, fmt.Errorf("expected *releasev1.Release, got %T", rel)
-		}
-		result = append(result, HelmRelease{Name: r.Name, Namespace: r.Namespace})
-	}
-	return result, nil
+	return HelmRelease{Name: r.Name, Namespace: r.Namespace}, nil
 }
 
 func newHelmUninstallAction(t *testing.T, kubeConfig string) *action.Uninstall {
@@ -106,18 +88,8 @@ func newHelmUninstallAction(t *testing.T, kubeConfig string) *action.Uninstall {
 	return action.NewUninstall(initHelmActionConfig(t, kubeConfig))
 }
 
-func annotateUninstallOptions(uninstall *action.Uninstall) {
-	uninstall.IgnoreNotFound = true
+func setExtraUninstallOpts(uninstall *action.Uninstall) {
 	uninstall.WaitStrategy = kube.StatusWatcherStrategy
-	uninstall.Timeout = HelmActionTimeout
-}
-
-func runHelmUninstall(uninstall *action.Uninstall, releaseName string) (string, error) {
-	resp, err := uninstall.Run(releaseName)
-	if resp == nil {
-		return "", err
-	}
-	return resp.Info, err
 }
 
 func parseHelmValueStringInto(setting string, values map[string]any) error {

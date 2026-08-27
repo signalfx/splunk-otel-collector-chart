@@ -42,21 +42,33 @@ func parseHelmValueInto(setting string, values map[string]any) error {
 func listChartReleases(t *testing.T, kubeConfig string, labelKey string, labelValue string) []HelmRelease {
 	t.Helper()
 	list := newHelmListAction(t, kubeConfig)
-	// annotateListOptions(list, labelKey, labelValue)
 	list.AllNamespaces = true
 	list.Selector = labelKey + "==" + labelValue
 	setListStateMask(list)
 
-	releases, err := runHelmList(list)
+	releases, err := list.Run()
 	require.NoError(t, err)
-	return releases
+
+	result := make([]HelmRelease, 0, len(releases))
+	for _, release := range releases {
+		releaseInfo, releaseErr := helmReleaseInfo(release)
+		require.NoError(t, releaseErr)
+		result = append(result, releaseInfo)
+	}
+	return result
 }
 
 func uninstallChartRelease(t *testing.T, kubeConfig string, releaseName string) (string, error) {
 	t.Helper()
 	uninstall := newHelmUninstallAction(t, kubeConfig)
-	annotateUninstallOptions(uninstall)
-	return runHelmUninstall(uninstall, releaseName)
+	uninstall.IgnoreNotFound = true
+	uninstall.Timeout = HelmActionTimeout
+	setExtraUninstallOpts(uninstall)
+	resp, err := uninstall.Run(releaseName)
+	if resp == nil {
+		return "", err
+	}
+	return resp.Info, err
 }
 
 func installChartFromDir(t *testing.T, kubeConfig string, chartDir string, values map[string]any, options ChartOptions) error {
@@ -79,9 +91,7 @@ func upgradeChartFromDir(t *testing.T, kubeConfig string, chartDir string, value
 
 func setUpgradeOptions(upgrade *helmUpgradeAction, options ChartOptions) {
 	upgrade.action.Namespace = options.ChartNamespace
-	upgrade.action.WaitStrategy = helmWaitStrategy(options.WaitStrategy)
 	upgrade.action.Timeout = options.ChartTimeout
-	upgrade.action.ForceConflicts = options.ForceConflicts
 	setExtraUpgradeOpts(upgrade.action, options)
 }
 
@@ -89,5 +99,16 @@ func upgradeInstallChartFromDir(t *testing.T, kubeConfig string, chartDir string
 	t.Helper()
 	upgrade := newHelmUpgradeAction(t, kubeConfig, chartDir)
 	upgrade.action.Install = true
+	setUpgradeOptions(upgrade, options)
 	return runHelmUpgrade(upgrade, options.ChartReleaseName, values)
+}
+
+func runHelmInstall(install *helmInstallAction, values map[string]any) error {
+	_, err := install.action.Run(install.chart, values)
+	return err
+}
+
+func runHelmUpgrade(upgrade *helmUpgradeAction, releaseName string, values map[string]any) error {
+	_, err := upgrade.action.Run(releaseName, upgrade.chart, values)
+	return err
 }
