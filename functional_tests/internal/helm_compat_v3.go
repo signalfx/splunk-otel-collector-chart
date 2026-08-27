@@ -21,6 +21,15 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
+type helmInstallAction struct {
+	action *action.Install
+	chart  *chart.Chart
+}
+
+func setExtraInstallOpts(action *action.Install, opts ChartOptions) {
+	action.Wait = helmWaitEnabled(opts.WaitStrategy)
+}
+
 func mergeHelmValueFiles(valueFiles []string) (map[string]any, error) {
 	vopts := helmvalues.Options{ValueFiles: valueFiles}
 	return vopts.MergeValues(getter.All(cli.New()))
@@ -32,14 +41,6 @@ func newHelmInstallAction(t *testing.T, kubeConfig string, chartDir string) *hel
 		action: action.NewInstall(initHelmActionConfig(t, kubeConfig)),
 		chart:  loadChartFromDir(t, chartDir),
 	}
-}
-
-func annotateInstallOptions(install *helmInstallAction, options ChartOptions) {
-	install.action.Namespace = options.ChartNamespace
-	install.action.ReleaseName = options.ChartReleaseName
-	install.action.Wait = helmWaitEnabled(options.WaitStrategy)
-	install.action.Timeout = options.ChartTimeout
-	install.action.Labels = map[string]string{chartLabelKey: DefaultChartReleaseName}
 }
 
 func runHelmInstall(install *helmInstallAction, values map[string]any) error {
@@ -55,14 +56,8 @@ func newHelmUpgradeAction(t *testing.T, kubeConfig string, chartDir string) *hel
 	}
 }
 
-func annotateUpgradeOptions(upgrade *helmUpgradeAction, options ChartOptions) {
-	upgrade.action.Namespace = options.ChartNamespace
+func setExtraUpgradeOpts(upgrade *helmUpgradeAction, options ChartOptions) {
 	upgrade.action.Wait = helmWaitEnabled(options.WaitStrategy)
-	upgrade.action.Timeout = options.ChartTimeout
-}
-
-func setUpgradeInstall(upgrade *helmUpgradeAction, install bool) {
-	upgrade.action.Install = install
 }
 
 func runHelmUpgrade(upgrade *helmUpgradeAction, releaseName string, values map[string]any) error {
@@ -75,9 +70,7 @@ func newHelmListAction(t *testing.T, kubeConfig string) *action.List {
 	return action.NewList(initHelmActionConfig(t, kubeConfig))
 }
 
-func annotateListOptions(list *action.List, labelKey string, labelValue string) {
-	list.AllNamespaces = true
-	list.Selector = labelKey + "==" + labelValue
+func setListStateMask(list *action.List) {
 	list.StateMask = action.ListAll
 }
 
@@ -115,11 +108,6 @@ func runHelmUninstall(uninstall *action.Uninstall, releaseName string) (string, 
 
 func parseHelmValueStringInto(setting string, values map[string]any) error {
 	return strvals.ParseInto(setting, values)
-}
-
-type helmInstallAction struct {
-	action *action.Install
-	chart  *chart.Chart
 }
 
 type helmUpgradeAction struct {

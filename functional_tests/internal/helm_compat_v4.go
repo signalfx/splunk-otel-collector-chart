@@ -24,6 +24,21 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
+type helmInstallAction struct {
+	action *action.Install
+	chart  chart.Charter
+}
+
+func setExtraInstallOpts(action *action.Install, opts ChartOptions) {
+	action.WaitStrategy = helmWaitStrategy(opts.WaitStrategy)
+	action.ForceConflicts = opts.ForceConflicts
+}
+
+type helmUpgradeAction struct {
+	action *action.Upgrade
+	chart  chart.Charter
+}
+
 func mergeHelmValueFiles(valueFiles []string) (map[string]any, error) {
 	vopts := helmvalues.Options{ValueFiles: valueFiles}
 	return vopts.MergeValues(getter.All(cli.New()))
@@ -35,15 +50,6 @@ func newHelmInstallAction(t *testing.T, kubeConfig string, chartDir string) *hel
 		action: action.NewInstall(initHelmActionConfig(t, kubeConfig)),
 		chart:  loadChartFromDir(t, chartDir),
 	}
-}
-
-func annotateInstallOptions(install *helmInstallAction, options ChartOptions) {
-	install.action.Namespace = options.ChartNamespace
-	install.action.ReleaseName = options.ChartReleaseName
-	install.action.WaitStrategy = helmWaitStrategy(options.WaitStrategy)
-	install.action.Timeout = options.ChartTimeout
-	install.action.ForceConflicts = options.ForceConflicts
-	install.action.Labels = map[string]string{chartLabelKey: DefaultChartReleaseName}
 }
 
 func runHelmInstall(install *helmInstallAction, values map[string]any) error {
@@ -59,15 +65,9 @@ func newHelmUpgradeAction(t *testing.T, kubeConfig string, chartDir string) *hel
 	}
 }
 
-func annotateUpgradeOptions(upgrade *helmUpgradeAction, options ChartOptions) {
-	upgrade.action.Namespace = options.ChartNamespace
-	upgrade.action.WaitStrategy = helmWaitStrategy(options.WaitStrategy)
-	upgrade.action.Timeout = options.ChartTimeout
-	upgrade.action.ForceConflicts = options.ForceConflicts
-}
-
-func setUpgradeInstall(upgrade *helmUpgradeAction, install bool) {
-	upgrade.action.Install = install
+func setExtraUpgradeOpts(action *action.Upgrade, options ChartOptions) {
+	action.WaitStrategy = helmWaitStrategy(options.WaitStrategy)
+	action.ForceConflicts = options.ForceConflicts
 }
 
 func runHelmUpgrade(upgrade *helmUpgradeAction, releaseName string, values map[string]any) error {
@@ -80,9 +80,7 @@ func newHelmListAction(t *testing.T, kubeConfig string) *action.List {
 	return action.NewList(initHelmActionConfig(t, kubeConfig))
 }
 
-func annotateListOptions(list *action.List, labelKey string, labelValue string) {
-	list.AllNamespaces = true
-	list.Selector = labelKey + "==" + labelValue
+func setListStateMask(list *action.List) {
 	list.StateMask = action.ListAll
 }
 
@@ -124,16 +122,6 @@ func runHelmUninstall(uninstall *action.Uninstall, releaseName string) (string, 
 
 func parseHelmValueStringInto(setting string, values map[string]any) error {
 	return strvals.ParseInto(setting, values)
-}
-
-type helmInstallAction struct {
-	action *action.Install
-	chart  chart.Charter
-}
-
-type helmUpgradeAction struct {
-	action *action.Upgrade
-	chart  chart.Charter
 }
 
 func initHelmActionConfig(t *testing.T, kubeConfig string) *action.Configuration {
