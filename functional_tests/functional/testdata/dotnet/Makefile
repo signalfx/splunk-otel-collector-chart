@@ -1,8 +1,6 @@
-# Default image repository
-IMAGE_REPO ?= quay.io/splunko11ytest/dotnet_test
+PLATFORM ?= linux/amd64
+IMAGE ?= dotnet_test:latest
 
-# This .NET application cannot currently run on arm machines due to .NET runtime environment limitations
-# Was not able to use docker buildx with .NET
-.PHONY: push
-push:
-	docker build --file Dockerfile --no-cache	--tag $(IMAGE_REPO):latest --push .
+.PHONY: build
+build:
+	docker build --file Dockerfile --platform $(PLATFORM) --tag $(IMAGE) .
