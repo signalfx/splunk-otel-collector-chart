@@ -4,6 +4,20 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.159.0] - 2026-08-28
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.159.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.159.0).
+
+### 💡 Enhancements 💡
+
+- `agent`: Add an opt-in file-log Logs-to-Metrics catalog using count and sum connectors. ([#2526](https://github.com/signalfx/splunk-otel-collector-chart/pull/2526))
+  The feature is disabled by default and generated metrics are considered custom unless categorized otherwise.
+  For configuration and cardinality guidance, see [Generate metrics from Kubernetes container logs](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/docs/advanced-configuration.md#generate-metrics-from-kubernetes-container-logs).
+  
+- `chart`: Add `deployment.environment.name` to OpAMP Bridge descriptions when `environment` is set. ([#2569](https://github.com/signalfx/splunk-otel-collector-chart/pull/2569))
+- `chart`: Add `remoteManagement.enabled` to deploy an OpAMP Bridge that manages chart-created collectors. ([#2548](https://github.com/signalfx/splunk-otel-collector-chart/pull/2548))
+- `chart`: Bump obi to 0.12.2 in helm-charts/splunk-otel-collector/Chart.yaml ([#2568](https://github.com/signalfx/splunk-otel-collector-chart/pull/2568),[#2572](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2572))
+
 ## [0.158.0] - 2026-08-11
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.158.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.158.0).
