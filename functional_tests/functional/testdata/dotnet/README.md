@@ -2,7 +2,8 @@
 
 This image is used for testing the auto-instrumentation of .Net application through the OpenTelemetry Operator.
 
-This image is pushed to https://quay.io/repository/splunko11ytest/dotnet_test.
+This image is built locally by the chart repository's Kind functional-test
+setup.
 
 The container performs two separate functions:
 * It runs a .Net HTTP server on port 3000 of the container host.
@@ -12,12 +13,10 @@ Running this container inside a Kubernetes cluster under observation of the oper
 
 ## Develop
 
-Login to quay.io and push with `make push`
-Make sure for new image repositories you make the repository public
-- Arm based machines can have issues running docker/dockerx build commands that use QEMU virtualization and have .NET support, see: https://github.com/dotnet/dotnet-docker/issues/3832
-- On an arm M2 Mac running Docker Desktop 25.0.0, was able to get the docker/dockerx build for 1 arch images but not multi arch images.
-  - New versions of the OS with Docker may fix this issue.
-  - Dockerx related command:  `docker buildx create --use --name multi-arch-builder`
+Build this image directly with `make -C functional_tests/functional/testdata/dotnet build`.
+Set `PLATFORM=linux/arm64` when building for an ARM64 local Kind cluster. If
+the .NET build or runtime has ARM64 limitations, use the default
+`PLATFORM=linux/amd64` and run it with Docker's emulation support.
 
 ### Debugging .NET
 

@@ -1,4 +1,4 @@
-FROM tomcat:11.0-jre21
+FROM tomcat:11.0.0-jre21
 
 COPY start.sh .
 

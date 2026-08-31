@@ -14,6 +14,6 @@ spec:
         app: dotnet-test
     spec:
       containers:
-        - image: quay.io/splunko11ytest/dotnet_test:latest
+        - image: dotnet_test:latest
           name: dotnet-test
           imagePullPolicy: IfNotPresent
