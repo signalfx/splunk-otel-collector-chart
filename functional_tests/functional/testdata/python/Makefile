@@ -1,4 +1,7 @@
 
-.PHONY: push
-push:
-	docker buildx build --file Dockerfile --platform linux/amd64,linux/arm64 --tag quay.io/splunko11ytest/python_test:latest --push .
+PLATFORM ?= linux/amd64
+IMAGE ?= python_test:latest
+
+.PHONY: build
+build:
+	docker build --file Dockerfile --platform $(PLATFORM) --tag $(IMAGE) .

@@ -316,18 +316,27 @@ kind-delete: ## Delete kind cluster and remove kubeconfig
 	fi
 	@echo "=== Kind cluster cleanup complete ==="
 
-PYTHON_TEST_IMAGE ?= quay.io/splunko11ytest/python_test:latest
-NODEJS_TEST_IMAGE ?= quay.io/splunko11ytest/nodejs_test:latest
+TEST_IMAGE_PLATFORM ?= linux/amd64
+PYTHON_TEST_IMAGE ?= python_test:latest
+NODEJS_TEST_IMAGE ?= nodejs_test:latest
+JAVA_TEST_IMAGE ?= java_test:latest
+DOTNET_TEST_IMAGE ?= dotnet_test:latest
 
 .PHONY: kind-build-test-images
 kind-build-test-images: ## Build test app images and load them into kind cluster
 	@echo "Building Python test app image..."
-	docker build -t $(PYTHON_TEST_IMAGE) functional_tests/functional/testdata/python
+	docker build --platform=$(TEST_IMAGE_PLATFORM) -t $(PYTHON_TEST_IMAGE) functional_tests/functional/testdata/python
 	@echo "Building Node.js test app image..."
-	docker build -t $(NODEJS_TEST_IMAGE) functional_tests/functional/testdata/nodejs
+	docker build --platform=$(TEST_IMAGE_PLATFORM) -t $(NODEJS_TEST_IMAGE) functional_tests/functional/testdata/nodejs
+	@echo "Building Java test app image..."
+	docker build --platform=$(TEST_IMAGE_PLATFORM) -t $(JAVA_TEST_IMAGE) functional_tests/functional/testdata/java
+	@echo "Building .NET test app image..."
+	docker build --platform=$(TEST_IMAGE_PLATFORM) -t $(DOTNET_TEST_IMAGE) functional_tests/functional/testdata/dotnet
 	@echo "Loading test app images into kind cluster..."
 	kind load docker-image $(PYTHON_TEST_IMAGE) --name=$(KIND_CLUSTER_NAME)
 	kind load docker-image $(NODEJS_TEST_IMAGE) --name=$(KIND_CLUSTER_NAME)
+	kind load docker-image $(JAVA_TEST_IMAGE) --name=$(KIND_CLUSTER_NAME)
+	kind load docker-image $(DOTNET_TEST_IMAGE) --name=$(KIND_CLUSTER_NAME)
 	@echo "=== Test images loaded into kind ==="
 
 .PHONY: functionaltest-local

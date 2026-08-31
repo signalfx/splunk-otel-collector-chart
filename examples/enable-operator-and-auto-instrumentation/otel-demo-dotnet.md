@@ -11,6 +11,15 @@ The .NET demo will create a dotnet-demo namespace and deploys the related .NET a
 If you have your own .NET application you want to instrument, you can still use the steps below as an example for how
 to instrument your application.
 
+Build the sample application image from the chart repository and load it into the Kind cluster before deploying it.
+Set `PLATFORM` to `linux/arm64` on an Apple Silicon Mac or `linux/amd64` for an x86 cluster:
+
+```bash
+PLATFORM=linux/arm64
+docker build --platform="$PLATFORM" -t dotnet_test:latest functional_tests/functional/testdata/dotnet
+kind load docker-image dotnet_test:latest
+```
+
 ```bash
 kubectl create namespace dotnet-demo
 ```

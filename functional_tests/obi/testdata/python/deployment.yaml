@@ -15,7 +15,7 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-        - image: quay.io/splunko11ytest/python_test:latest
+        - image: python_test:latest
           name: python-test
           imagePullPolicy: IfNotPresent
       nodeSelector:
