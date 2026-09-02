@@ -2,3 +2,10 @@ self-hosted-runner:
   labels: []
 
 config-variables: []
+
+# GitHub supports these keys, but actionlint 1.7.11 does not recognize them yet.
+paths:
+  .github/workflows/functional_test_eks.yaml:
+    ignore:
+      - 'unexpected key "deployment" for "environment" section'
+      - 'unexpected key "queue" for "concurrency" section'
