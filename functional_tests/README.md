@@ -56,23 +56,25 @@ kubectl get csr -o=jsonpath='{range.items[?(@.spec.signerName=="kubernetes.io/ku
 # Update helm dependencies
 make dep-update
 
-# Run functional tests (Kubernetes will pull images automatically)
+# Build and load the application test images into Kind
+make kind-build-test-images
+
+# Run functional tests
 make functionaltest SUITE=functional
 
 # Clean up when done
 kind delete cluster --name=kind
 ```
 
-## Optional: Pre-load Test Images
+## Build Test Images for a Different Platform
 
-If you want to pre-load images for faster test execution:
+`kind-build-test-images` builds the four application images used by the
+functional, secureapp, and OBI Kind suites and loads them into the cluster.
+It defaults to `linux/amd64`, matching GitHub-hosted Linux runners. Override
+the platform for an ARM64 local Kind cluster, such as on an Apple Silicon Mac:
 
 ```bash
-# Load application test images
-kind load docker-image quay.io/splunko11ytest/nodejs_test:latest --name kind
-kind load docker-image quay.io/splunko11ytest/java_test:latest --name kind
-kind load docker-image quay.io/splunko11ytest/dotnet_test:latest --name kind
-kind load docker-image quay.io/splunko11ytest/python_test:latest --name kind
+TEST_IMAGE_PLATFORM=linux/arm64 make kind-build-test-images
 
 # Load auto-instrumentation images (get the latest version from values.yaml) -
 # On Mac M1s, you can also push this image so kind doesn't get confused with the platform to use:

@@ -1,0 +1,72 @@
+name: Run EKS Functional Tests
+description: Configure AWS and EKS access, then run install or upgrade functional tests.
+
+inputs:
+  aws-access-key-id:
+    description: AWS access key ID.
+    required: true
+  aws-cluster-name:
+    description: EKS cluster name.
+    required: true
+  aws-region:
+    description: AWS region.
+    required: true
+  aws-secret-access-key:
+    description: AWS secret access key.
+    required: true
+  go-version:
+    description: Go version used to run functional tests.
+    required: true
+  kube-test-env:
+    description: KUBE_TEST_ENV value for the functional test.
+    required: true
+  kubeconfig-path:
+    description: Kubeconfig path to export as KUBECONFIG.
+    required: true
+  mode:
+    description: Test mode, either install or upgrade.
+    required: false
+    default: install
+  otelcol-image:
+    description: Override for the collector image reference.
+    required: false
+    default: ''
+  skip-tests:
+    description: SKIP_TESTS value for environments that only validate install or upgrade wiring.
+    required: false
+    default: ''
+  upgrade-from-values:
+    description: UPGRADE_FROM_VALUES value for upgrade tests.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Export kubeconfig path
+      shell: bash
+      run: echo "KUBECONFIG=${{ inputs.kubeconfig-path }}" >> "$GITHUB_ENV"
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+        mask-aws-account-id: true
+
+    - name: Install EKS kubeconfig
+      env:
+        AWS_CLUSTER_NAME: ${{ inputs.aws-cluster-name }}
+        AWS_REGION: ${{ inputs.aws-region }}
+      shell: bash
+      run: aws eks update-kubeconfig --name "$AWS_CLUSTER_NAME" --region "$AWS_REGION"
+
+    - uses: ./.github/actions/cloud-functional-test
+      with:
+        go-version: ${{ inputs.go-version }}
+        kube-test-env: ${{ inputs.kube-test-env }}
+        mode: ${{ inputs.mode }}
+        otelcol-image: ${{ inputs.otelcol-image }}
+        skip-tests: ${{ inputs.skip-tests }}
+        upgrade-from-values: ${{ inputs.upgrade-from-values }}

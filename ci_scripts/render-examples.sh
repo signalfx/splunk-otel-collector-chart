@@ -81,6 +81,12 @@ render_task() {
     done
   fi
 
+  # Normalize blank lines: depending on the Helm version, an extra blank line can be
+  # left before a "---" document separator or at the end of a rendered file. Strip
+  # those so the rendered output doesn't depend on the Helm version used to render it.
+  find "${rendered_manifests_dir}" -type f -name "*.yaml" -not -path "*/splunk-otel-collector/*" \
+    -exec perl -0777 -pi -e 's/(?:\n[ \t]*)+\n(?=-{3}\n)/\n/g; s/\s+\z/\n/' {} +
+
   echo "[${example_name}] SUCCESS"
 }
 

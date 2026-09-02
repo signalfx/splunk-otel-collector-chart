@@ -974,6 +974,14 @@ remoteManagement:
   # Requires splunkObservability.realm and splunkObservability.accessToken.
   enabled: false
 
+  collectorConfig:
+    # Controls how Helm upgrades handle collector ConfigMaps managed by OpAMP Bridge.
+    # When set to preserve, Helm preserves live ConfigMap data after the ConfigMap
+    # has been marked as remote-managed. When set to resetFromHelm, Helm renders
+    # collector config from chart values even if the live ConfigMap was previously
+    # marked as remote-managed.
+    upgradeStrategy: preserve
+
   opampBridge:
     # OpAMP server endpoint for the bridge. When empty, the chart uses the
     # Splunk Observability ingest OpAMP endpoint:

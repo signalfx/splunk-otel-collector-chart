@@ -33,7 +33,7 @@ spec:
         {{- toYaml $bridge.podLabels | nindent 8 }}
         {{- end }}
       annotations:
-        checksum/config: {{ printf "%s\n%s\n%s\n%s" (toYaml $bridge) (include "splunk-otel-collector.opampBridgeEndpoint" .) .Values.clusterName .Values.environment | sha256sum }}
+        checksum/config: {{ printf "%s\n%s\n%s\n%s" (toYaml $bridge) (include "splunk-otel-collector.opampBridgeEndpoint" .) .Values.clusterName .Values.environment (.Values.image.otelcol.tag | default .Chart.AppVersion) | sha256sum }}
         {{- if $bridge.podAnnotations }}
         {{- toYaml $bridge.podAnnotations | nindent 8 }}
         {{- end }}
