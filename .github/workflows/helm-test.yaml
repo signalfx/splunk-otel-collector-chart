@@ -33,6 +33,20 @@ jobs:
       - name: Render all examples
         run: make render
 
+      - name: Package Helm chart
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p "$RUNNER_TEMP/helm-chart"
+          helm package helm-charts/splunk-otel-collector --destination "$RUNNER_TEMP/helm-chart"
+
+      - name: Upload Helm chart artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0 # v7
+        with:
+          name: splunk-otel-collector-chart-pr-${{ github.event.pull_request.number }}
+          path: ${{ runner.temp }}/helm-chart/*.tgz
+          if-no-files-found: error
+
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
