@@ -1,0 +1,83 @@
+suite: splunk-otel-collector.lightPrometheusReceiver
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+templates:
+  - configmap-agent.yaml
+
+tests:
+  - it: rejects malformed Prometheus annotations before creating the light receiver
+    set:
+      autodetect:
+        prometheus: true
+      featureGates:
+        useLightPrometheusReceiver: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'lightprometheus:'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '(?s)prometheus\.io/port.*matches'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '(?s)prometheus\.io/path.*matches'
+
+  - it: anchors the port pattern to digits only, so a value like '9090@evil.com' can never match
+    set:
+      autodetect:
+        prometheus: true
+      featureGates:
+        useLightPrometheusReceiver: true
+    template: configmap-agent.yaml
+    asserts:
+      # helm-unittest only renders templates; it can't execute the `expr` rule engine against
+      # a live pod annotation. This asserts the rendered pattern is fully anchored (^...$) and
+      # restricted to the [0-9] character class, which by construction cannot match any string
+      # containing '@' (or any other non-digit character).
+      - matchRegex:
+          path: data["relay"]
+          pattern: '(?s)annotations\["prometheus\.io/port"\]\s+matches\s+"\^\[0-9\]\+\$"'
+
+  - it: keeps the standard receiver configuration unchanged when the light receiver is disabled
+    set:
+      autodetect:
+        prometheus: true
+      featureGates:
+        useLightPrometheusReceiver: false
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'prometheus/autodetect:'
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: 'lightprometheus:'
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'rule: type == "pod" && annotations\["prometheus.io/scrape"\] == "true"'
+
+  - it: applies the annotation validation to Istio autodetection
+    set:
+      autodetect:
+        prometheus: false
+        istio: true
+      featureGates:
+        useLightPrometheusReceiver: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'lightprometheus:'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '(?s)prometheus\.io/port.*matches'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '(?s)prometheus\.io/path.*matches'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '(?s)prometheus\.io/scrape.*istio\.io/rev.*prometheus\.io/port.*matches'

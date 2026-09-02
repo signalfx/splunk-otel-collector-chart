@@ -113,10 +113,20 @@ receivers:
       {{- end }}
         {{- if .Values.autodetect.prometheus }}
         # Enable prometheus scraping for pods with standard prometheus annotations
+        {{- if .Values.featureGates.useLightPrometheusReceiver }}
+        # The light receiver concatenates these values into a URL, so only allow a numeric port and an absolute path.
+        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && (! ("prometheus.io/port" in annotations) || annotations["prometheus.io/port"] matches "^[0-9]+$") && (! ("prometheus.io/path" in annotations) || annotations["prometheus.io/path"] matches "^/(?:$|[^/].*)$")
+        {{- else }}
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
+        {{- end }}
         {{- else }}
         # Enable prometheus scraping for Istio pods only
+        {{- if .Values.featureGates.useLightPrometheusReceiver }}
+        # The light receiver concatenates these values into a URL, so only allow a numeric port and an absolute path.
+        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev" in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot" or name matches "istio.*") && (! ("prometheus.io/port" in annotations) || annotations["prometheus.io/port"] matches "^[0-9]+$") && (! ("prometheus.io/path" in annotations) || annotations["prometheus.io/path"] matches "^/(?:$|[^/].*)$")
+        {{- else }}
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev" in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot" or name matches "istio.*")
+        {{- end }}
         {{- end }}
         config:
           {{- if .Values.featureGates.useLightPrometheusReceiver }}
