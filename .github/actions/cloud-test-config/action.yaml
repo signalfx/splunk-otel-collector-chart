@@ -1,0 +1,112 @@
+name: Configure Cloud Functional Tests
+description: Resolve the collector image and whether cloud functional tests are eligible to run.
+
+inputs:
+  collector-image:
+    description: Optional collector image override.
+    required: false
+    default: ''
+  event-name:
+    description: Name of the event that triggered the workflow.
+    required: true
+  pr-repo-full-name:
+    description: Full name of the pull request head repository.
+    required: false
+    default: ''
+  pr-user-login:
+    description: Login of the pull request author.
+    required: false
+    default: ''
+  ref:
+    description: Git ref that triggered the workflow.
+    required: true
+  repository:
+    description: Full name of the repository running the workflow.
+    required: true
+
+outputs:
+  cloud-tests-enabled:
+    description: Whether credential-bearing cloud tests are eligible to run.
+    value: ${{ steps.config.outputs.cloud-tests-enabled }}
+  gke-autopilot-allowed:
+    description: Whether the collector image is compatible with GKE Autopilot.
+    value: ${{ steps.config.outputs.gke-autopilot-allowed }}
+  otelcol-image:
+    description: Collector image override to pass to functional tests.
+    value: ${{ steps.config.outputs.otelcol-image }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve collector image and cloud-test gating
+      id: config
+      shell: bash
+      env:
+        COLLECTOR_IMAGE: ${{ inputs.collector-image }}
+        EVENT_NAME: ${{ inputs.event-name }}
+        PR_REPO_FULL_NAME: ${{ inputs.pr-repo-full-name }}
+        PR_USER_LOGIN: ${{ inputs.pr-user-login }}
+        REF: ${{ inputs.ref }}
+        REPOSITORY: ${{ inputs.repository }}
+      run: |
+        cloud_tests_enabled=false
+        # GKE Autopilot's admission webhook will reject the agent
+        # DaemonSet (hostNetwork / hostPath) unless the container
+        # image matches Splunk's registered Autopilot WorkloadAllowlist,
+        # which is keyed on the quay.io/signalfx/splunk-otel-collector
+        # repository.
+        gke_autopilot_allowed=true
+        if [[ -n "$COLLECTOR_IMAGE" ]] && \
+          [[ "$COLLECTOR_IMAGE" == *$'\n'* || "$COLLECTOR_IMAGE" == *$'\r'* ]]; then
+          echo "::error::COLLECTOR_IMAGE must be a single-line image reference"
+          exit 1
+        fi
+
+        collector_repo="$COLLECTOR_IMAGE"
+        collector_repo="${collector_repo%%@*}"
+        image_name="${collector_repo##*/}"
+        if [[ "$image_name" == *:* ]]; then
+          collector_repo="${collector_repo%:*}"
+        fi
+
+        case "$EVENT_NAME" in
+          workflow_dispatch)
+            if [[ -n "$COLLECTOR_IMAGE" ]]; then
+              case "$collector_repo" in
+                quay.io/signalfx/splunk-otel-collector | \
+                  quay.io/signalfx/splunk-otel-collector-dev | \
+                  quay.io/signalfx/splunk-otel-collector-fips)
+                  ;;
+                *)
+                  echo "::error::COLLECTOR_IMAGE must use an approved Splunk collector repository on quay.io"
+                  exit 1
+                  ;;
+              esac
+            fi
+            cloud_tests_enabled=true
+            ;;
+          pull_request)
+            if [[ "$PR_REPO_FULL_NAME" == "$REPOSITORY" && "$PR_USER_LOGIN" != "dependabot[bot]" ]]; then
+              cloud_tests_enabled=true
+            fi
+            ;;
+          *)
+            if [[ "$REF" == "refs/heads/main" ]]; then
+              cloud_tests_enabled=true
+            fi
+            ;;
+        esac
+
+        # When COLLECTOR_IMAGE is empty the chart default is used, so leave gke_autopilot_allowed=true.
+        if [[ -n "$COLLECTOR_IMAGE" ]]; then
+          if [[ "$collector_repo" != "quay.io/signalfx/splunk-otel-collector" ]]; then
+            gke_autopilot_allowed=false
+            echo "::notice::GKE Autopilot tests will be skipped because COLLECTOR_IMAGE='${COLLECTOR_IMAGE}' is not the stable quay.io/signalfx/splunk-otel-collector image."
+          fi
+        fi
+
+        {
+          echo "cloud-tests-enabled=${cloud_tests_enabled}"
+          echo "gke-autopilot-allowed=${gke_autopilot_allowed}"
+          echo "otelcol-image=${COLLECTOR_IMAGE}"
+        } >> "$GITHUB_OUTPUT"

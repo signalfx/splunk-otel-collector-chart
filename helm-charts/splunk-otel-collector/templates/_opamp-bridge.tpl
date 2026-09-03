@@ -31,6 +31,47 @@ Whether collector workloads should open direct OpAMP sessions.
 {{- end -}}
 
 {{/*
+Remote management marker for collector ConfigMaps whose relay config is managed
+by OpAMP Bridge after Helm creates the bootstrap config.
+*/}}
+{{- define "splunk-otel-collector.remoteManagementConfigAnnotation" -}}
+splunk.com/remote-management-config
+{{- end -}}
+
+{{/*
+Render collector ConfigMap relay config.
+
+When remote management manages this workload, preserve live data.relay on
+upgrades only after the live ConfigMap is marked with the remote management
+annotation. This lets existing installs render the new Helm bootstrap config
+when remote management is enabled for the first time, then preserves OpAMP
+remote config on later upgrades.
+*/}}
+{{- define "splunk-otel-collector.collectorConfigMapRelay" -}}
+{{- $root := .root -}}
+{{- $configMapName := .configMapName -}}
+{{- $chartConfig := .chartConfig -}}
+{{- $managed := .managed -}}
+{{- $annotation := include "splunk-otel-collector.remoteManagementConfigAnnotation" $root -}}
+{{- $upgradeStrategy := dig "collectorConfig" "upgradeStrategy" "preserve" $root.Values.remoteManagement -}}
+{{- if and $managed (ne $upgradeStrategy "resetFromHelm") -}}
+{{- $namespace := include "splunk-otel-collector.namespace" $root -}}
+{{- $live := lookup "v1" "ConfigMap" $namespace $configMapName -}}
+{{- $alreadyManaged := false -}}
+{{- if and $live $live.metadata $live.metadata.annotations (eq (index $live.metadata.annotations $annotation) "true") -}}
+{{- $alreadyManaged = true -}}
+{{- end -}}
+{{- if and $alreadyManaged $live.data (hasKey $live.data "relay") -}}
+{{- index $live.data "relay" -}}
+{{- else -}}
+{{- $chartConfig -}}
+{{- end -}}
+{{- else -}}
+{{- $chartConfig -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get OpAMP Bridge endpoint.
 */}}
 {{- define "splunk-otel-collector.opampBridgeEndpoint" -}}
@@ -49,7 +90,7 @@ Whether the chart-created agent workload should be managed by the OpAMP Bridge.
 {{- define "splunk-otel-collector.opampBridge.agentManaged" -}}
 {{- $bridge := .Values.remoteManagement.opampBridge -}}
 {{- $agentEnabled := and .Values.agent.enabled (ne .Values.distribution "eks/fargate") -}}
-{{- if and $agentEnabled $bridge.workloads.agent.enabled -}}true{{- end -}}
+{{- if and .Values.remoteManagement.enabled $agentEnabled $bridge.workloads.agent.enabled -}}true{{- end -}}
 {{- end -}}
 
 {{/*
@@ -57,7 +98,7 @@ Whether the chart-created gateway workload should be managed by the OpAMP Bridge
 */}}
 {{- define "splunk-otel-collector.opampBridge.gatewayManaged" -}}
 {{- $bridge := .Values.remoteManagement.opampBridge -}}
-{{- if and .Values.gateway.enabled $bridge.workloads.gateway.enabled -}}true{{- end -}}
+{{- if and .Values.remoteManagement.enabled .Values.gateway.enabled $bridge.workloads.gateway.enabled -}}true{{- end -}}
 {{- end -}}
 
 {{/*
@@ -66,7 +107,7 @@ Whether the chart-created cluster receiver workload should be managed by the OpA
 {{- define "splunk-otel-collector.opampBridge.clusterReceiverManaged" -}}
 {{- $bridge := .Values.remoteManagement.opampBridge -}}
 {{- $clusterReceiverEnabled := eq (include "splunk-otel-collector.clusterReceiverEnabled" .) "true" -}}
-{{- if and $clusterReceiverEnabled $bridge.workloads.clusterReceiver.enabled -}}true{{- end -}}
+{{- if and .Values.remoteManagement.enabled $clusterReceiverEnabled $bridge.workloads.clusterReceiver.enabled -}}true{{- end -}}
 {{- end -}}
 
 {{/*
@@ -112,6 +153,7 @@ Render standalone OpAMP Bridge non-identifying attributes for a chart-managed wo
 */}}
 {{- define "splunk-otel-collector.opampBridgeWorkloadAttributes" -}}
 {{- $attrs := deepCopy (dig "description" "non_identifying_attributes" (dict) .workload) -}}
+{{- $_ := set $attrs "service.version" (.root.Values.image.otelcol.tag | default .root.Chart.AppVersion) -}}
 {{- $_ := set $attrs "otelcol.service.mode" .workload.serviceMode -}}
 {{- with .root.Values.clusterName -}}
 {{- $_ := set $attrs "k8s.cluster.name" . -}}

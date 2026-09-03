@@ -65,6 +65,20 @@ can apply remote configuration and roll out workload changes. When Remote
 Management is enabled, chart-created collectors do not open their own direct
 OpAMP sessions to Splunk Observability Cloud; the bridge owns that connection.
 
+When Remote Management manages a chart-created collector, Helm marks the
+collector ConfigMap and preserves its live `data.relay` value on later upgrades
+so remote configuration applied by the bridge is not overwritten. Set
+`remoteManagement.collectorConfig.upgradeStrategy: resetFromHelm` to force Helm
+to render collector config from chart values again. Because OpAMP Bridge owns the
+live `data.relay` field after applying remote config, use Helm's
+`--force-conflicts` flag with `resetFromHelm`:
+
+```bash
+helm upgrade <release> <chart> \
+  --set remoteManagement.collectorConfig.upgradeStrategy=resetFromHelm \
+  --force-conflicts
+```
+
 By default, the bridge is configured to manage every enabled collector workload
 installed by this chart: the agent, gateway, and cluster receiver. If you do not
 override `remoteManagement.opampBridge.workloads`, every installed chart-managed

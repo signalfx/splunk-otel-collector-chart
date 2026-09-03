@@ -1,16 +1,23 @@
 {{ if .Values.gateway.enabled }}
+{{- $configMapName := printf "%s-otel-collector" (include "splunk-otel-collector.fullname" .) }}
+{{- $remoteManagementConfigManaged := eq (include "splunk-otel-collector.opampBridge.gatewayManaged" .) "true" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "splunk-otel-collector.fullname" . }}-otel-collector
+  name: {{ $configMapName }}
   namespace: {{ template "splunk-otel-collector.namespace" . }}
   labels:
     {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
     app: {{ template "splunk-otel-collector.name" . }}
     chart: {{ template "splunk-otel-collector.chart" . }}
     release: {{ .Release.Name }}
+  {{- if $remoteManagementConfigManaged }}
+  annotations:
+    {{ include "splunk-otel-collector.remoteManagementConfigAnnotation" . }}: "true"
+  {{- end }}
 data:
   relay: |
     {{- $defaultConfig := include "splunk-otel-collector.gatewayConfig" . | fromYaml }}
-    {{- .Values.gateway.config | mustMergeOverwrite $defaultConfig | toYaml | nindent 4 }}
+    {{- $chartConfig := .Values.gateway.config | mustMergeOverwrite $defaultConfig | toYaml }}
+    {{- include "splunk-otel-collector.collectorConfigMapRelay" (dict "root" . "configMapName" $configMapName "chartConfig" $chartConfig "managed" $remoteManagementConfigManaged) | nindent 4 }}
 {{- end }}
