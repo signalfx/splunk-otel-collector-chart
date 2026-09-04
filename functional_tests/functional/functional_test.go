@@ -21,7 +21,6 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"helm.sh/helm/v4/pkg/kube"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -145,13 +144,13 @@ func deployCharts(
 		aksWinOpts := internal.ChartOptions{
 			ChartNamespace:   internal.DefaultNamespace,
 			ChartReleaseName: "aks-win",
-			WaitStrategy:     kube.StatusWatcherStrategy,
+			WaitStrategy:     internal.StatusWatcherStrategy,
 			ChartTimeout:     internal.HelmActionTimeout,
 		}
 		aksLinuxOpts := internal.ChartOptions{
 			ChartNamespace:   internal.DefaultNamespace,
 			ChartReleaseName: "aks-linux",
-			WaitStrategy:     kube.StatusWatcherStrategy,
+			WaitStrategy:     internal.StatusWatcherStrategy,
 			ChartTimeout:     internal.HelmActionTimeout,
 		}
 		if upgradeChartDir := os.Getenv("UPGRADE_FROM_CHART_DIR"); upgradeChartDir != "" {

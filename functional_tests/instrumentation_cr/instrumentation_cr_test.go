@@ -14,13 +14,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"helm.sh/helm/v4/pkg/action"
-	"helm.sh/helm/v4/pkg/chart"
-	"helm.sh/helm/v4/pkg/chart/loader"
-	"helm.sh/helm/v4/pkg/cli"
-	helmvalues "helm.sh/helm/v4/pkg/cli/values"
-	"helm.sh/helm/v4/pkg/getter"
-	"helm.sh/helm/v4/pkg/kube"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,7 +28,6 @@ import (
 )
 
 const (
-	chartPath          = "helm-charts/splunk-otel-collector"
 	testDeploymentName = "injection-test"
 )
 
@@ -85,46 +77,22 @@ func valuePaths(files ...string) []string {
 	return paths
 }
 
-func loadChart(t *testing.T) chart.Charter {
-	t.Helper()
-	c, err := loader.Load(filepath.Join("..", "..", chartPath))
-	require.NoError(t, err)
-	return c
-}
-
 func mergeValues(t *testing.T, valueFiles ...string) map[string]any {
 	t.Helper()
-	vopts := helmvalues.Options{ValueFiles: valuePaths(valueFiles...)}
-	vals, err := vopts.MergeValues(getter.All(cli.New()))
-	require.NoError(t, err)
-	return vals
+	return internal.MergeHelmValueFiles(t, valuePaths(valueFiles...))
 }
 
 func helmInstall(t *testing.T, valueFiles ...string) {
 	t.Helper()
 	vals := mergeValues(t, valueFiles...)
-	actionConfig := internal.InitHelmActionConfig(t, kubeConfig(t))
-	install := action.NewInstall(actionConfig)
-	install.Namespace = internal.DefaultNamespace
-	install.ReleaseName = internal.DefaultChartReleaseName
-	install.WaitStrategy = kube.StatusWatcherStrategy
-	install.Timeout = internal.HelmActionTimeout
-	install.ForceConflicts = false
-	install.Labels = map[string]string{"helm.sh/chart-name": internal.DefaultChartReleaseName}
-	_, err := install.Run(loadChart(t), vals)
+	err := internal.HelmInstall(t, kubeConfig(t), vals, internal.GetDefaultChartOptions())
 	require.NoError(t, err)
 }
 
 func helmUpgrade(t *testing.T, valueFiles ...string) {
 	t.Helper()
 	vals := mergeValues(t, valueFiles...)
-	actionConfig := internal.InitHelmActionConfig(t, kubeConfig(t))
-	upgrade := action.NewUpgrade(actionConfig)
-	upgrade.Namespace = internal.DefaultNamespace
-	upgrade.WaitStrategy = kube.StatusWatcherStrategy
-	upgrade.Timeout = internal.HelmActionTimeout
-	upgrade.ForceConflicts = false
-	_, err := upgrade.Run(internal.DefaultChartReleaseName, loadChart(t), vals)
+	err := internal.HelmUpgrade(t, kubeConfig(t), vals, internal.GetDefaultChartOptions())
 	require.NoError(t, err)
 }
 
@@ -170,14 +138,7 @@ func waitWebhookEndpoint(t *testing.T, cs *kubernetes.Clientset) {
 func helmUpgradeInstall(t *testing.T, valueFiles ...string) {
 	t.Helper()
 	vals := mergeValues(t, valueFiles...)
-	actionConfig := internal.InitHelmActionConfig(t, kubeConfig(t))
-	upgrade := action.NewUpgrade(actionConfig)
-	upgrade.Install = true
-	upgrade.Namespace = internal.DefaultNamespace
-	upgrade.WaitStrategy = kube.StatusWatcherStrategy
-	upgrade.Timeout = internal.HelmActionTimeout
-	upgrade.ForceConflicts = false
-	_, err := upgrade.Run(internal.DefaultChartReleaseName, loadChart(t), vals)
+	err := internal.HelmUpgradeInstall(t, kubeConfig(t), vals, internal.GetDefaultChartOptions())
 	require.NoError(t, err)
 }
 
@@ -188,15 +149,7 @@ func tryInstallOrRecover(t *testing.T, cs *kubernetes.Clientset, valueFiles ...s
 	t.Helper()
 	vals := mergeValues(t, valueFiles...)
 
-	actionConfig := internal.InitHelmActionConfig(t, kubeConfig(t))
-	install := action.NewInstall(actionConfig)
-	install.Namespace = internal.DefaultNamespace
-	install.ReleaseName = internal.DefaultChartReleaseName
-	install.WaitStrategy = kube.StatusWatcherStrategy
-	install.Timeout = internal.HelmActionTimeout
-	install.ForceConflicts = false
-	install.Labels = map[string]string{"helm.sh/chart-name": internal.DefaultChartReleaseName}
-	_, installErr := install.Run(loadChart(t), vals)
+	installErr := internal.HelmInstall(t, kubeConfig(t), vals, internal.GetDefaultChartOptions())
 	if installErr == nil {
 		return
 	}

@@ -20,6 +20,14 @@ inputs:
     description: 'Path to go.mod to determine Go version (used when go-version is not set)'
     required: false
     default: ''
+  go-test-tags:
+    description: 'Go build tags to pass to functional tests'
+    required: false
+    default: ''
+  helm-version:
+    description: 'Helm version to install for functional tests'
+    required: false
+    default: v4.2.3
   k8s-version:
     description: 'Kubernetes version for the kind cluster (e.g. v1.36.1)'
     required: true
@@ -61,6 +69,11 @@ runs:
         go-version-file: ${{ inputs.go-version-file != '' && inputs.go-version-file || '' }}
         cache-dependency-path: '**/go.sum'
 
+    - name: Set up Helm
+      uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 #v5.0.1
+      with:
+        version: ${{ inputs.helm-version }}
+
     - name: Create kind cluster
       uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
       with:
@@ -100,6 +113,7 @@ runs:
         K8S_VERSION: ${{ inputs.k8s-version }}
         OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
         UPDATE_EXPECTED_RESULTS: ${{ inputs.update-expected-results }}
+        GO_TEST_TAGS: ${{ inputs.go-test-tags }}
         SUITE: ${{ inputs.suite }}
         UPGRADE_FROM_VALUES: ${{ inputs.upgrade-from-values }}
         UPGRADE_FROM_CHART_DIR: ${{ inputs.mode == 'upgrade' && 'base/splunk-otel-collector' || '' }}
