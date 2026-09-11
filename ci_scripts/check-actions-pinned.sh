@@ -22,7 +22,7 @@ while IFS= read -r line; do
   # Skip local actions, empty lines, shell script false positives, and the exact
   # first-party reusable workflow intentionally sourced from protected main.
   case "$ref" in
-    ./*|*echo*|*grep*|*sed*|""|signalfx/splunk-otel-collector-chart/.github/workflows/eks-privileged-tests.yaml@refs/heads/main) continue ;;
+    ./*|*echo*|*grep*|*sed*|""|signalfx/splunk-otel-collector-chart/.github/workflows/eks-privileged-tests.yaml@main) continue ;;
   esac
 
   if ! echo "$ref" | grep -qE '@[0-9a-f]{40}'; then

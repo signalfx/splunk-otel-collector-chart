@@ -139,7 +139,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: signalfx/splunk-otel-collector-chart/.github/workflows/eks-privileged-tests.yaml@refs/heads/main
+    uses: signalfx/splunk-otel-collector-chart/.github/workflows/eks-privileged-tests.yaml@main
     with:
       otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
