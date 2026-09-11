@@ -27,11 +27,15 @@ agent:
   extraEnvs:
     - name: HTTPS_PROXY
       value: "192.168.0.10"
+    - name: NO_PROXY
+      value: "*"
 
 clusterReceiver:
   extraEnvs:
     - name: HTTPS_PROXY
       value: "192.168.0.10"
+    - name: NO_PROXY
+      value: "*"
 
 gateway:
   enabled: true
