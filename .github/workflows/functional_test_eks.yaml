@@ -173,6 +173,7 @@ jobs:
           done
 
           if (( ${#pending_entries[@]} > 0 )); then
+            echo "::error title=Chart release readiness::Pending changelog entries remain; see the job log for details."
             echo "The release pull request does not include all changelog entries currently on main."
             printf 'Pending entry: %s\n' "${pending_entries[@]}"
             echo "Update or recreate the release pull request before merging it."
@@ -211,6 +212,7 @@ jobs:
           ' <<< "$open_prs")"
 
           if [[ -n "$blocking_prs" ]]; then
+            echo "::error title=Chart release readiness::Required dependency updates remain open; see the job log for details."
             echo "Merge these dependency updates before releasing, or add the blocked label when an update is intentionally deferred:"
             printf '%s\n' "$blocking_prs"
             exit 1
@@ -241,12 +243,14 @@ jobs:
           fi
 
           if [[ "$EKS_TEST_RESULT" != "success" ]]; then
+            echo "::error title=Chart release gate::The required EKS functional tests did not pass."
             echo "All EKS functional tests must pass before merging the release pull request."
             echo "EKS reusable workflow result: $EKS_TEST_RESULT"
             exit 1
           fi
 
           if [[ "$RELEASE_READINESS_RESULT" != "success" ]]; then
+            echo "::error title=Chart release gate::The chart release readiness checks did not pass."
             echo "The chart release readiness checks must pass before merging the release pull request."
             echo "Release readiness result: $RELEASE_READINESS_RESULT"
             exit 1
