@@ -6,6 +6,6 @@ Ex. Adding a feature - Explain what this achieves.-->
 
 **Testing:** <Describe what testing was performed and which tests were added.>
 
-- [ ] EKS functional tests were run when recommended, or are not needed for this change.
+- [ ] I checked the EKS recommendation in PR checks and ensured the tests ran if recommended.
 
 **Documentation:** <Describe the documentation added.>
