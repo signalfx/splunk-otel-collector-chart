@@ -1,0 +1,205 @@
+name: EKS privileged functional tests
+
+on:
+  workflow_call:
+    inputs:
+      otelcol-image:
+        description: Optional collector image override for a manual test run.
+        required: false
+        default: ''
+        type: string
+
+# Callers must grant only the permissions required by the jobs below. A called
+# workflow cannot elevate GITHUB_TOKEN permissions beyond its caller.
+permissions: {}
+
+env:
+  GO_VERSION: 1.26.6
+  # Make sure to exit early if cache segment download times out after 2 minutes.
+  # We limit cache download as a whole to 5 minutes.
+  SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
+
+jobs:
+  authorize-caller:
+    name: Authorize EKS test caller
+    permissions: {}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Keep authorization in this workflow and require callers to reference its
+      # protected-main version. That prevents a PR from weakening its own gate.
+      - name: Validate caller and collector image
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          COLLECTOR_IMAGE: ${{ inputs.otelcol-image }}
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || '' }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login || '' }}
+          REF: ${{ github.ref }}
+          REPOSITORY: ${{ github.repository }}
+          REPOSITORY_ID: ${{ github.repository_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$REPOSITORY" != "signalfx/splunk-otel-collector-chart" || "$REPOSITORY_ID" != "286847478" ]]; then
+            echo "::error::This workflow only authorizes the splunk-otel-collector-chart repository."
+            exit 1
+          fi
+
+          case "$EVENT_NAME" in
+            pull_request)
+              if [[ "$BASE_REF" != "main" || "$HEAD_REPOSITORY" != "$REPOSITORY" || "$PR_AUTHOR" == "dependabot[bot]" ]]; then
+                echo "::error::EKS tests only accept internal, non-Dependabot pull requests targeting main."
+                exit 1
+              fi
+              if [[ -n "$COLLECTOR_IMAGE" ]]; then
+                echo "::error::Pull requests cannot override COLLECTOR_IMAGE."
+                exit 1
+              fi
+              ;;
+            workflow_dispatch)
+              if [[ "$REF" != "refs/heads/main" ]]; then
+                echo "::error::Manual EKS tests must be dispatched from main."
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::This workflow only accepts pull_request or workflow_dispatch callers."
+              exit 1
+              ;;
+          esac
+
+          if [[ -n "$COLLECTOR_IMAGE" ]] && \
+            [[ "$COLLECTOR_IMAGE" == *$'\n'* || "$COLLECTOR_IMAGE" == *$'\r'* ]]; then
+            echo "::error::COLLECTOR_IMAGE must be a single-line image reference."
+            exit 1
+          fi
+
+          collector_repo="$COLLECTOR_IMAGE"
+          collector_repo="${collector_repo%%@*}"
+          image_name="${collector_repo##*/}"
+          if [[ "$image_name" == *:* ]]; then
+            collector_repo="${collector_repo%:*}"
+          fi
+
+          if [[ -n "$COLLECTOR_IMAGE" ]]; then
+            case "$collector_repo" in
+              quay.io/signalfx/splunk-otel-collector | \
+                quay.io/signalfx/splunk-otel-collector-dev | \
+                quay.io/signalfx/splunk-otel-collector-fips)
+                ;;
+              *)
+                echo "::error::COLLECTOR_IMAGE must use an approved Splunk collector repository on quay.io."
+                exit 1
+                ;;
+            esac
+          fi
+
+  eks-test:
+    name: ${{ matrix.name }}
+    needs: authorize-caller
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: EKS install - approval required
+            aws-cluster-name: rotel-eks
+            aws-region: us-west-1
+            kube-test-env: eks
+            kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
+            mode: install
+            session-name: eks-install
+            skip-tests: ''
+            upgrade-from-values: ''
+          - name: EKS upgrade - approval required
+            aws-cluster-name: rotel-eks
+            aws-region: us-west-1
+            kube-test-env: eks
+            kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
+            mode: upgrade
+            session-name: eks-upgrade
+            skip-tests: ''
+            upgrade-from-values: eks_upgrade_from_previous_release_values.yaml
+          - name: EKS Fargate install - approval required
+            aws-cluster-name: gdi-github-eks-fargate
+            aws-region: us-west-2
+            kube-test-env: eks/fargate
+            kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
+            mode: install
+            session-name: eks-fargate-install
+            skip-tests: 'true'
+            upgrade-from-values: ''
+          - name: EKS Fargate upgrade - approval required
+            aws-cluster-name: gdi-github-eks-fargate
+            aws-region: us-west-2
+            kube-test-env: eks/fargate
+            kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
+            mode: upgrade
+            session-name: eks-fargate-upgrade
+            skip-tests: 'true'
+            upgrade-from-values: eks_fargate_upgrade_from_previous_release_values.yaml
+          - name: EKS Auto Mode install - approval required
+            aws-cluster-name: rotel-eks-autotest
+            aws-region: us-west-2
+            kube-test-env: eks/auto-mode
+            kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
+            mode: install
+            session-name: eks-auto-mode-install
+            skip-tests: ''
+            upgrade-from-values: ''
+          - name: EKS Auto Mode upgrade - approval required
+            aws-cluster-name: rotel-eks-autotest
+            aws-region: us-west-2
+            kube-test-env: eks/auto-mode
+            kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
+            mode: upgrade
+            session-name: eks-auto-mode-upgrade
+            skip-tests: ''
+            upgrade-from-values: eks_auto_mode_upgrade_from_previous_release_values.yaml
+    environment:
+      name: aws-eks-functional-tests
+      deployment: false
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    continue-on-error: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref != 'update-release' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Export kubeconfig path
+        env:
+          KUBECONFIG_PATH: ${{ matrix.kubeconfig-path }}
+        shell: bash
+        run: echo "KUBECONFIG=$KUBECONFIG_PATH" >> "$GITHUB_ENV"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
+        with:
+          audience: sts.amazonaws.com
+          aws-region: ${{ matrix.aws-region }}
+          mask-aws-account-id: true
+          output-env-credentials: true
+          role-duration-seconds: 3600
+          role-session-name: ${{ matrix.session-name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          role-to-assume: ${{ secrets.AWS_TEST_ROLE_ARN }}
+
+      - name: Install EKS kubeconfig
+        env:
+          AWS_CLUSTER_NAME: ${{ matrix.aws-cluster-name }}
+          AWS_REGION: ${{ matrix.aws-region }}
+        shell: bash
+        run: aws eks update-kubeconfig --name "$AWS_CLUSTER_NAME" --region "$AWS_REGION"
+
+      - uses: ./.github/actions/cloud-functional-test
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          kube-test-env: ${{ matrix.kube-test-env }}
+          mode: ${{ matrix.mode }}
+          otelcol-image: ${{ inputs.otelcol-image }}
+          skip-tests: ${{ matrix.skip-tests }}
+          upgrade-from-values: ${{ matrix.upgrade-from-values }}
