@@ -4,6 +4,19 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.160.0] - 2026-09-11
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.160.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.160.0).
+
+### 💡 Enhancements 💡
+
+- `chart`: Preserve OpAMP-managed collector ConfigMaps on Helm upgrades when Remote Management is enabled. ([#2575](https://github.com/signalfx/splunk-otel-collector-chart/pull/2575))
+- `chart`: Bump obi to 0.13.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2576](https://github.com/signalfx/splunk-otel-collector-chart/pull/2576))
+
+### 🧰 Bug fixes 🧰
+
+- `chart`: Reject malformed Prometheus pod annotations when using the Light Prometheus Receiver ([#2583](https://github.com/signalfx/splunk-otel-collector-chart/pull/2583))
+
 ## [0.159.0] - 2026-08-28
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.159.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.159.0).
