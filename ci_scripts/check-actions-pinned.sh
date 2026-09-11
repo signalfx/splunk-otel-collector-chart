@@ -19,9 +19,10 @@ while IFS= read -r line; do
 
   ref=$(echo "$content" | sed -n "s/.*uses:[[:space:]]*['\"]*//p" | sed "s/['\"].*$//" | sed 's/[[:space:]]*$//')
 
-  # Skip local actions, empty lines, and shell script false positives
+  # Skip local actions, empty lines, shell script false positives, and the exact
+  # first-party reusable workflow intentionally sourced from protected main.
   case "$ref" in
-    ./*|*echo*|*grep*|*sed*|"") continue ;;
+    ./*|*echo*|*grep*|*sed*|""|signalfx/splunk-otel-collector-chart/.github/workflows/eks-privileged-tests.yaml@refs/heads/main) continue ;;
   esac
 
   if ! echo "$ref" | grep -qE '@[0-9a-f]{40}'; then

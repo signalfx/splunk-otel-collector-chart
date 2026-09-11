@@ -15,12 +15,6 @@ on:
 permissions:
   contents: read
 
-env:
-  GO_VERSION: 1.26.6
-  # Make sure to exit early if cache segment download times out after 2 minutes.
-  # We limit cache download as a whole to 5 minutes.
-  SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
-
 jobs:
   chart-release-fast-gate:
     # Emit the required check immediately for PRs that are not the internal
@@ -76,7 +70,7 @@ jobs:
               functional_tests \
               .github/actions/cloud-functional-test \
               .github/actions/cloud-test-config \
-              .github/actions/eks-functional-test \
+              .github/workflows/eks-privileged-tests.yaml \
               .github/workflows/functional_test_eks.yaml \
               Makefile \
               Makefile.common || diff_status=$?
@@ -138,181 +132,16 @@ jobs:
           echo "### EKS tests recommended" >> "$GITHUB_STEP_SUMMARY"
           echo "Approve the EKS test environment to run the functional tests for this change." >> "$GITHUB_STEP_SUMMARY"
 
-  eks-test:
-    name: EKS install - approval required
+  eks-functional-tests:
+    name: EKS functional tests
     needs: collector-image-config
     if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.eks-tests-recommended == 'true' }}
-    environment:
-      name: aws-eks-functional-tests
-      deployment: false
     permissions:
       contents: read
       id-token: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/eks-functional-test
-        with:
-          aws-cluster-name: rotel-eks
-          aws-region: us-west-1
-          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
-          go-version: ${{ env.GO_VERSION }}
-          kube-test-env: eks
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
-          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
-
-  eks-upgrade-test:
-    name: EKS upgrade - approval required
-    needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.eks-tests-recommended == 'true' }}
-    environment:
-      name: aws-eks-functional-tests
-      deployment: false
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/eks-functional-test
-        with:
-          aws-cluster-name: rotel-eks
-          aws-region: us-west-1
-          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
-          go-version: ${{ env.GO_VERSION }}
-          kube-test-env: eks
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
-          mode: upgrade
-          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
-          upgrade-from-values: eks_upgrade_from_previous_release_values.yaml
-
-  eks-fargate-test:
-    name: EKS Fargate install - approval required
-    needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.eks-tests-recommended == 'true' }}
-    environment:
-      name: aws-eks-functional-tests
-      deployment: false
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/eks-functional-test
-        with:
-          aws-cluster-name: gdi-github-eks-fargate
-          aws-region: us-west-2
-          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
-          go-version: ${{ env.GO_VERSION }}
-          kube-test-env: eks/fargate
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
-          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
-          skip-tests: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
-
-  eks-fargate-upgrade-test:
-    name: EKS Fargate upgrade - approval required
-    needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.eks-tests-recommended == 'true' }}
-    environment:
-      name: aws-eks-functional-tests
-      deployment: false
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/eks-functional-test
-        with:
-          aws-cluster-name: gdi-github-eks-fargate
-          aws-region: us-west-2
-          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
-          go-version: ${{ env.GO_VERSION }}
-          kube-test-env: eks/fargate
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
-          mode: upgrade
-          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
-          skip-tests: "true" # we need to skip functional tests as we have not set probes to listen to the traffic.
-          upgrade-from-values: eks_fargate_upgrade_from_previous_release_values.yaml
-
-  eks-auto-mode-test:
-    name: EKS Auto Mode install - approval required
-    needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.eks-tests-recommended == 'true' }}
-    environment:
-      name: aws-eks-functional-tests
-      deployment: false
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/eks-functional-test
-        with:
-          aws-cluster-name: rotel-eks-autotest
-          aws-region: us-west-2
-          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
-          go-version: ${{ env.GO_VERSION }}
-          kube-test-env: eks/auto-mode
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
-          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
-
-  eks-auto-mode-upgrade-test:
-    name: EKS Auto Mode upgrade - approval required
-    needs: collector-image-config
-    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.eks-tests-recommended == 'true' }}
-    environment:
-      name: aws-eks-functional-tests
-      deployment: false
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/eks-functional-test
-        with:
-          aws-cluster-name: rotel-eks-autotest
-          aws-region: us-west-2
-          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
-          go-version: ${{ env.GO_VERSION }}
-          kube-test-env: eks/auto-mode
-          kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
-          mode: upgrade
-          otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
-          upgrade-from-values: eks_auto_mode_upgrade_from_previous_release_values.yaml
+    uses: signalfx/splunk-otel-collector-chart/.github/workflows/eks-privileged-tests.yaml@refs/heads/main
+    with:
+      otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
 
   release-readiness:
     name: Validate chart release readiness
@@ -393,12 +222,7 @@ jobs:
     # Only release PRs expose the required check name here; other runs report optional results.
     name: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'update-release' && 'Chart release gate' || 'EKS results (optional)' }}
     needs:
-      - eks-test
-      - eks-upgrade-test
-      - eks-fargate-test
-      - eks-fargate-upgrade-test
-      - eks-auto-mode-test
-      - eks-auto-mode-upgrade-test
+      - eks-functional-tests
       - release-readiness
     # Evaluate every result so release PRs fail closed on failures, skips, or cancellation.
     if: ${{ always() }}
@@ -406,12 +230,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_REQUIRED: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'update-release' }}
-      EKS_TEST_RESULT: ${{ needs.eks-test.result }}
-      EKS_UPGRADE_TEST_RESULT: ${{ needs.eks-upgrade-test.result }}
-      EKS_FARGATE_TEST_RESULT: ${{ needs.eks-fargate-test.result }}
-      EKS_FARGATE_UPGRADE_TEST_RESULT: ${{ needs.eks-fargate-upgrade-test.result }}
-      EKS_AUTO_MODE_TEST_RESULT: ${{ needs.eks-auto-mode-test.result }}
-      EKS_AUTO_MODE_UPGRADE_TEST_RESULT: ${{ needs.eks-auto-mode-upgrade-test.result }}
+      EKS_TEST_RESULT: ${{ needs.eks-functional-tests.result }}
       RELEASE_READINESS_RESULT: ${{ needs.release-readiness.result }}
     steps:
       - name: Verify chart release gate
@@ -421,21 +240,11 @@ jobs:
             exit 0
           fi
 
-          results=(
-            "$EKS_TEST_RESULT"
-            "$EKS_UPGRADE_TEST_RESULT"
-            "$EKS_FARGATE_TEST_RESULT"
-            "$EKS_FARGATE_UPGRADE_TEST_RESULT"
-            "$EKS_AUTO_MODE_TEST_RESULT"
-            "$EKS_AUTO_MODE_UPGRADE_TEST_RESULT"
-          )
-          for result in "${results[@]}"; do
-            if [[ "$result" != "success" ]]; then
-              echo "All EKS functional tests must pass before merging the release pull request."
-              printf 'EKS job results: %s\n' "${results[*]}"
-              exit 1
-            fi
-          done
+          if [[ "$EKS_TEST_RESULT" != "success" ]]; then
+            echo "All EKS functional tests must pass before merging the release pull request."
+            echo "EKS reusable workflow result: $EKS_TEST_RESULT"
+            exit 1
+          fi
 
           if [[ "$RELEASE_READINESS_RESULT" != "success" ]]; then
             echo "The chart release readiness checks must pass before merging the release pull request."
