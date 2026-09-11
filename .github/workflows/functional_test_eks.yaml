@@ -142,6 +142,8 @@ jobs:
     uses: signalfx/splunk-otel-collector-chart/.github/workflows/eks-privileged-tests.yaml@main
     with:
       otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}
+    secrets:
+      AWS_TEST_ROLE_ARN: ${{ secrets.AWS_TEST_ROLE_ARN }}
 
   release-readiness:
     name: Validate chart release readiness
