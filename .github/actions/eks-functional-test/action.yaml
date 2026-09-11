@@ -2,17 +2,14 @@ name: Run EKS Functional Tests
 description: Configure AWS and EKS access, then run install or upgrade functional tests.
 
 inputs:
-  aws-access-key-id:
-    description: AWS access key ID.
-    required: true
   aws-cluster-name:
     description: EKS cluster name.
     required: true
   aws-region:
     description: AWS region.
     required: true
-  aws-secret-access-key:
-    description: AWS secret access key.
+  aws-role-arn:
+    description: AWS IAM role ARN to assume through GitHub OIDC.
     required: true
   go-version:
     description: Go version used to run functional tests.
@@ -50,10 +47,13 @@ runs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
       with:
-        aws-access-key-id: ${{ inputs.aws-access-key-id }}
-        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region }}
+        audience: sts.amazonaws.com
         mask-aws-account-id: true
+        output-env-credentials: true
+        role-duration-seconds: 3600
+        role-session-name: ${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
+        role-to-assume: ${{ inputs.aws-role-arn }}
 
     - name: Install EKS kubeconfig
       env:

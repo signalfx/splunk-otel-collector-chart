@@ -115,6 +115,20 @@ jobs:
           ref: ${{ github.ref }}
           repository: ${{ github.repository }}
 
+  eks-tests-recommended:
+    name: EKS tests recommended - approval required
+    needs: collector-image-config
+    if: ${{ needs.collector-image-config.outputs.cloud-tests-enabled == 'true' && needs.collector-image-config.outputs.eks-tests-recommended == 'true' }}
+    permissions: {}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Surface EKS test recommendation
+        run: |
+          echo "EKS functional tests are recommended for this change. Approve the EKS test environment to run them."
+          echo "### EKS tests recommended" >> "$GITHUB_STEP_SUMMARY"
+          echo "Approve the EKS test environment to run the functional tests for this change." >> "$GITHUB_STEP_SUMMARY"
+
   eks-test:
     name: EKS install - approval required
     needs: collector-image-config
@@ -122,6 +136,9 @@ jobs:
     environment:
       name: aws-eks-functional-tests
       deployment: false
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
     continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
@@ -132,10 +149,9 @@ jobs:
 
       - uses: ./.github/actions/eks-functional-test
         with:
-          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
           aws-cluster-name: rotel-eks
           aws-region: us-west-1
-          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
           go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks
           kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
@@ -148,6 +164,9 @@ jobs:
     environment:
       name: aws-eks-functional-tests
       deployment: false
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
     continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
@@ -158,10 +177,9 @@ jobs:
 
       - uses: ./.github/actions/eks-functional-test
         with:
-          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
           aws-cluster-name: rotel-eks
           aws-region: us-west-1
-          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
           go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks
           kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks
@@ -176,6 +194,9 @@ jobs:
     environment:
       name: aws-eks-functional-tests
       deployment: false
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
     continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
@@ -186,10 +207,9 @@ jobs:
 
       - uses: ./.github/actions/eks-functional-test
         with:
-          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
           aws-cluster-name: gdi-github-eks-fargate
           aws-region: us-west-2
-          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
           go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/fargate
           kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
@@ -203,6 +223,9 @@ jobs:
     environment:
       name: aws-eks-functional-tests
       deployment: false
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
     continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
@@ -213,10 +236,9 @@ jobs:
 
       - uses: ./.github/actions/eks-functional-test
         with:
-          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
           aws-cluster-name: gdi-github-eks-fargate
           aws-region: us-west-2
-          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
           go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/fargate
           kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-fargate
@@ -232,6 +254,9 @@ jobs:
     environment:
       name: aws-eks-functional-tests
       deployment: false
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
     continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
@@ -242,10 +267,9 @@ jobs:
 
       - uses: ./.github/actions/eks-functional-test
         with:
-          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
           aws-cluster-name: rotel-eks-autotest
           aws-region: us-west-2
-          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
           go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/auto-mode
           kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
@@ -258,6 +282,9 @@ jobs:
     environment:
       name: aws-eks-functional-tests
       deployment: false
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
     continue-on-error: ${{ needs.collector-image-config.outputs.release-required != 'true' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
@@ -268,10 +295,9 @@ jobs:
 
       - uses: ./.github/actions/eks-functional-test
         with:
-          aws-access-key-id: ${{ secrets.AWS_EKS_ACCESS_KEY_ID }}
           aws-cluster-name: rotel-eks-autotest
           aws-region: us-west-2
-          aws-secret-access-key: ${{ secrets.AWS_EKS_SECRET_ACCESS_KEY }}
+          aws-role-arn: ${{ secrets.AWS_TEST_ROLE_ARN }}
           go-version: ${{ env.GO_VERSION }}
           kube-test-env: eks/auto-mode
           kubeconfig-path: /tmp/kube-config-splunk-otel-collector-chart-functional-testing-eks-auto-mode
