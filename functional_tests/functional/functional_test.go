@@ -1088,7 +1088,7 @@ func testAgentMetrics(t *testing.T) {
 	generateRequiredTelemetry(t)
 
 	t.Run("internal metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_internal_metrics.yaml", "otelcol_otelsvc_k8s_pod_updated")
+		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_internal_metrics.yaml", "otelcol_processor_memory_limiter_accepted_log_records")
 	})
 
 	t.Run("kubelet_stats metrics", func(t *testing.T) {
@@ -1244,12 +1244,11 @@ func testHECMetrics(t *testing.T) {
 		"otelcol_exporter_queue_size",
 		"otelcol_exporter_sent_metric_points",
 		"otelcol_exporter_sent_log_records",
-		"otelcol_otelsvc_k8s_ip_lookup_miss",
+		"otelcol.k8s.watcher.namespace.added",
+		"otelcol.k8s.watcher.pod.added",
+		"otelcol.k8s.watcher.pod_cache.size",
+		"otelcol.k8s.watcher.pod.updated",
 		"otelcol_processor_memory_limiter_accepted_log_records",
-		"otelcol_otelsvc_k8s_namespace_added",
-		"otelcol_otelsvc_k8s_pod_added",
-		"otelcol_otelsvc_k8s_pod_table_size",
-		"otelcol_otelsvc_k8s_pod_updated",
 		"otelcol_process_cpu_seconds",
 		"otelcol_process_memory_rss",
 		"otelcol_process_runtime_heap_alloc_bytes",
