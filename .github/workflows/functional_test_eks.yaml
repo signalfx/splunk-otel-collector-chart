@@ -22,10 +22,19 @@ env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
 
 jobs:
+  chart-release-fast-gate:
+    # Emit the required check immediately for PRs that are not the internal
+    # update-release PR. This job never checks out or executes PR code.
+    name: ${{ github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.ref != 'update-release') && 'Chart release gate' || 'Chart release gate pending required checks' }}
+    permissions: {}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Report release gate status
+        run: echo "The full chart release gate is required only for the internal update-release pull request."
+
   collector-image-config:
-    # Keep the required check fast on ordinary PRs; release PRs get the same check name
-    # from chart-release-gate only after all EKS jobs finish.
-    name: ${{ github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || github.event.pull_request.head.ref != 'update-release') && 'Chart release gate' || 'Resolve EKS test configuration' }}
+    name: Resolve EKS test configuration
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]') }}
     runs-on: ubuntu-latest
     outputs:
