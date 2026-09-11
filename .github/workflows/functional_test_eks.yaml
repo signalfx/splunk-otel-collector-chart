@@ -204,6 +204,8 @@ jobs:
                 or .headRefName == "update-java"
                 or .headRefName == "update-nodejs"
                 or .headRefName == "update-dotnet"
+                # OBI updates are not release-blocking yet.
+                # or .headRefName == "update-obi"
                 or .headRefName == "update-java-csa"
                 or .headRefName == "update-python-secureapp"
               )
