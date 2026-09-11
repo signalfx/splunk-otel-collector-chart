@@ -9,8 +9,7 @@ on:
         default: ''
         type: string
 
-# Callers must grant only the permissions required by the jobs below. A called
-# workflow cannot elevate GITHUB_TOKEN permissions beyond its caller.
+# Deny GitHub token access by default; EKS jobs grant only what they need.
 permissions: {}
 
 env:
@@ -20,8 +19,8 @@ env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
 
 jobs:
-  authorize-caller:
-    name: Authorize EKS test caller
+  validate-caller:
+    name: Validate EKS test caller
     permissions: {}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -32,8 +31,10 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
           COLLECTOR_IMAGE: ${{ inputs.otelcol-image }}
+          EVENT_ACTION: ${{ github.event.action || '' }}
           EVENT_NAME: ${{ github.event_name }}
           HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || '' }}
+          HEAD_REPOSITORY_ID: ${{ github.event.pull_request.head.repo.id || '' }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login || '' }}
           REF: ${{ github.ref }}
           REPOSITORY: ${{ github.repository }}
@@ -49,7 +50,13 @@ jobs:
 
           case "$EVENT_NAME" in
             pull_request)
-              if [[ "$BASE_REF" != "main" || "$HEAD_REPOSITORY" != "$REPOSITORY" || "$PR_AUTHOR" == "dependabot[bot]" ]]; then
+              if [[ "$EVENT_ACTION" != "opened" && "$EVENT_ACTION" != "synchronize" && "$EVENT_ACTION" != "reopened" ]]; then
+                echo "::error::EKS tests do not accept this pull request action."
+                exit 1
+              fi
+              if [[ "$BASE_REF" != "main" || "$REF" != refs/pull/*/merge || \
+                "$HEAD_REPOSITORY" != "$REPOSITORY" || "$HEAD_REPOSITORY_ID" != "$REPOSITORY_ID" || \
+                -z "$PR_AUTHOR" || "$PR_AUTHOR" == "dependabot[bot]" ]]; then
                 echo "::error::EKS tests only accept internal, non-Dependabot pull requests targeting main."
                 exit 1
               fi
@@ -98,7 +105,7 @@ jobs:
 
   eks-test:
     name: ${{ matrix.name }}
-    needs: authorize-caller
+    needs: validate-caller
     strategy:
       fail-fast: false
       matrix:
