@@ -8,6 +8,10 @@ on:
         required: false
         default: ''
         type: string
+    secrets:
+      AWS_TEST_ROLE_ARN:
+        description: AWS role ARN supplied by the protected job environment.
+        required: false
 
 # Deny GitHub token access by default; EKS jobs grant only what they need.
 permissions: {}
@@ -174,6 +178,16 @@ jobs:
     timeout-minutes: 60
     continue-on-error: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref != 'update-release' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
+      - name: Validate protected environment configuration
+        env:
+          AWS_TEST_ROLE_ARN: ${{ secrets.AWS_TEST_ROLE_ARN }}
+        shell: bash
+        run: |
+          if [[ -z "$AWS_TEST_ROLE_ARN" ]]; then
+            echo "::error title=AWS OIDC configuration::AWS_TEST_ROLE_ARN is not available from the protected environment."
+            exit 1
+          fi
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
