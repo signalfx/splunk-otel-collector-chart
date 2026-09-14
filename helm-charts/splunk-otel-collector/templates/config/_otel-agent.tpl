@@ -950,6 +950,15 @@ processors:
       - delete_key(resource.attributes, "server.port") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
   {{- end }}
 
+  {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
+  transform/limit_histogram_buckets:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - merge_histogram_buckets(31, method="limit_buckets")
+  {{- end }}
+
 # If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
 # to the gateway deployment.
 # Otherwise it's pointed directly to signalfx backend based on the values provided in signalfx setting,
@@ -1386,6 +1395,7 @@ service:
         - resource/add_agent_k8s
         - resource_detection
         - resource
+        - transform/limit_histogram_buckets
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio
         - transform/drop_server_attrs

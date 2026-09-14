@@ -222,6 +222,12 @@ data:
           - set(attributes["service.name"], Concat([cache["owner_name"], attributes["k8s.namespace.name"]],
             ".")) where attributes["service.name"] == nil and cache["owner_name"] != nil
             and attributes["k8s.namespace.name"] != nil
+      transform/limit_histogram_buckets:
+        error_mode: ignore
+        metric_statements:
+        - context: datapoint
+          statements:
+          - merge_histogram_buckets(31, method="limit_buckets")
     receivers:
       file_log:
         encoding: utf-8
@@ -528,6 +534,7 @@ data:
           - resource/add_agent_k8s
           - resource_detection
           - resource
+          - transform/limit_histogram_buckets
           - attributes/istio
           - transform/drop_server_attrs
           receivers:

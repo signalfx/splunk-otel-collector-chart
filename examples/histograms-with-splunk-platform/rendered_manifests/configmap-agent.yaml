@@ -241,6 +241,12 @@ data:
         - system
         override: true
         timeout: 15s
+      transform/limit_histogram_buckets:
+        error_mode: ignore
+        metric_statements:
+        - context: datapoint
+          statements:
+          - merge_histogram_buckets(31, method="limit_buckets")
     receivers:
       file_log:
         encoding: utf-8
@@ -527,6 +533,7 @@ data:
           - resource/add_agent_k8s
           - resource_detection
           - resource
+          - transform/limit_histogram_buckets
           receivers:
           - receiver_creator
         traces:
