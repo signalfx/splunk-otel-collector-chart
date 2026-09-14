@@ -46,9 +46,6 @@ data:
         - action: insert
           key: metric_source
           value: kubernetes
-        - action: upsert
-          key: k8s.cluster.name
-          value: CHANGEME
       resource/add_cluster_host:
         attributes:
         - action: insert
@@ -64,6 +61,21 @@ data:
         - env
         - openshift
         - system
+        override: true
+        timeout: 15s
+      resource_detection/k8s_cluster_name:
+        detectors:
+        - openshift
+        openshift:
+          resource_attributes:
+            cloud.platform:
+              enabled: false
+            cloud.provider:
+              enabled: false
+            cloud.region:
+              enabled: false
+            k8s.cluster.name:
+              enabled: true
         override: true
         timeout: 15s
       transform/k8shpascaletargetref:
@@ -132,6 +144,7 @@ data:
           - memory_limiter
           - batch
           - transform/k8shpascaletargetref
+          - resource_detection/k8s_cluster_name
           - resource
           - resource/k8s_cluster
           receivers:
@@ -172,5 +185,3 @@ data:
             value: ${K8S_NAMESPACE}
           - name: metric_source
             value: kubernetes
-          - name: k8s.cluster.name
-            value: CHANGEME
