@@ -1361,7 +1361,7 @@ instrumentation:
     dotnet:
       image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.15.0
       env:
-        # The Splunk .NET image uses the legacy linux-x64 profiler path.
+        # The Splunk .NET image uses linux-x64; the upstream operator defaults to linux.
         - name: CORECLR_PROFILER_PATH
           value: /otel-auto-instrumentation-dotnet/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
         - name: OTEL_DOTNET_AUTO_PLUGINS
