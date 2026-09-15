@@ -4,6 +4,15 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.160.0] - 2026-09-15
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.160.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.160.0).
+
+### 💡 Enhancements 💡
+
+- `chart`: Bump TargetAllocator to 0.158.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2560](https://github.com/signalfx/splunk-otel-collector-chart/pull/2560))
+- `operator`: Bump java to v2.31.1 in helm-charts/splunk-otel-collector/values.yaml ([#2557](https://github.com/signalfx/splunk-otel-collector-chart/pull/2557))
+
 ## [0.160.0] - 2026-09-11
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.160.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.160.1).
