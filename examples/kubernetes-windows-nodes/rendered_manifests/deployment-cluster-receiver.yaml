@@ -39,8 +39,8 @@ spec:
       - name: otel-collector
         args:
         - --config=/conf/relay.yaml
-        image: quay.io/signalfx/splunk-otel-collector-dev:latest
-        imagePullPolicy: 
+        image: quay.io/signalfx/splunk-otel-collector:0.159.0
+        imagePullPolicy: IfNotPresent
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             valueFrom:
