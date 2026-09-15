@@ -238,7 +238,7 @@ tests:
           pattern: 'otelcol.service.mode: agent'
       - matchRegex:
           path: data["config.yaml"]
-          pattern: 'service.version: [0-9]+\.[0-9]+\.[0-9]+'
+          pattern: 'service.version: [-.0-9A-Za-z_]+'
       - matchRegex:
           path: data["config.yaml"]
           pattern: 'otelcol.service.mode: clusterReceiver'
@@ -416,3 +416,17 @@ tests:
       - matchRegex:
           path: data["config.yaml"]
           pattern: 'service.version: 0\.200\.0'
+
+  - it: should report dev collector image tag as managed workload service version
+    template: opamp-bridge-configmap.yaml
+    documentIndex: 0
+    set:
+      remoteManagement:
+        enabled: true
+      image:
+        otelcol:
+          tag: latest
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'service.version: latest'

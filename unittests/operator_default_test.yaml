@@ -23,6 +23,11 @@ tests:
       - contains:
           path: spec.dotnet.env
           content:
+            name: CORECLR_PROFILER_PATH
+            value: /otel-auto-instrumentation-dotnet/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
+      - contains:
+          path: spec.dotnet.env
+          content:
             name: OTEL_DOTNET_AUTO_PLUGINS
             value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
       - contains:
