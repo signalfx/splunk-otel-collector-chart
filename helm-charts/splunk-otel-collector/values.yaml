@@ -1361,6 +1361,9 @@ instrumentation:
     dotnet:
       image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.15.0
       env:
+        # The Splunk .NET image uses linux-x64; the upstream operator defaults to linux.
+        - name: CORECLR_PROFILER_PATH
+          value: /otel-auto-instrumentation-dotnet/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
         - name: OTEL_DOTNET_AUTO_CONTAINER_RESOURCE_DETECTOR_ENABLED

@@ -62,6 +62,8 @@ data:
         image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:1.0.4
       dotnet:
         env:
+        - name: CORECLR_PROFILER_PATH
+          value: /otel-auto-instrumentation-dotnet/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
         - name: OTEL_DOTNET_AUTO_PLUGINS
           value: Splunk.OpenTelemetry.AutoInstrumentation.Plugin,Splunk.OpenTelemetry.AutoInstrumentation
         - name: OTEL_DOTNET_AUTO_CONTAINER_RESOURCE_DETECTOR_ENABLED
