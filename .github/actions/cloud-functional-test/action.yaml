@@ -5,6 +5,14 @@ inputs:
   go-version:
     description: Go version to install for functional tests.
     required: true
+  go-test-tags:
+    description: Go build tags to pass to functional tests.
+    required: false
+    default: ''
+  helm-version:
+    description: Helm version to install for functional tests.
+    required: false
+    default: v4.2.3
   kube-test-env:
     description: KUBE_TEST_ENV value for functional tests.
     required: true
@@ -28,6 +36,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Set up Helm
+      uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 #v5.0.1
+      with:
+        version: ${{ inputs.helm-version }}
+
     - name: Download the latest published release to use as a base for the upgrade
       if: inputs.mode == 'upgrade'
       shell: bash
@@ -50,6 +63,7 @@ runs:
       shell: bash
       env:
         HOST_ENDPOINT: 0.0.0.0
+        GO_TEST_TAGS: ${{ inputs.go-test-tags }}
         KUBE_TEST_ENV: ${{ inputs.kube-test-env }}
         OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
         SKIP_TESTS: ${{ inputs.skip-tests }}
