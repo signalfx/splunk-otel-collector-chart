@@ -447,6 +447,8 @@ func Test_Functions(t *testing.T) {
 
 		deployCharts(t, testKubeConfig, client, extensionsClient)
 		if !skipTests && kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
+			deleteInstallationHookJob(t, client)
+			internal.ResetMetricsSink(t, globalSinks.k8sclusterReceiverMetricsConsumer)
 			t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 		}
 		deployTestResources(t, client, dynamicClient)
@@ -468,6 +470,24 @@ func Test_Functions(t *testing.T) {
 	} else {
 		runHostedClusterTests(t, kubeTestEnv)
 	}
+}
+
+func deleteInstallationHookJob(t *testing.T, client kubernetes.Interface) {
+	t.Helper()
+
+	jobs := client.BatchV1().Jobs(internal.DefaultNamespace)
+	propagation := metav1.DeletePropagationForeground
+	err := jobs.Delete(t.Context(), "sock-splunk-otel-collector-inst-hook", metav1.DeleteOptions{
+		PropagationPolicy: &propagation,
+	})
+	if k8serrors.IsNotFound(err) {
+		return
+	}
+	require.NoError(t, err)
+	require.Eventually(t, func() bool {
+		_, getErr := jobs.Get(t.Context(), "sock-splunk-otel-collector-inst-hook", metav1.GetOptions{})
+		return k8serrors.IsNotFound(getErr)
+	}, 30*time.Second, time.Second)
 }
 
 func runLocalClusterUpgradeTests(t *testing.T) {
@@ -877,6 +897,11 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		internal.WithWaitForSnapshotMatch(),
 		internal.WithVolatileAttributes(existsAttrs...),
 		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
+		internal.WithSelectedNumberDatapoint("k8s.service.endpoint.count", map[string]string{
+			"k8s.namespace.name":             "default",
+			"k8s.service.endpoint.condition": "ready",
+			"k8s.service.name":               "kubernetes",
+		}),
 		internal.WithFirstDatapointOnly(
 			"k8s.container.ready",
 			"k8s.container.restarts",

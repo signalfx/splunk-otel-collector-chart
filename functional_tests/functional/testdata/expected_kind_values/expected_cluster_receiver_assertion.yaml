@@ -2895,5 +2895,23 @@ resources:
                     receiver: k8scluster
               name: k8s.replicaset.desired
               type: gauge
+            - datapoints:
+                - attributes:
+                    cluster_name: ci-k8s-cluster
+                    customfield1: customvalue1
+                    customfield2: customvalue2
+                    k8s.cluster.name: dev-operator
+                    k8s.namespace.name: default
+                    k8s.service.endpoint.address_type: IPv4
+                    k8s.service.endpoint.condition: ready
+                    k8s.service.endpoint.zone/exists: true
+                    k8s.service.name: kubernetes
+                    k8s.service.publish_not_ready_addresses: "false"
+                    k8s.service.type: ClusterIP
+                    k8s.service.uid/exists: true
+                    metric_source: kubernetes
+                    receiver: k8scluster
+              name: k8s.service.endpoint.count
+              type: gauge
 signal: metrics
 version: 1
