@@ -127,9 +127,6 @@ data:
         - action: insert
           key: k8s.node.name
           value: ${K8S_NODE_NAME}
-        - action: upsert
-          key: k8s.cluster.name
-          value: CHANGEME
       resource/add_agent_k8s:
         attributes:
         - action: insert
@@ -155,6 +152,21 @@ data:
         - env
         - openshift
         - system
+        override: true
+        timeout: 15s
+      resource_detection/k8s_cluster_name:
+        detectors:
+        - openshift
+        openshift:
+          resource_attributes:
+            cloud.platform:
+              enabled: false
+            cloud.provider:
+              enabled: false
+            cloud.region:
+              enabled: false
+            k8s.cluster.name:
+              enabled: true
         override: true
         timeout: 15s
     receivers:
@@ -437,5 +449,3 @@ data:
             value: ${K8S_POD_UID}
           - name: k8s.node.name
             value: ${K8S_NODE_NAME}
-          - name: k8s.cluster.name
-            value: CHANGEME
