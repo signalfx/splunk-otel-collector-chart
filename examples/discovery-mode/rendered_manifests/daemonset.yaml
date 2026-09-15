@@ -85,8 +85,8 @@ spec:
           containerPort: 9411
           hostPort: 9411
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.160.0
-        imagePullPolicy: IfNotPresent
+        image: quay.io/signalfx/splunk-otel-collector-dev:latest
+        imagePullPolicy: 
         env:
           - name: SPLUNK_MEMORY_TOTAL_MIB
             valueFrom:
