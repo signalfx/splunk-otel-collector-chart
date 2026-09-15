@@ -73,8 +73,8 @@ spec:
           containerPort: 4318
           hostPort: 4318
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector-dev:latest
-        imagePullPolicy: 
+        image: quay.io/signalfx/splunk-otel-collector:0.160.0
+        imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 0
         env:
