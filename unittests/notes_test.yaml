@@ -117,3 +117,11 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: 'clusterReceiver\.config\.service\.pipelines\.logs/custom\.processors references "resourcedetection/custom": "resourcedetection" has been renamed to "resource_detection"'
+
+  - it: should warn when the Light Prometheus Receiver feature gate is enabled
+    set:
+      featureGates:
+        useLightPrometheusReceiver: true
+    asserts:
+      - matchRegexRaw:
+          pattern: '\[WARNING\] "featureGates\.useLightPrometheusReceiver" is deprecated and will be removed in a future release\.'
