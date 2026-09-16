@@ -126,51 +126,39 @@ resourceSpans:
           name: '@opentelemetry/instrumentation-http'
         spans:
           - attributes:
-              - key: http.url
-                value:
-                  stringValue: http://localhost:3000/
-              - key: http.host
-                value:
-                  stringValue: localhost:3000
-              - key: net.host.name
-                value:
-                  stringValue: localhost
-              - key: http.method
+              - key: http.request.method
                 value:
                   stringValue: GET
-              - key: http.scheme
+              - key: url.scheme
                 value:
                   stringValue: http
-              - key: http.target
+              - key: server.address
                 value:
-                  stringValue: /
-              - key: http.user_agent
-                value:
-                  stringValue: curl/7.88.1
-              - key: http.flavor
-                value:
-                  stringValue: "1.1"
-              - key: net.transport
-                value:
-                  stringValue: ip_tcp
-              - key: net.host.ip
+                  stringValue: localhost
+              - key: network.peer.address
                 value:
                   stringValue: 127.0.0.1
-              - key: net.host.port
-                value:
-                  intValue: "3000"
-              - key: net.peer.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.peer.port
+              - key: network.peer.port
                 value:
                   intValue: "59812"
-              - key: http.status_code
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: user_agent.original
+                value:
+                  stringValue: curl/7.88.1
+              - key: url.path
+                value:
+                  stringValue: /
+              - key: client.address
+                value:
+                  stringValue: 127.0.0.1
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: http.response.status_code
                 value:
                   intValue: "200"
-              - key: http.status_text
-                value:
-                  stringValue: OK
             endTimeUnixNano: "1778047454124822542"
             flags: 257
             kind: 2
@@ -180,51 +168,39 @@ resourceSpans:
             status: {}
             traceId: 3d9ed1d547848a851e275cc875fa9458
           - attributes:
-              - key: http.url
-                value:
-                  stringValue: http://localhost:3000/
-              - key: http.host
-                value:
-                  stringValue: localhost:3000
-              - key: net.host.name
-                value:
-                  stringValue: localhost
-              - key: http.method
+              - key: http.request.method
                 value:
                   stringValue: GET
-              - key: http.scheme
+              - key: url.scheme
                 value:
                   stringValue: http
-              - key: http.target
+              - key: server.address
                 value:
-                  stringValue: /
-              - key: http.user_agent
-                value:
-                  stringValue: curl/7.88.1
-              - key: http.flavor
-                value:
-                  stringValue: "1.1"
-              - key: net.transport
-                value:
-                  stringValue: ip_tcp
-              - key: net.host.ip
+                  stringValue: localhost
+              - key: network.peer.address
                 value:
                   stringValue: 127.0.0.1
-              - key: net.host.port
-                value:
-                  intValue: "3000"
-              - key: net.peer.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.peer.port
+              - key: network.peer.port
                 value:
                   intValue: "59826"
-              - key: http.status_code
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: user_agent.original
+                value:
+                  stringValue: curl/7.88.1
+              - key: url.path
+                value:
+                  stringValue: /
+              - key: client.address
+                value:
+                  stringValue: 127.0.0.1
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: http.response.status_code
                 value:
                   intValue: "200"
-              - key: http.status_text
-                value:
-                  stringValue: OK
             endTimeUnixNano: "1778047455138556125"
             flags: 257
             kind: 2
@@ -234,51 +210,39 @@ resourceSpans:
             status: {}
             traceId: 54965f68813b8dc0cd32f031c541e912
           - attributes:
-              - key: http.url
-                value:
-                  stringValue: http://localhost:3000/
-              - key: http.host
-                value:
-                  stringValue: localhost:3000
-              - key: net.host.name
-                value:
-                  stringValue: localhost
-              - key: http.method
+              - key: http.request.method
                 value:
                   stringValue: GET
-              - key: http.scheme
+              - key: url.scheme
                 value:
                   stringValue: http
-              - key: http.target
+              - key: server.address
                 value:
-                  stringValue: /
-              - key: http.user_agent
-                value:
-                  stringValue: curl/7.88.1
-              - key: http.flavor
-                value:
-                  stringValue: "1.1"
-              - key: net.transport
-                value:
-                  stringValue: ip_tcp
-              - key: net.host.ip
+                  stringValue: localhost
+              - key: network.peer.address
                 value:
                   stringValue: 127.0.0.1
-              - key: net.host.port
-                value:
-                  intValue: "3000"
-              - key: net.peer.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.peer.port
+              - key: network.peer.port
                 value:
                   intValue: "40246"
-              - key: http.status_code
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: user_agent.original
+                value:
+                  stringValue: curl/7.88.1
+              - key: url.path
+                value:
+                  stringValue: /
+              - key: client.address
+                value:
+                  stringValue: 127.0.0.1
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: http.response.status_code
                 value:
                   intValue: "200"
-              - key: http.status_text
-                value:
-                  stringValue: OK
             endTimeUnixNano: "1778047456145584791"
             flags: 257
             kind: 2
@@ -288,51 +252,39 @@ resourceSpans:
             status: {}
             traceId: edaa4cdba6e44fe824d4f6df7a0621f0
           - attributes:
-              - key: http.url
-                value:
-                  stringValue: http://localhost:3000/
-              - key: http.host
-                value:
-                  stringValue: localhost:3000
-              - key: net.host.name
-                value:
-                  stringValue: localhost
-              - key: http.method
+              - key: http.request.method
                 value:
                   stringValue: GET
-              - key: http.scheme
+              - key: url.scheme
                 value:
                   stringValue: http
-              - key: http.target
+              - key: server.address
                 value:
-                  stringValue: /
-              - key: http.user_agent
-                value:
-                  stringValue: curl/7.88.1
-              - key: http.flavor
-                value:
-                  stringValue: "1.1"
-              - key: net.transport
-                value:
-                  stringValue: ip_tcp
-              - key: net.host.ip
+                  stringValue: localhost
+              - key: network.peer.address
                 value:
                   stringValue: 127.0.0.1
-              - key: net.host.port
-                value:
-                  intValue: "3000"
-              - key: net.peer.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.peer.port
+              - key: network.peer.port
                 value:
                   intValue: "40248"
-              - key: http.status_code
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: user_agent.original
+                value:
+                  stringValue: curl/7.88.1
+              - key: url.path
+                value:
+                  stringValue: /
+              - key: client.address
+                value:
+                  stringValue: 127.0.0.1
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: http.response.status_code
                 value:
                   intValue: "200"
-              - key: http.status_text
-                value:
-                  stringValue: OK
             endTimeUnixNano: "1778047457155582584"
             flags: 257
             kind: 2
@@ -342,51 +294,39 @@ resourceSpans:
             status: {}
             traceId: 89cfef1760cfde907d66d12856dfec96
           - attributes:
-              - key: http.url
-                value:
-                  stringValue: http://localhost:3000/
-              - key: http.host
-                value:
-                  stringValue: localhost:3000
-              - key: net.host.name
-                value:
-                  stringValue: localhost
-              - key: http.method
+              - key: http.request.method
                 value:
                   stringValue: GET
-              - key: http.scheme
+              - key: url.scheme
                 value:
                   stringValue: http
-              - key: http.target
+              - key: server.address
                 value:
-                  stringValue: /
-              - key: http.user_agent
-                value:
-                  stringValue: curl/7.88.1
-              - key: http.flavor
-                value:
-                  stringValue: "1.1"
-              - key: net.transport
-                value:
-                  stringValue: ip_tcp
-              - key: net.host.ip
+                  stringValue: localhost
+              - key: network.peer.address
                 value:
                   stringValue: 127.0.0.1
-              - key: net.host.port
-                value:
-                  intValue: "3000"
-              - key: net.peer.ip
-                value:
-                  stringValue: 127.0.0.1
-              - key: net.peer.port
+              - key: network.peer.port
                 value:
                   intValue: "40264"
-              - key: http.status_code
+              - key: network.protocol.version
+                value:
+                  stringValue: "1.1"
+              - key: user_agent.original
+                value:
+                  stringValue: curl/7.88.1
+              - key: url.path
+                value:
+                  stringValue: /
+              - key: client.address
+                value:
+                  stringValue: 127.0.0.1
+              - key: server.port
+                value:
+                  intValue: "3000"
+              - key: http.response.status_code
                 value:
                   intValue: "200"
-              - key: http.status_text
-                value:
-                  stringValue: OK
             endTimeUnixNano: "1778047458171591916"
             flags: 257
             kind: 2

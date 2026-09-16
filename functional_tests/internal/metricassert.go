@@ -48,7 +48,7 @@ const (
 	// K8sAPIVerbRegex matches canonical request verbs reported in API server metrics.
 	K8sAPIVerbRegex           = `^(APPLY|CONNECT|CREATE|DELETE|DELETECOLLECTION|GET|LIST|PATCH|POST|PROXY|PUT|UPDATE|WATCH|WATCHLIST|other)$`
 	KubeletVersionRegex       = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
-	OtelCollectorVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+`
+	OtelCollectorVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
 )
 
 // CommonK8sMetricAssertionExistsAttrs holds shared attrs asserted as present-only.
