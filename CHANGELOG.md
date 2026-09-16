@@ -4,6 +4,24 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.160.0] - 2026-09-15
+
+Splunk OpenTelemetry Collector for Kubernetes chart 0.160.0 uses [Splunk OpenTelemetry Collector v0.160.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.160.1).
+
+### 💡 Enhancements 💡
+
+- `chart`: Preserve OpAMP-managed collector ConfigMaps on Helm upgrades when Remote Management is enabled. ([#2575](https://github.com/signalfx/splunk-otel-collector-chart/pull/2575))
+- `chart`: Bump OBI from 0.12.2 to 0.13.1 in helm-charts/splunk-otel-collector/Chart.yaml ([#2576](https://github.com/signalfx/splunk-otel-collector-chart/pull/2576), [#2597](https://github.com/signalfx/splunk-otel-collector-chart/pull/2597))
+- `chart`: Bump TargetAllocator from 0.156.0 to 0.158.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2560](https://github.com/signalfx/splunk-otel-collector-chart/pull/2560))
+- `operator`: Bump java from v2.30.0 to v2.31.1 in helm-charts/splunk-otel-collector/values.yaml ([#2557](https://github.com/signalfx/splunk-otel-collector-chart/pull/2557))
+- `operator`: Bump java-csa from v2.30.0 to v2.31.1 in helm-charts/splunk-otel-collector/values.yaml ([#2600](https://github.com/signalfx/splunk-otel-collector-chart/pull/2600))
+- `operator`: Bump nodejs from v4.10.0 to v4.11.0 in helm-charts/splunk-otel-collector/values.yaml ([#2573](https://github.com/signalfx/splunk-otel-collector-chart/pull/2573))
+- `operator`: Bump operator from 0.120.2 to 0.122.1 in helm-charts/splunk-otel-collector/Chart.yaml ([#2556](https://github.com/signalfx/splunk-otel-collector-chart/pull/2556))
+
+### 🧰 Bug fixes 🧰
+
+- `chart`: Reject malformed Prometheus pod annotations when using the Light Prometheus Receiver ([#2583](https://github.com/signalfx/splunk-otel-collector-chart/pull/2583))
+
 ## [0.159.0] - 2026-08-28
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.159.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.159.0).
