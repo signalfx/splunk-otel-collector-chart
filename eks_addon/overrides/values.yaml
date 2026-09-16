@@ -13,6 +13,7 @@ distribution: eks
 image:
   otelcol:
     repository: ${ECR_OTELCOL_REPO}
+    tag: ${CHART_APPVERSION}
   initPatchLogDirs:
     repository: public.ecr.aws/docker/library/almalinux
     tag: "9"
