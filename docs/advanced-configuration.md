@@ -316,8 +316,25 @@ scrape additional metadata. The supported options are:
 - `gke` - Google GKE / Standard mode
 - `gke/autopilot` - Google GKE / Autopilot mode
 - `openshift` - Red Hat OpenShift
+- `talos` - Talos Linux
 
 This value can be omitted if none of the values apply.
+
+### Talos Linux
+
+Talos does not ship `/usr/lib/os-release` and mounts its root filesystem
+read-only, so the container runtime cannot create that bind-mount source and
+the agent pods fail with `CreateContainerError`. Setting `distribution: talos`
+skips that mount:
+
+```yaml
+distribution: talos
+```
+
+The `hostmetrics` receiver still reports host OS details, which it reads from
+`/hostfs/etc/os-release`. Talos is treated as a vanilla Kubernetes distribution
+in every other respect, including control plane metrics. The cluster name is not
+auto-detected on Talos, so `clusterName` must be set.
 
 ## AKS KubeletStats Receiver
 
