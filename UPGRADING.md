@@ -1,5 +1,25 @@
 # Upgrade guidelines
 
+## 0.160.0 to 0.161.0
+
+### `useLightPrometheusReceiver` feature gate is deprecated
+
+The `featureGates.useLightPrometheusReceiver` feature gate is deprecated and will
+be removed in a future release. It remains available in this release, but the
+standard Prometheus receiver is recommended for metrics collection from discovered
+Prometheus endpoints.
+
+If the feature gate is enabled in your values, set it to `false` before upgrading
+to use the standard Prometheus receiver:
+
+```yaml
+featureGates:
+  useLightPrometheusReceiver: false
+```
+
+The setting has no effect when the feature gate is already disabled, which is the
+default.
+
 ## 0.157.0 to 0.158.0
 
 ### Deployment environment resource attribute renamed
