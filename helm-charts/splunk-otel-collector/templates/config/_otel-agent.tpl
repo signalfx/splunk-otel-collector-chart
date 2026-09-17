@@ -226,7 +226,7 @@ receivers:
       # Receivers for collecting k8s control plane metrics.
       # Distributions besides Kubernetes and Openshift are not supported.
       # Verified with Kubernetes v1.22 and Openshift v4.10.59.
-      {{- if and (or (eq .Values.distribution "openshift") (eq .Values.distribution "")) (not (.Values.featureGates.useControlPlaneMetricsHistogramData)) }}
+      {{- if and (or (eq .Values.distribution "openshift") (eq .Values.distribution "") (eq .Values.distribution "talos")) (not (.Values.featureGates.useControlPlaneMetricsHistogramData)) }}
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
       {{- if .Values.agent.controlPlaneMetrics.coredns.enabled }}
@@ -317,7 +317,7 @@ receivers:
           type: kubernetes-proxy
           # Connecting to kube proxy in unknown Kubernetes distributions can be troublesome and generate log noise
           # For now, set the scrape failure log level to debug when no specific distribution is selected
-          {{- if eq .Values.distribution "" }}
+          {{- if or (eq .Values.distribution "") (eq .Values.distribution "talos") }}
           scrapeFailureLogLevel: debug
           {{- end }}
           {{- if eq .Values.distribution "openshift" }}
