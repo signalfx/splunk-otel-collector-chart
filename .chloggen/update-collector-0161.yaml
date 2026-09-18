@@ -1,0 +1,13 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: breaking
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: chart
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Bump the Splunk OpenTelemetry Collector image to 0.161.0 and migrate generated Kubernetes attributes to stable semantic conventions
+# One or more tracking issues related to this change
+issues: [49152, 49477]
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |
+  Kubernetes label and annotation attributes now use singular `label` and `annotation` segments, and container image metadata uses `container.image.tags`. Kubelet CPU usage metrics are now calculated from scrape-to-scrape rates by the collector by default and are not emitted on the first scrape.

@@ -55,7 +55,7 @@ resourceSpans:
         - key: service.version
           value:
             stringValue: latest
-        - key: k8s.pod.labels.app
+        - key: k8s.pod.label.app
           value:
             stringValue: dotnet-test
         - key: k8s.pod.uid
@@ -64,7 +64,7 @@ resourceSpans:
         - key: container.image.name
           value:
             stringValue: dotnet_test
-        - key: container.image.tag
+        - key: container.image.tags
           value:
             stringValue: latest
         - key: host.name

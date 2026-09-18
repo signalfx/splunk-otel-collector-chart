@@ -214,7 +214,7 @@ k8s_attributes:
       - k8s.pod.uid
       - container.id
       - container.image.name
-      - container.image.tag
+      - container.image.tags
     annotations:
       - key: splunk.com/sourcetype
         from: pod
@@ -291,9 +291,9 @@ resource/logs:
       action: upsert
     {{- end }}
     - key: com.splunk.sourcetype
-      from_attribute: k8s.pod.annotations.splunk.com/sourcetype
+      from_attribute: k8s.pod.annotation.splunk.com/sourcetype
       action: upsert
-    - key: k8s.pod.annotations.splunk.com/sourcetype
+    - key: k8s.pod.annotation.splunk.com/sourcetype
       action: delete
     - key: {{ include "splunk-otel-collector.filterAttr" . }}
       action: delete
@@ -314,7 +314,7 @@ resource/logs:
       from_attribute: k8s.namespace.name
       action: upsert
     - key: label_app
-      from_attribute: k8s.pod.labels.app
+      from_attribute: k8s.pod.label.app
       action: upsert
     {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
     - key: k8s.container.name
@@ -327,7 +327,7 @@ resource/logs:
       action: delete
     - key: k8s.namespace.name
       action: delete
-    - key: k8s.pod.labels.app
+    - key: k8s.pod.label.app
       action: delete
     {{- end }}
     {{- end }}
@@ -371,7 +371,7 @@ transform/istio_service_name:
   log_statements:
     - context: resource
       statements:
-        - set(attributes["service.name"], Concat([attributes["k8s.pod.labels.app"], attributes["k8s.namespace.name"]], ".")) where attributes["service.name"] == nil and attributes["k8s.pod.labels.app"] != nil and attributes["k8s.namespace.name"] != nil
+        - set(attributes["service.name"], Concat([attributes["k8s.pod.label.app"], attributes["k8s.namespace.name"]], ".")) where attributes["service.name"] == nil and attributes["k8s.pod.label.app"] != nil and attributes["k8s.namespace.name"] != nil
         - set(cache["owner_name"], attributes["k8s.pod.name"]) where attributes["service.name"] == nil and attributes["k8s.pod.name"] != nil
         # Name of the object owning the pod is taken from "k8s.pod.name" attribute by stripping the pod suffix according
         # to the k8s name generation rules (we don't want to put pressure on the k8s API server to get the owner name):

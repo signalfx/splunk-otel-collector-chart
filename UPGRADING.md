@@ -20,6 +20,47 @@ featureGates:
 The setting has no effect when the feature gate is already disabled, which is the
 default.
 
+### Kubernetes semantic convention attributes changed
+
+The Collector's `k8s_attributes` processor now enables the stable Kubernetes
+semantic conventions by default. The following generated attributes changed:
+
+- `container.image.tag` is now `container.image.tags` (a slice).
+- `k8s.pod.labels.<key>` is now `k8s.pod.label.<key>`.
+- `k8s.pod.annotations.<key>` is now `k8s.pod.annotation.<key>`.
+
+Update dashboards, alerts, searches, and custom processors that reference the
+deprecated names. The chart-generated configuration has already been migrated
+to the stable names. During a migration period, dual emission can be enabled on
+each Collector workload that uses `k8s_attributes`:
+
+```yaml
+agent:
+  featureGates: -processor.k8sattributes.DontEmitV0K8sConventions,processor.k8sattributes.EmitV1K8sConventions
+clusterReceiver:
+  featureGates: -processor.k8sattributes.DontEmitV0K8sConventions,processor.k8sattributes.EmitV1K8sConventions
+gateway:
+  featureGates: -processor.k8sattributes.DontEmitV0K8sConventions,processor.k8sattributes.EmitV1K8sConventions
+```
+
+### Kubelet CPU usage metrics use scrape-based rates
+
+The `receiver.kubeletstats.cpuUsageScrapeBased` feature gate is now enabled by
+default. `container.cpu.usage`, `k8s.pod.cpu.usage`, and `k8s.node.cpu.usage`
+are calculated from consecutive `*.cpu.time` scrapes and are not reported on
+the first scrape after startup. To retain the previous kubelet behavior, add
+the disable flag to every workload that runs `kubelet_stats`:
+
+```yaml
+agent:
+  featureGates: -receiver.kubeletstats.cpuUsageScrapeBased
+clusterReceiver:
+  featureGates: -receiver.kubeletstats.cpuUsageScrapeBased
+```
+
+If a workload already has custom feature gates, append this gate to the same
+comma-separated value.
+
 ## 0.157.0 to 0.158.0
 
 ### Deployment environment resource attribute renamed

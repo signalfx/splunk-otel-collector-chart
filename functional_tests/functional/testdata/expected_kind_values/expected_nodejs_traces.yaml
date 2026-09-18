@@ -94,13 +94,13 @@ resourceSpans:
         - key: k8s.pod.uid
           value:
             stringValue: 04d6969c-708f-47fd-832c-f9511c2eb732
-        - key: k8s.pod.labels.app
+        - key: k8s.pod.label.app
           value:
             stringValue: nodejs-test
         - key: container.image.name
           value:
             stringValue: nodejs_test
-        - key: container.image.tag
+        - key: container.image.tags
           value:
             stringValue: latest
         - key: container.id
