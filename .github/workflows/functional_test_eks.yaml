@@ -27,18 +27,13 @@ jobs:
     outputs:
       release-required: ${{ steps.release-scope.outputs.required }}
     steps:
-      # This job only runs for repository-owned PRs. The checked-out files are
-      # treated as data; no code from the pull request is executed here.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
       - name: Detect chart version change
         id: release-scope
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
@@ -47,11 +42,16 @@ jobs:
           # turn a release PR into a fast-pass PR.
           required=true
           chart_path="helm-charts/splunk-otel-collector/Chart.yaml"
-          if ! base_chart="$(git show "$BASE_SHA:$chart_path")" || ! head_chart="$(git show "$HEAD_SHA:$chart_path")"; then
+          if ! base_chart="$(gh api \
+            -H "Accept: application/vnd.github.raw+json" \
+            "repos/$REPOSITORY/contents/$chart_path?ref=$BASE_SHA")" || \
+            ! head_chart="$(gh api \
+              -H "Accept: application/vnd.github.raw+json" \
+              "repos/$REPOSITORY/contents/$chart_path?ref=$HEAD_SHA")"; then
             echo "::warning title=Chart release gate::The chart files could not be read; requiring the full release checks."
           else
-            base_version="$(awk '$1 == "version:" { print $2; exit }' <<< "$base_chart")"
-            head_version="$(awk '$1 == "version:" { print $2; exit }' <<< "$head_chart")"
+            base_version="$(awk '/^version:/ { print $2; exit }' <<< "$base_chart")"
+            head_version="$(awk '/^version:/ { print $2; exit }' <<< "$head_chart")"
 
             if [[ -z "$base_version" || -z "$head_version" ]]; then
               echo "::warning title=Chart release gate::The chart version could not be determined; requiring the full release checks."
@@ -70,12 +70,13 @@ jobs:
     # version. Release PRs get the required check from chart-release-gate.
     name: ${{ needs.release-scope.outputs.release-required != 'true' && 'Chart release gate' || 'Chart release gate pending required checks' }}
     needs: release-scope
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     permissions: {}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       INTERNAL_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+      RELEASE_REQUIRED: ${{ needs.release-scope.outputs.release-required }}
       RELEASE_SCOPE_RESULT: ${{ needs.release-scope.result }}
     steps:
       - name: Report release gate status
@@ -85,12 +86,17 @@ jobs:
             exit 1
           fi
 
+          if [[ "$INTERNAL_PR" == "true" && "$RELEASE_REQUIRED" != "true" && "$RELEASE_REQUIRED" != "false" ]]; then
+            echo "::error title=Chart release gate::The chart release scope returned an unexpected value."
+            exit 1
+          fi
+
           echo "The full chart release gate is required only for internal pull requests that change the chart version."
 
   collector-image-config:
     name: Resolve EKS test configuration
     needs: release-scope
-    if: ${{ always() && (github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]')) }}
+    if: ${{ !cancelled() && (github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]')) }}
     runs-on: ubuntu-latest
     outputs:
       cloud-tests-enabled: ${{ steps.config.outputs.cloud-tests-enabled }}
@@ -292,8 +298,8 @@ jobs:
       - release-scope
       - eks-functional-tests
       - release-readiness
-    # Evaluate every result so release PRs fail closed on failures, skips, or cancellation.
-    if: ${{ always() }}
+    # Evaluate every result so release PRs fail closed on failures or skips.
+    if: ${{ !cancelled() }}
     permissions: {}
     runs-on: ubuntu-latest
     env:
