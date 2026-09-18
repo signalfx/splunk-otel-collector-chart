@@ -500,10 +500,12 @@ agent:
 
   # Set this to true to skip all the init containers. If you are running the agent as a non-root user,
   # you must ensure to handle patching of log directories on the host filesystem manually.
+  # This also skips the remove-not-ready-taint init container.
   skipInitContainers: false
 
-  # Remove `splunk.net/agent-not-ready` from the node after the agent pod schedules.
-  # Requires `patch` on Nodes. See docs/advanced-configuration.md#agent-startup-taint.
+  # When enabled, the agent DaemonSet tolerates `splunk.net/agent-not-ready` and
+  # removes that taint from the node after the agent pod schedules.
+  # Requires `patch` on Nodes. Off by default. See docs/advanced-configuration.md#agent-startup-taint.
   removeNotReadyTaint:
     enabled: false
     key: splunk.net/agent-not-ready
@@ -862,7 +864,7 @@ image:
     # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
 
-  # Image for the remove-not-ready-taint init container (`kubectl` + a shell).
+  # Image for the remove-not-ready-taint init container. Must include `kubectl` and a shell.
   initRemoveNotReadyTaint:
     repository: docker.io/bitnami/kubectl
     tag: "1.32.3"
@@ -937,8 +939,6 @@ tolerations:
     effect: NoSchedule
     operator: Exists
   - key: batch.amazonaws.com/batch-node
-    operator: Exists
-  - key: splunk.net/agent-not-ready
     operator: Exists
 
 # Defines which nodes should be selected to deploy the agent collector daemonset.

@@ -75,15 +75,22 @@ spec:
       affinity:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       {{- $removeNotReadyTaint := and .Values.agent.removeNotReadyTaint.enabled (not .Values.isWindows) }}
-      {{- $patchLogDirs := and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers) .Values.agent.securityContext.runAsUser .Values.agent.securityContext.runAsGroup }}
-      {{- if or $removeNotReadyTaint $patchLogDirs }}
-      initContainers:
+      {{- $removeNotReadyTaintInit := and $removeNotReadyTaint (not .Values.agent.skipInitContainers) }}
+      {{- if or .Values.tolerations $removeNotReadyTaint }}
+      tolerations:
         {{- if $removeNotReadyTaint }}
+        - key: {{ .Values.agent.removeNotReadyTaint.key | quote }}
+          operator: Exists
+        {{- end }}
+        {{- with .Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- $patchLogDirs := and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers) .Values.agent.securityContext.runAsUser .Values.agent.securityContext.runAsGroup }}
+      {{- if or $removeNotReadyTaintInit (and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers)) }}
+      initContainers:
+        {{- if $removeNotReadyTaintInit }}
         - name: remove-not-ready-taint
           image: {{ template "splunk-otel-collector.image.initRemoveNotReadyTaint" . }}
           imagePullPolicy: {{ .Values.image.initRemoveNotReadyTaint.pullPolicy }}
@@ -91,9 +98,20 @@ spec:
             - sh
             - -c
             - |
-              set -e
               KEY="{{ .Values.agent.removeNotReadyTaint.key }}"
-              kubectl taint node "${K8S_NODE_NAME}" "${KEY}-" || true
+              i=0
+              while [ "$i" -lt 12 ]; do
+                if out=$(kubectl taint node "${K8S_NODE_NAME}" "${KEY}-" 2>&1); then
+                  exit 0
+                fi
+                case "$out" in
+                  *"not found"*) exit 0 ;;
+                esac
+                i=$((i + 1))
+                sleep 5
+              done
+              echo "$out" >&2
+              exit 1
           env:
             - name: K8S_NODE_NAME
               valueFrom:

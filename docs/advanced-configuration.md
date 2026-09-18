@@ -507,8 +507,9 @@ priorityClassName: splunk-otel-agent-priority
 
 ## Agent startup taint
 
-The agent DaemonSet tolerates `splunk.net/agent-not-ready` by default. To have the
-agent remove that taint from the node after it schedules:
+This is off by default. The chart does not apply a taint to nodes. When enabled,
+the agent DaemonSet tolerates `splunk.net/agent-not-ready`, gains `patch` RBAC
+on Nodes, and removes that taint from the node after the agent pod schedules:
 
 ```yaml
 agent:
@@ -516,7 +517,8 @@ agent:
     enabled: true
 ```
 
-Apply the same taint on the node at startup. This is not supported on Windows nodes.
+Apply the same taint on the node at startup. This is not supported on Windows
+nodes. `agent.skipInitContainers: true` skips taint removal.
 
 ## GKE ARM support
 
