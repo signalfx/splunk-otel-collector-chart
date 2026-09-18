@@ -507,8 +507,8 @@ priorityClassName: splunk-otel-agent-priority
 
 ## Agent startup taint
 
-Off by default. When enabled, the agent tolerates `splunk.net/agent-not-ready`
-and removes that taint after it schedules:
+When enabled, the agent tolerates `splunk.net/agent-not-ready` and removes that
+taint after it schedules:
 
 ```yaml
 agent:
@@ -523,7 +523,7 @@ key: splunk.net/agent-not-ready
 effect: NoSchedule
 ```
 
-Not supported on Windows nodes.
+Not supported on Windows nodes. Off by default.
 
 ## GKE ARM support
 
