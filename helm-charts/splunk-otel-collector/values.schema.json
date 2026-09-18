@@ -647,7 +647,7 @@
           "type": "boolean"
         },
         "removeNotReadyTaint": {
-          "description": "Remove the Splunk agent-not-ready startup taint from the node after the agent pod has scheduled.",
+          "description": "Remove the Splunk agent-not-ready taint from the node after the agent pod schedules.",
           "type": "object",
           "additionalProperties": false,
           "properties": {

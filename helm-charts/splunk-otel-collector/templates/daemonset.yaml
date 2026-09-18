@@ -93,16 +93,7 @@ spec:
             - |
               set -e
               KEY="{{ .Values.agent.removeNotReadyTaint.key }}"
-              if [ -z "${K8S_NODE_NAME}" ]; then
-                echo "K8S_NODE_NAME is empty; skipping taint removal"
-                exit 0
-              fi
-              if kubectl get node "${K8S_NODE_NAME}" -o jsonpath="{.spec.taints[?(@.key==\"${KEY}\")].key}" | grep -q .; then
-                kubectl taint node "${K8S_NODE_NAME}" "${KEY}-"
-                echo "Removed taint ${KEY} from node ${K8S_NODE_NAME}"
-              else
-                echo "Taint ${KEY} not present on node ${K8S_NODE_NAME}; nothing to remove"
-              fi
+              kubectl taint node "${K8S_NODE_NAME}" "${KEY}-" || true
           env:
             - name: K8S_NODE_NAME
               valueFrom:

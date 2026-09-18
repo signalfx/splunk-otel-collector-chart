@@ -502,14 +502,10 @@ agent:
   # you must ensure to handle patching of log directories on the host filesystem manually.
   skipInitContainers: false
 
-  # Remove a node startup taint after the agent DaemonSet pod has scheduled on the node.
-  # Pair this with a matching Karpenter/EKS startupTaint so application pods wait until
-  # the agent has reserved capacity. See docs/advanced-configuration.md#agent-startup-taint.
-  # Disabled by default because it grants the agent ServiceAccount permission to patch Nodes.
+  # Remove `splunk.net/agent-not-ready` from the node after the agent pod schedules.
+  # Requires `patch` on Nodes. See docs/advanced-configuration.md#agent-startup-taint.
   removeNotReadyTaint:
     enabled: false
-    # Taint key applied as a NodePool/node startup taint. The agent always tolerates this key
-    # (see top-level `tolerations`). Workloads must not tolerate it.
     key: splunk.net/agent-not-ready
 
   # OTel agent annotations
@@ -866,8 +862,7 @@ image:
     # The policy that specifies when the user wants the Universal Base images to be pulled
     pullPolicy: IfNotPresent
 
-  # Image used by the init container that removes `agent.removeNotReadyTaint.key` from the node.
-  # Effective only if `agent.removeNotReadyTaint.enabled` is true. The image must provide `kubectl` and a shell.
+  # Image for the remove-not-ready-taint init container (`kubectl` + a shell).
   initRemoveNotReadyTaint:
     repository: docker.io/bitnami/kubectl
     tag: "1.32.3"
@@ -926,10 +921,8 @@ secret:
   annotations: {}
 
 # The tolerations for deploying the agent collector daemonset. By default, it targets control-plane, worker,
-# AWS Batch-managed, k8s distribution-specific nodes (infrastructure or system), and the optional Splunk
-# agent-not-ready startup taint so logs and metrics can be collected from nodes.
-# The Splunk startup taint (splunk.net/agent-not-ready) is a no-op unless it is also applied on the node
-# (for example as a Karpenter startupTaint). See docs/advanced-configuration.md#agent-startup-taint.
+# AWS Batch-managed, and k8s distribution-specific nodes (infrastructure or system) to ensure logs and metrics
+# collection from nodes.
 tolerations:
   - key: node-role.kubernetes.io/master
     effect: NoSchedule

@@ -10,7 +10,6 @@ issues: []
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  Default agent tolerations now include `splunk.net/agent-not-ready`. Set
-  `agent.removeNotReadyTaint.enabled=true` to remove that taint from the node
-  after the agent pod has scheduled, so application pods wait for the agent
-  (similar to CSI `agent-not-ready` startup taints).
+  Default agent tolerations include `splunk.net/agent-not-ready`. Set
+  `agent.removeNotReadyTaint.enabled=true` to remove that taint after the
+  agent pod has scheduled.
