@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.160.0
+    helm.sh/chart: splunk-otel-collector-0.161.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.160.1"
+    app.kubernetes.io/version: "0.161.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.160.0
+    chart: splunk-otel-collector-0.161.1
     release: default
 data:
   relay: |
@@ -57,7 +57,7 @@ data:
           queue_size: 1000
         source: kubernetes
         splunk_app_name: splunk-otel-collector-chart
-        splunk_app_version: 0.160.0
+        splunk_app_version: 0.161.1
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -130,7 +130,7 @@ data:
           - k8s.pod.uid
           - container.id
           - container.image.name
-          - container.image.tag
+          - container.image.tags
         filter:
           node_from_env_var: K8S_NODE_NAME
         pod_association:
@@ -170,10 +170,10 @@ data:
       resource/logs:
         attributes:
         - action: upsert
-          from_attribute: k8s.pod.annotations.splunk.com/sourcetype
+          from_attribute: k8s.pod.annotation.splunk.com/sourcetype
           key: com.splunk.sourcetype
         - action: delete
-          key: k8s.pod.annotations.splunk.com/sourcetype
+          key: k8s.pod.annotation.splunk.com/sourcetype
         - action: delete
           key: splunk.com/exclude
       resource_detection:

@@ -25,7 +25,7 @@ resourceLogs:
               - key: container.image.name
                 value:
                   stringValue: busybox
-              - key: container.image.tag
+              - key: container.image.tags
                 value:
                   stringValue: "1.37"
               - key: customfield1
@@ -52,7 +52,7 @@ resourceLogs:
               - key: k8s.node.name
                 value:
                   stringValue: node-001
-              - key: k8s.pod.labels.app
+              - key: k8s.pod.label.app
                 value:
                   stringValue: log-attr-test
               - key: k8s.pod.name

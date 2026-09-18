@@ -58,7 +58,7 @@ var CommonK8sMetricAssertionExistsAttrs []string
 var CommonK8sMetricAssertionRegexAttrs = map[string]string{
 	"container.id":         ContainerIDRegex,
 	"container.image.name": ContainerImageRegex,
-	"container.image.tag":  ContainerImageTagRegex,
+	"container.image.tags": ContainerImageTagRegex,
 	"k8s.daemonset.uid":    K8sUIDRegex,
 	"k8s.deployment.uid":   K8sUIDRegex,
 	"k8s.kubelet.version":  KubeletVersionRegex,

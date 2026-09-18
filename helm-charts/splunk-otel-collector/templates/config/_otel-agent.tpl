@@ -831,7 +831,7 @@ processors:
     log_statements:
       - context: log
         statements:
-          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
+          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tags"][0]], ":")) where IsString(resource.attributes["container.image.name"]) and IsList(resource.attributes["container.image.tags"]) and Len(resource.attributes["container.image.tags"]) > 0
   {{- end }}
   {{- end }}
 
