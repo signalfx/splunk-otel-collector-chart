@@ -1088,7 +1088,7 @@ func testAgentMetrics(t *testing.T) {
 	generateRequiredTelemetry(t)
 
 	t.Run("internal metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_internal_metrics.yaml", "otelcol_processor_memory_limiter_accepted_log_records")
+		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_internal_metrics.yaml", "otelcol_processor_memory_limiter_accepted_log_records", "")
 	})
 
 	t.Run("kubelet_stats metrics", func(t *testing.T) {
@@ -1098,16 +1098,18 @@ func testAgentMetrics(t *testing.T) {
 			"expected_kubelet_stats_metrics.yaml",
 			"container.memory.usage",
 			kindAgentPodNamePrefix,
+			// Kubelet CPU stats are not emitted consistently across supported Kubernetes versions.
+			"container.cpu.usage",
 		)
 	})
 
 	t.Run("host_metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_host_metrics.yaml", "system.memory.usage")
+		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_host_metrics.yaml", "system.memory.usage", "")
 	})
 }
 
 // testAgentMetricsTemplate tests metrics using template matching with target metric detection
-func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSink, expectedFileName string, targetMetric string, podNamePrefix ...string) {
+func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSink, expectedFileName string, targetMetric string, podNamePrefix string, flakyMetricNames ...string) {
 	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, expectedFileName)
 	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
 	require.NoError(t, err, "Failed to read expected metrics from %s", expectedFileName)
@@ -1120,7 +1122,18 @@ func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSin
 		testName = testName[lastSlash+1:]
 	}
 
-	err = tryMetricsComparison(expectedMetrics, *selectedMetrics, podNamePrefix...)
+	comparisonExpected := pmetric.NewMetrics()
+	expectedMetrics.CopyTo(comparisonExpected)
+	comparisonActual := pmetric.NewMetrics()
+	selectedMetrics.CopyTo(comparisonActual)
+	internal.RemoveFlakyMetrics(&comparisonExpected, flakyMetricNames)
+	internal.RemoveFlakyMetrics(&comparisonActual, flakyMetricNames)
+
+	var podPrefixes []string
+	if podNamePrefix != "" {
+		podPrefixes = []string{podNamePrefix}
+	}
+	err = tryMetricsComparison(comparisonExpected, comparisonActual, podPrefixes...)
 	if err != nil {
 		if !exactMatch {
 			t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())

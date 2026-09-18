@@ -4,6 +4,25 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.161.1] - 2026-09-18
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.161.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.161.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Bump the Splunk OpenTelemetry Collector image to 0.161.0 and migrate generated Kubernetes attributes to stable semantic conventions ([#49152](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/49152), [#49477](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/49477))
+  Kubernetes label and annotation attributes now use singular `label` and `annotation` segments, and container image metadata uses `container.image.tags`. Kubelet CPU usage metrics are now calculated from scrape-to-scrape rates by the collector by default and are not emitted on the first scrape.
+
+### 🚩 Deprecations 🚩
+
+- `chart`: Deprecate the `featureGates.useLightPrometheusReceiver` feature gate ([#2609](https://github.com/signalfx/splunk-otel-collector-chart/pull/2609))
+  The Light Prometheus Receiver feature gate will be removed in a future release. Set `featureGates.useLightPrometheusReceiver=false` to use the standard Prometheus receiver.
+
+### 💡 Enhancements 💡
+
+- `chart`: Bump TargetAllocator to 0.159.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2604](https://github.com/signalfx/splunk-otel-collector-chart/pull/2604))
+- `operator`: Bump operator to 0.123.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2605](https://github.com/signalfx/splunk-otel-collector-chart/pull/2605))
+
 ## [0.160.0] - 2026-09-15
 
 Splunk OpenTelemetry Collector for Kubernetes chart 0.160.0 uses [Splunk OpenTelemetry Collector v0.160.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.160.1).
