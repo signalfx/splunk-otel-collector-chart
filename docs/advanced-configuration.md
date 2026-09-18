@@ -516,7 +516,14 @@ agent:
     enabled: true
 ```
 
-Apply `splunk.net/agent-not-ready=:NoSchedule` on the node at startup. Not supported on Windows nodes.
+Apply this taint on the node at startup:
+
+```yaml
+key: splunk.net/agent-not-ready
+effect: NoSchedule
+```
+
+Not supported on Windows nodes.
 
 ## GKE ARM support
 
