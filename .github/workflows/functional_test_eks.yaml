@@ -66,8 +66,8 @@ jobs:
           echo "required=$required" >> "$GITHUB_OUTPUT"
 
   chart-release-fast-gate:
-    # Emit the required check immediately for PRs that do not change the chart
-    # version. Release PRs get the required check from chart-release-gate.
+    # Publish the required check for ineligible and non-release PRs. Internal
+    # release PRs get the required check from chart-release-gate instead.
     name: ${{ needs.release-scope.outputs.release-required != 'true' && 'Chart release gate' || 'Chart release gate pending required checks' }}
     needs: release-scope
     if: ${{ !cancelled() }}
@@ -75,6 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
+      EVENT_NAME: ${{ github.event_name }}
       INTERNAL_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
       RELEASE_REQUIRED: ${{ needs.release-scope.outputs.release-required }}
       RELEASE_SCOPE_RESULT: ${{ needs.release-scope.result }}
@@ -91,7 +92,15 @@ jobs:
             exit 1
           fi
 
-          echo "The full chart release gate is required only for internal pull requests that change the chart version."
+          if [[ "$EVENT_NAME" != "pull_request" ]]; then
+            echo "Manual workflow runs are not chart release pull requests; the release gate is not evaluated."
+          elif [[ "$INTERNAL_PR" != "true" ]]; then
+            echo "External and fork pull requests are not eligible to release the chart. This check does not authorize a chart release."
+          elif [[ "$RELEASE_REQUIRED" == "true" ]]; then
+            echo "An internal chart version change was detected. The final chart release gate is pending the required checks."
+          else
+            echo "No chart version change was detected. This pull request is not a chart release."
+          fi
 
   collector-image-config:
     name: Resolve EKS test configuration
