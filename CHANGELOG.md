@@ -4,6 +4,20 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.161.0] - 2026-09-18
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.161.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.161.0).
+
+### 🚩 Deprecations 🚩
+
+- `chart`: Deprecate the `featureGates.useLightPrometheusReceiver` feature gate ([#2609](https://github.com/signalfx/splunk-otel-collector-chart/pull/2609))
+  The Light Prometheus Receiver feature gate will be removed in a future release. Set `featureGates.useLightPrometheusReceiver=false` to use the standard Prometheus receiver.
+  
+
+### 💡 Enhancements 💡
+
+- `operator`: Bump operator to 0.123.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2605](https://github.com/signalfx/splunk-otel-collector-chart/pull/2605))
+
 ## [0.160.0] - 2026-09-15
 
 Splunk OpenTelemetry Collector for Kubernetes chart 0.160.0 uses [Splunk OpenTelemetry Collector v0.160.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.160.1).
