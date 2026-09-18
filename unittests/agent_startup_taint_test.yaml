@@ -1,0 +1,70 @@
+suite: Agent startup taint
+templates:
+  - "daemonset.yaml"
+  - "clusterRole.yaml"
+  - "configmap-agent.yaml"
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+
+tests:
+  - it: should tolerate the Splunk agent-not-ready startup taint by default
+    template: daemonset.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: splunk.net/agent-not-ready
+            operator: Exists
+
+  - it: should not add the taint-removal init container by default
+    template: daemonset.yaml
+    asserts:
+      - notExists:
+          path: spec.template.spec.initContainers
+
+  - it: should not grant node patch RBAC by default
+    template: clusterRole.yaml
+    asserts:
+      - notContains:
+          path: rules
+          content:
+            resources:
+              - nodes
+            verbs:
+              - patch
+          any: true
+
+  - it: should add the taint-removal init container when enabled
+    template: daemonset.yaml
+    set:
+      agent:
+        removeNotReadyTaint:
+          enabled: true
+          key: splunk.net/agent-not-ready
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].image
+          value: docker.io/bitnami/kubectl:1.32.3
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].env[?(@.name=="K8S_NODE_NAME")].valueFrom.fieldRef.fieldPath
+          value: spec.nodeName
+
+  - it: should grant node patch RBAC when taint removal is enabled
+    template: clusterRole.yaml
+    set:
+      agent:
+        removeNotReadyTaint:
+          enabled: true
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - ""
+            resources:
+              - nodes
+            verbs:
+              - patch

@@ -646,6 +646,19 @@
           "description": "Skip init containers",
           "type": "boolean"
         },
+        "removeNotReadyTaint": {
+          "description": "Remove the Splunk agent-not-ready startup taint from the node after the agent pod has scheduled.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "key": {
+              "type": "string"
+            }
+          }
+        },
         "annotations": {
           "type": "object"
         },
@@ -1128,6 +1141,26 @@
           }
         },
         "initPatchLogDirs": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "tag": {
+              "type": "string"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "enum": [
+                "IfNotPresent",
+                "Always",
+                "Never"
+              ]
+            }
+          }
+        },
+        "initRemoveNotReadyTaint": {
           "type": "object",
           "additionalProperties": false,
           "properties": {

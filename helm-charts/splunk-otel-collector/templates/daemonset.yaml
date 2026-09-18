@@ -79,9 +79,50 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers) }}
+      {{- $removeNotReadyTaint := and .Values.agent.removeNotReadyTaint.enabled (not .Values.isWindows) }}
+      {{- $patchLogDirs := and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers) .Values.agent.securityContext.runAsUser .Values.agent.securityContext.runAsGroup }}
+      {{- if or $removeNotReadyTaint $patchLogDirs }}
       initContainers:
-        {{- if and .Values.agent.securityContext.runAsUser .Values.agent.securityContext.runAsGroup }}
+        {{- if $removeNotReadyTaint }}
+        - name: remove-not-ready-taint
+          image: {{ template "splunk-otel-collector.image.initRemoveNotReadyTaint" . }}
+          imagePullPolicy: {{ .Values.image.initRemoveNotReadyTaint.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              KEY="{{ .Values.agent.removeNotReadyTaint.key }}"
+              if [ -z "${K8S_NODE_NAME}" ]; then
+                echo "K8S_NODE_NAME is empty; skipping taint removal"
+                exit 0
+              fi
+              if kubectl get node "${K8S_NODE_NAME}" -o jsonpath="{.spec.taints[?(@.key==\"${KEY}\")].key}" | grep -q .; then
+                kubectl taint node "${K8S_NODE_NAME}" "${KEY}-"
+                echo "Removed taint ${KEY} from node ${K8S_NODE_NAME}"
+              else
+                echo "Taint ${KEY} not present on node ${K8S_NODE_NAME}; nothing to remove"
+              fi
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          {{- if .Values.featureGates.explicitMountServiceAccountToken }}
+          volumeMounts:
+            - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              name: serviceaccount-token
+              readOnly: true
+          {{- end }}
+        {{- end }}
+        {{- if $patchLogDirs }}
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}

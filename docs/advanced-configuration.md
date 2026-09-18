@@ -505,6 +505,43 @@ the following line to your custom values.yaml:
 priorityClassName: splunk-otel-agent-priority
 ```
 
+## Agent startup taint
+
+On new nodes, kube-scheduler can bind application pods before the agent DaemonSet.
+If the agent uses a high PriorityClass, it may then preempt those pods when it cannot
+fit. To make the agent schedule first, apply a startup taint on the node (for example
+Karpenter `spec.template.spec.startupTaints`) and enable taint removal on the agent:
+
+```yaml
+agent:
+  removeNotReadyTaint:
+    enabled: true
+    key: splunk.net/agent-not-ready
+```
+
+The chart already adds a default agent toleration for `splunk.net/agent-not-ready`
+(`operator: Exists`, all effects). Application workloads must **not** tolerate this
+taint.
+
+Example Karpenter NodePool fragment:
+
+```yaml
+spec:
+  template:
+    spec:
+      startupTaints:
+        - key: splunk.net/agent-not-ready
+          effect: NoSchedule
+```
+
+When `agent.removeNotReadyTaint.enabled` is true, the agent DaemonSet runs a Linux
+init container that patches the node to remove that taint after the agent pod has
+been scheduled (so the agent's resource requests are reserved). This grants the
+agent ServiceAccount `patch` on Nodes. Leave the flag false if you do not use the
+startup taint.
+
+This feature is not supported on Windows nodes.
+
 ## GKE ARM support
 
 We support ARM workloads on GKE with default configurations of this helm chart.

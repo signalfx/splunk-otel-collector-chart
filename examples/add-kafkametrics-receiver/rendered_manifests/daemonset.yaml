@@ -56,7 +56,8 @@ spec:
           operator: Exists
         - key: batch.amazonaws.com/batch-node
           operator: Exists
-      initContainers:
+        - key: splunk.net/agent-not-ready
+          operator: Exists
       containers:
       - name: otel-collector
         args:

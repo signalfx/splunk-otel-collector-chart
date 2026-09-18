@@ -56,6 +56,8 @@ spec:
           operator: Exists
         - key: batch.amazonaws.com/batch-node
           operator: Exists
+        - key: splunk.net/agent-not-ready
+          operator: Exists
       initContainers:
         - name: patch-log-dirs
           image: registry.access.redhat.com/ubi9/ubi
