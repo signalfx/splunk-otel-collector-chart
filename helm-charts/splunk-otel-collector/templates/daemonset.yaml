@@ -76,7 +76,6 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- $removeNotReadyTaint := and .Values.agent.removeNotReadyTaint.enabled (not .Values.isWindows) }}
-      {{- $removeNotReadyTaintInit := and $removeNotReadyTaint (not .Values.agent.skipInitContainers) }}
       {{- if or .Values.tolerations $removeNotReadyTaint }}
       tolerations:
         {{- if $removeNotReadyTaint }}
@@ -88,9 +87,9 @@ spec:
         {{- end }}
       {{- end }}
       {{- $patchLogDirs := and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers) .Values.agent.securityContext.runAsUser .Values.agent.securityContext.runAsGroup }}
-      {{- if or $removeNotReadyTaintInit (and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers)) }}
+      {{- if or $removeNotReadyTaint (and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers)) }}
       initContainers:
-        {{- if $removeNotReadyTaintInit }}
+        {{- if $removeNotReadyTaint }}
         - name: remove-not-ready-taint
           image: {{ template "splunk-otel-collector.image.initRemoveNotReadyTaint" . }}
           imagePullPolicy: {{ .Values.image.initRemoveNotReadyTaint.pullPolicy }}

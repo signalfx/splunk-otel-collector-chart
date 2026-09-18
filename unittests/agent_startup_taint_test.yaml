@@ -109,7 +109,7 @@ tests:
           path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].command[2]
           pattern: KEY="custom.example/agent-not-ready"
 
-  - it: should skip the taint-removal init container when skipInitContainers is true
+  - it: should still remove the startup taint when skipInitContainers is true
     template: daemonset.yaml
     set:
       agent:
@@ -122,11 +122,9 @@ tests:
           content:
             key: splunk.net/agent-not-ready
             operator: Exists
-      - notContains:
-          path: spec.template.spec.initContainers
-          content:
-            name: remove-not-ready-taint
-          any: true
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].name
+          value: remove-not-ready-taint
 
   - it: should not add the startup taint on Windows nodes
     template: daemonset.yaml
