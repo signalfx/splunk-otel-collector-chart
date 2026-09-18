@@ -505,6 +505,26 @@ the following line to your custom values.yaml:
 priorityClassName: splunk-otel-agent-priority
 ```
 
+## Agent startup taint
+
+Off by default. When enabled, the agent tolerates `splunk.net/agent-not-ready`
+and removes that taint after it schedules:
+
+```yaml
+agent:
+  removeNotReadyTaint:
+    enabled: true
+```
+
+Apply this taint on the node at startup:
+
+```yaml
+key: splunk.net/agent-not-ready
+effect: NoSchedule
+```
+
+Not supported on Windows nodes.
+
 ## GKE ARM support
 
 We support ARM workloads on GKE with default configurations of this helm chart.

@@ -297,6 +297,13 @@ Create the validateSecret image name.
 {{- end -}}
 
 {{/*
+Create the remove-not-ready-taint init container image name.
+*/}}
+{{- define "splunk-otel-collector.image.initRemoveNotReadyTaint" -}}
+{{- printf "%s:%s" .Values.image.initRemoveNotReadyTaint.repository .Values.image.initRemoveNotReadyTaint.tag | trimSuffix ":" -}}
+{{- end -}}
+
+{{/*
 Create the OpAMP Bridge image name.
 */}}
 {{- define "splunk-otel-collector.image.opampBridge" -}}
