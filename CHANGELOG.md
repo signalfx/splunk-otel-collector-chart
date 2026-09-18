@@ -20,6 +20,7 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 
 ### 💡 Enhancements 💡
 
+- `chart`: Bump TargetAllocator to 0.159.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2604](https://github.com/signalfx/splunk-otel-collector-chart/pull/2604))
 - `operator`: Bump operator to 0.123.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2605](https://github.com/signalfx/splunk-otel-collector-chart/pull/2605))
 
 ## [0.160.0] - 2026-09-15
