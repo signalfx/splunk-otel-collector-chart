@@ -102,7 +102,9 @@ resourceSpans:
             stringValue: nodejs_test
         - key: container.image.tags
           value:
-            stringValue: latest
+            arrayValue:
+              values:
+                - stringValue: latest
         - key: container.id
           value:
             stringValue: d49a33ad19fe48b3c5d312aa1ae52445cabe763652947c3562f0fd140fc1d611

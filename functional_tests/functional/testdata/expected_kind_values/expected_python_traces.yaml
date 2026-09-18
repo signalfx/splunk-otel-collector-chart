@@ -63,7 +63,9 @@ resourceSpans:
             stringValue: python_test
         - key: container.image.tags
           value:
-            stringValue: latest
+            arrayValue:
+              values:
+                - stringValue: latest
         - key: container.id
           value:
             stringValue: 862258faa6700c1ee91aaf58d5cf141a9c4b4ef67fdcd4019ff953032584ea95

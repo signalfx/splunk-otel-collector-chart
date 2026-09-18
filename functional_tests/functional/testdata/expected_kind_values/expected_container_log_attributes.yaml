@@ -27,7 +27,9 @@ resourceLogs:
                   stringValue: busybox
               - key: container.image.tags
                 value:
-                  stringValue: "1.37"
+                  arrayValue:
+                    values:
+                      - stringValue: "1.37"
               - key: customfield1
                 value:
                   stringValue: customvalue1
