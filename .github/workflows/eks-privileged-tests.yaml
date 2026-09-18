@@ -176,8 +176,7 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    # TODO: Replace the branch-name exception with release-scope detection while
-    # preserving the protected workflow's independent authorization boundary.
+    # TODO: Make this release-scope-aware without weakening caller validation.
     continue-on-error: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref != 'update-release' && contains(github.event.pull_request.labels.*.name, 'Ignore Tests') }}
     steps:
       - name: Validate protected environment configuration

@@ -18,7 +18,7 @@ permissions:
 jobs:
   release-scope:
     name: Detect chart release
-    # Match the exact source repository so fork PRs never enter the release path.
+    # Only internal PRs can enter the release path.
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     permissions:
       contents: read
@@ -38,8 +38,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Default to the full gate so an unexpected parsing problem cannot
-          # turn a release PR into a fast-pass PR.
+          # Fail closed on lookup or parsing errors.
           required=true
           chart_path="helm-charts/splunk-otel-collector/Chart.yaml"
           if ! base_chart="$(gh api \
@@ -66,8 +65,7 @@ jobs:
           echo "required=$required" >> "$GITHUB_OUTPUT"
 
   chart-release-fast-gate:
-    # Publish the required check for ineligible and non-release PRs. Internal
-    # release PRs get the required check from chart-release-gate instead.
+    # Release PRs publish the required check from chart-release-gate instead.
     name: ${{ needs.release-scope.outputs.release-required != 'true' && 'Chart release gate' || 'Chart release gate pending required checks' }}
     needs: release-scope
     if: ${{ !cancelled() }}
