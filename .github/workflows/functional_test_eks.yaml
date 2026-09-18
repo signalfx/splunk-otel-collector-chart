@@ -305,8 +305,8 @@ jobs:
       - release-scope
       - eks-functional-tests
       - release-readiness
-    # Evaluate every result so release PRs fail closed on failures or skips.
-    if: ${{ !cancelled() }}
+    # Release PRs must publish a final result, including after cancellation.
+    if: ${{ always() }}
     permissions: {}
     runs-on: ubuntu-latest
     env:
