@@ -548,9 +548,6 @@ receivers:
                     kubeproxy_sync_proxy_rules_service_changes_pending|\
                     kubeproxy_sync_proxy_rules_duration_seconds|\
                     kubeproxy_network_programming_duration_seconds)(?:_sum|_count|_bucket)?"
-                - action: drop
-                  regex: 'kubeproxy_network_programming_duration_seconds_bucket;([1-3][1-46-9]|[4-9][1-9]|100|110|115|270)\.0'
-                  source_labels: [__name__, le]
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.scheduler.enabled }}
       prometheus/kubernetes-scheduler:
@@ -948,6 +945,15 @@ processors:
     metric_statements:
       - delete_key(resource.attributes, "server.address") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
       - delete_key(resource.attributes, "server.port") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
+  {{- end }}
+
+  {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
+  transform/limit_histogram_buckets:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - merge_histogram_buckets(31, method="limit_buckets")
   {{- end }}
 
 # If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
@@ -1386,6 +1392,7 @@ service:
         - resource/add_agent_k8s
         - resource_detection
         - resource
+        - transform/limit_histogram_buckets
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio
         - transform/drop_server_attrs
