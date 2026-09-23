@@ -18,36 +18,32 @@ resources:
                 - attributes:
                     ip_family/exists: true
                   explicit_bounds:
-                    - 0
-                    - 0.25
                     - 0.5
-                    - 1
-                    - 2
                     - 3
-                    - 4
-                    - 5
                     - 6
-                    - 7
-                    - 8
                     - 9
-                    - 10
+                    - 12
                     - 15
-                    - 20
-                    - 25
+                    - 18
+                    - 21
+                    - 24
+                    - 27
                     - 30
-                    - 35
-                    - 40
-                    - 50
+                    - 33
+                    - 36
+                    - 39
+                    - 42
+                    - 45
+                    - 48
+                    - 51
+                    - 54
+                    - 57
                     - 60
-                    - 70
-                    - 80
+                    - 75
                     - 90
                     - 105
                     - 120
-                    - 150
-                    - 180
                     - 210
-                    - 240
                     - 300
               name: kubeproxy_network_programming_duration_seconds
               temporality: cumulative
