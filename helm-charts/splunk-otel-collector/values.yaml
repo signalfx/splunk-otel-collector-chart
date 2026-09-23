@@ -297,13 +297,13 @@ extraAttributes:
 
   # Labels that will be collected from k8s pods (or namespaces) (in case they are set)
   # and added as extra attributes to the telemetry in the following format:
-  # k8s.<pod|namespace>.labels.<label_name>: <label_value>
+  # k8s.<pod|namespace>.label.<label_name>: <label_value>
   #  For example, if you want to collect "my_key" label from your namespaces, you could use the following:
   #  fromLabels:
   #    - key: my_key
   #      from: namespace
   #
-  #  If you want to change the default attribute name `k8s.pod.labels.<label_name>`, you could do that using a `tag_name` field:
+  #  If you want to change the default attribute name `k8s.pod.label.<label_name>`, you could do that using a `tag_name` field:
   #  fromLabels:
   #    - key: my_key
   #      tag_name: my_tag
@@ -312,7 +312,7 @@ extraAttributes:
   #  `key_regex` field can be used to get a specific set of labels that match a regex.
   #  If `key_regex` used is used, the `key` field accepts regexp matching groups.
   #  The following example will fetch all the pod labels and propagate them to the attributes as is,
-  #  without "k8s.pod.labels." prefix. "$" from the matching group must be escaped as "$$".
+  #  without "k8s.pod.label." prefix. "$" from the matching group must be escaped as "$$".
   #  fromLabels:
   #    - key_regex: (.*)
   #      from: pod
@@ -322,7 +322,7 @@ extraAttributes:
 
   # Annotations that will be collected from k8s pods (or namespaces) (in case they are set)
   # and added as extra attributes to the telemetry in the following format:
-  # k8s.<pod|namespace>.annotations.<annotation_name>: <annotation_value>
+  # k8s.<pod|namespace>.annotation.<annotation_name>: <annotation_value>
   # fromAnnotations uses the same extraction rules as fromLabels option so refer examples from the fromLabels option.
   fromAnnotations: []
 
