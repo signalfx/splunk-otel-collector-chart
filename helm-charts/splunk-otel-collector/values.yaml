@@ -1359,7 +1359,7 @@ instrumentation:
       #   - name: APACHE_ENV_VAR
       #     value: apache_value
     dotnet:
-      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.15.0
+      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.16.0
       env:
         # The Splunk .NET image uses linux-x64; the upstream operator defaults to linux.
         - name: CORECLR_PROFILER_PATH
