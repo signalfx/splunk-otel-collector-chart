@@ -35,7 +35,8 @@ collector workloads created by this chart. At least one chart-created workload
 or extra agent must be managed when Remote Management is enabled.
 
 By default, the bridge connects to
-`https://ingest.<realm>.observability.splunkcloud.com/v1/opamp` and sends the
+the Splunk Observability OpAMP endpoint for the configured realm,
+`https://ingest.<realm>.observability.splunkcloud.com/v1/opamp`, and sends the
 `splunkObservability.accessToken` as the `X-SF-Token` header. Use
 `remoteManagement.opampBridge.endpoint`, `headers`, and `tls` when the bridge
 must connect to another OpAMP endpoint or use custom connection settings. When

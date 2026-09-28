@@ -240,6 +240,23 @@ tests:
           path: data["config.yaml"]
           pattern: 'otelcol.service.mode: clusterReceiver'
 
+  - it: should use the realm opamp endpoint when ingestUrl is overridden
+    template: opamp-bridge-configmap.yaml
+    documentIndex: 0
+    set:
+      splunkObservability:
+        realm: us1
+        ingestUrl: https://ingest-proxy.example.com
+      remoteManagement:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "https://ingest.us1.observability.splunkcloud.com/v1/opamp"'
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "https://ingest-proxy.example.com/v1/opamp"'
+
   - it: should include gateway workload when gateway is enabled
     template: opamp-bridge-configmap.yaml
     documentIndex: 0

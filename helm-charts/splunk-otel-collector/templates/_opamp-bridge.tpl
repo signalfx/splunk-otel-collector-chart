@@ -37,7 +37,7 @@ Get OpAMP Bridge endpoint.
 {{- if .Values.remoteManagement.opampBridge.endpoint -}}
 {{- .Values.remoteManagement.opampBridge.endpoint -}}
 {{- else if eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true" -}}
-{{- printf "%s/v1/opamp" (include "splunk-otel-collector.o11yIngestUrl" .) -}}
+{{- printf "https://ingest.%s.observability.splunkcloud.com/v1/opamp" .Values.splunkObservability.realm -}}
 {{- else -}}
 {{- fail "/remoteManagement/opampBridge/endpoint is required when remoteManagement.enabled is true and splunkObservability.realm is not set" -}}
 {{- end -}}
