@@ -18,8 +18,10 @@ Start with `internal.CommonK8sMetricAssertionExistsAttrs` and
 `internal.CommonK8sMetricAssertionRegexAttrs`, then extend them near the test for
 test-specific attributes.
 
-If the old comparison used `pmetrictest.IgnoreSubsequentDataPoints`, pass those
-metric names through `internal.WithFirstDatapointOnly(...)`.
+For metrics with additional live series, use `datapoints/include` in the YAML
+snapshot to require the listed series and allow others. Use `datapoints/count`
+when only the number of series matters. The test compares each full batch to
+the snapshot without removing datapoints first.
 
 To refresh from a live functional run after an assertion mismatch:
 
@@ -29,3 +31,6 @@ cd functional_tests && UPDATE_EXPECTED_RESULTS=true go test ./functional -run 'T
 
 If a cluster-specific attribute appears, add it to that test's exists or regex
 attrs before refreshing so the snapshot does not pin a generated value.
+The upstream writer emits exact collections; after refreshing, restore any
+`/include` or `/count` constraints and selected exact attribute values that
+the test needs.

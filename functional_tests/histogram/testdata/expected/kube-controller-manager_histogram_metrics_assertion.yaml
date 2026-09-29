@@ -14,7 +14,7 @@ resources:
         url.scheme: https
       scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     name/exists: true
                   explicit_bounds:

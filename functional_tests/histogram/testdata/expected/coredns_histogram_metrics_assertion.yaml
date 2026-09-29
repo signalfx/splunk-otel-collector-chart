@@ -14,7 +14,7 @@ resources:
         url.scheme: http
       scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     server/exists: true
                     zone/exists: true

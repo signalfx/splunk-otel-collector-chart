@@ -14,7 +14,7 @@ resources:
         url.scheme: http
       scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - explicit_bounds:
                     - 0.001
                     - 0.002
