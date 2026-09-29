@@ -995,7 +995,7 @@ remoteManagement:
 
   opampBridge:
     # OpAMP server endpoint for the bridge. When empty, the chart uses the
-    # Splunk Observability ingest OpAMP endpoint:
+    # Splunk Observability OpAMP endpoint for the configured realm:
     # https://ingest.<realm>.observability.splunkcloud.com/v1/opamp
     endpoint: ""
 
