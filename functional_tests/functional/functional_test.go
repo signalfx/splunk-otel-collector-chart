@@ -874,6 +874,7 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	)
 	internal.AssertMetricsSnapshot(t, globalSinks.k8sclusterReceiverMetricsConsumer,
 		"k8s.pod.phase", assertionFile, 3*time.Minute, 10*time.Second,
+		internal.WithWaitForSnapshotMatch(),
 		internal.WithVolatileAttributes(existsAttrs...),
 		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
 	)

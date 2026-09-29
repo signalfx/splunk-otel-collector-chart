@@ -31,6 +31,8 @@ cd functional_tests && UPDATE_EXPECTED_RESULTS=true go test ./functional -run 'T
 
 If a cluster-specific attribute appears, add it to that test's exists or regex
 attrs before refreshing so the snapshot does not pin a generated value.
-The upstream writer emits exact collections; after refreshing, restore any
-`/include` or `/count` constraints and selected exact attribute values that
-the test needs.
+The upstream writer emits exact collections for new snapshots. When refreshing
+an existing snapshot, the helper preserves its `datapoints/include` and
+`datapoints/count` constraints, including selected exact attribute values. It
+checks the refreshed assertion against the selected live batch before replacing
+the file.

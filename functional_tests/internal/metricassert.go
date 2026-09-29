@@ -4,6 +4,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -24,9 +25,10 @@ type metricsAssertionConfig struct {
 	scopeVersionRegex              string
 	exactDatapointAttrs            map[string]struct{}
 	includeHistogramExplicitBounds bool
+	waitForSnapshotMatch           bool
 }
 
-// MetricsAssertionOption configures snapshot generation.
+// MetricsAssertionOption configures snapshot selection and generation.
 type MetricsAssertionOption func(*metricsAssertionConfig)
 
 const (
@@ -108,6 +110,13 @@ func WithScopeVersionRegex(pattern string) MetricsAssertionOption {
 	}
 }
 
+// WithWaitForSnapshotMatch retries complete live batches until one matches.
+func WithWaitForSnapshotMatch() MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.waitForSnapshotMatch = true
+	}
+}
+
 // WithHistogramExplicitBounds includes histogram bucket boundaries in the snapshot.
 func WithHistogramExplicitBounds() MetricsAssertionOption {
 	return func(cfg *metricsAssertionConfig) {
@@ -126,41 +135,50 @@ func WithDatapointAttributesAsExistsExcept(exactAttrs ...string) MetricsAssertio
 	}
 }
 
-// AssertMetricsSnapshot waits for a live batch that matches the assertion.
+// AssertMetricsSnapshot selects a complete live batch and checks its assertion.
 func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetMetric, assertionFile string, timeout, interval time.Duration, opts ...MetricsAssertionOption) {
 	t.Helper()
 
 	if shouldUpdateExpectedResults() {
-		selected := waitForMetricSet(targetMetric, sink, timeout, interval)
+		var selected *pmetric.Metrics
+		if _, err := os.Stat(assertionFile); err == nil {
+			wantResources, wantMetrics, countErr := assertionExpectedCounts(assertionFile)
+			require.NoError(t, countErr, "Failed to read expected counts from %s", assertionFile)
+			selected = selectMetricSetByCountsWithTimeout(targetMetric, sink, wantResources, wantMetrics, timeout, interval)
+		} else {
+			require.True(t, os.IsNotExist(err), "Failed to inspect assertion file %s: %v", assertionFile, err)
+			selected = waitForMetricSet(targetMetric, sink, timeout, interval)
+		}
 		require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
 		require.NoError(t, WriteMetricsAssertion(t, assertionFile, *selected, opts...))
 		t.Logf("Wrote updated expected metric assertion to %s", assertionFile)
 		return
 	}
 
-	selected, assertErr := selectMetricSetByAssertionWithTimeout(targetMetric, sink, assertionFile, timeout, interval)
+	wantResources, wantMetrics, err := assertionExpectedCounts(assertionFile)
+	require.NoError(t, err, "Failed to read expected counts from %s", assertionFile)
+	if newMetricsAssertionConfig(opts...).waitForSnapshotMatch {
+		selected, assertErr := selectMetricSetByAssertionWithTimeout(targetMetric, sink, wantResources, wantMetrics, assertionFile, timeout, interval)
+		require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
+		require.NoError(t, assertErr, "Metric assertion failed for %s", assertionFile)
+		t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
+		return
+	}
+
+	selected := selectMetricSetByCountsWithTimeout(targetMetric, sink, wantResources, wantMetrics, timeout, interval)
 	require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
-	require.NoError(t, assertErr, "Metric assertion failed for %s", assertionFile)
+	require.NoError(t, pmetricassert.AssertMetrics(assertionFile, *selected), "Metric assertion failed for %s", assertionFile)
 	t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
 }
 
-func selectMetricSetByAssertionWithTimeout(targetMetric string, sink *consumertest.MetricsSink, assertionFile string, timeout, interval time.Duration) (*pmetric.Metrics, error) {
+func selectMetricSetByAssertionWithTimeout(targetMetric string, sink *consumertest.MetricsSink, wantResources, wantMetrics int, assertionFile string, timeout, interval time.Duration) (*pmetric.Metrics, error) {
 	deadline := time.Now().Add(timeout)
-	checked := 0
 	for time.Now().Before(deadline) {
-		batches := sink.AllMetrics()
-		if checked > len(batches) {
-			checked = 0
-		}
-		for _, metrics := range batches[checked:] {
-			if !containsMetric(metrics, targetMetric) {
-				continue
-			}
-			if err := pmetricassert.AssertMetrics(assertionFile, metrics); err == nil {
-				return &metrics, nil
+		if selected := selectMetricSetByCounts(targetMetric, sink, wantResources, wantMetrics); selected != nil {
+			if err := pmetricassert.AssertMetrics(assertionFile, *selected); err == nil {
+				return selected, nil
 			}
 		}
-		checked = len(batches)
 		time.Sleep(interval)
 	}
 
@@ -169,6 +187,55 @@ func selectMetricSetByAssertionWithTimeout(targetMetric string, sink *consumerte
 		return nil, nil
 	}
 	return selected, pmetricassert.AssertMetrics(assertionFile, *selected)
+}
+
+func selectMetricSetByCountsWithTimeout(targetMetric string, sink *consumertest.MetricsSink, wantResources, wantMetrics int, timeout, interval time.Duration) *pmetric.Metrics {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if selected := selectMetricSetByCounts(targetMetric, sink, wantResources, wantMetrics); selected != nil {
+			return selected
+		}
+		time.Sleep(interval)
+	}
+	return richestMetricSet(targetMetric, sink)
+}
+
+func selectMetricSetByCounts(targetMetric string, sink *consumertest.MetricsSink, wantResources, wantMetrics int) *pmetric.Metrics {
+	batches := sink.AllMetrics()
+	for i := len(batches) - 1; i >= 0; i-- {
+		metrics := batches[i]
+		if containsMetric(metrics, targetMetric) && metrics.ResourceMetrics().Len() == wantResources && metrics.MetricCount() == wantMetrics {
+			return &batches[i]
+		}
+	}
+	return nil
+}
+
+func assertionExpectedCounts(file string) (int, int, error) {
+	data, readErr := os.ReadFile(file)
+	if readErr != nil {
+		return 0, 0, fmt.Errorf("read assertion file %s: %w", file, readErr)
+	}
+	var doc struct {
+		Resources []struct {
+			Scopes []struct {
+				Metrics []any `yaml:"metrics"`
+			} `yaml:"scopes"`
+		} `yaml:"resources"`
+	}
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return 0, 0, fmt.Errorf("parse assertion file %s: %w", file, err)
+	}
+	metricCount := 0
+	for _, resource := range doc.Resources {
+		for _, scope := range resource.Scopes {
+			metricCount += len(scope.Metrics)
+		}
+	}
+	if len(doc.Resources) == 0 || metricCount == 0 {
+		return 0, 0, fmt.Errorf("assertion file %s has no resources or metrics", file)
+	}
+	return len(doc.Resources), metricCount, nil
 }
 
 func waitForMetricSet(targetMetric string, sink *consumertest.MetricsSink, timeout, interval time.Duration) *pmetric.Metrics {
@@ -205,6 +272,19 @@ func richestMetricSet(targetMetric string, metricSink *consumertest.MetricsSink)
 // WriteMetricsAssertion writes an assertion snapshot with flexible attribute matchers.
 func WriteMetricsAssertion(tb testing.TB, file string, actual pmetric.Metrics, opts ...MetricsAssertionOption) error {
 	tb.Helper()
+	previous, readErr := os.ReadFile(file)
+	if readErr != nil && !os.IsNotExist(readErr) {
+		return fmt.Errorf("read existing assertion file %s: %w", file, readErr)
+	}
+	tmp, createErr := os.CreateTemp(tb.TempDir(), "metric-assertion-*.yaml")
+	if createErr != nil {
+		return fmt.Errorf("create temporary assertion file: %w", createErr)
+	}
+	defer os.Remove(tmp.Name())
+	if err := tmp.Close(); err != nil {
+		return fmt.Errorf("close temporary assertion file: %w", err)
+	}
+
 	cfg := newMetricsAssertionConfig(opts...)
 	var writeOpts []pmetricassert.WriteOption
 	if cfg.includeHistogramExplicitBounds {
@@ -233,10 +313,137 @@ func WriteMetricsAssertion(tb testing.TB, file string, actual pmetric.Metrics, o
 	if len(cfg.regexAttrs) > 0 {
 		writeOpts = append(writeOpts, pmetricassert.WithAttributeRegex(cfg.regexAttrs))
 	}
-	if err := pmetricassert.WriteAssertionFile(tb, file, actual, writeOpts...); err != nil {
+	if err := pmetricassert.WriteAssertionFile(tb, tmp.Name(), actual, writeOpts...); err != nil {
 		return fmt.Errorf("write assertion file %s: %w", file, err)
 	}
-	return markScopeVersionRegex(file, cfg.scopeVersionRegex)
+	if err := markScopeVersionRegex(tmp.Name(), cfg.scopeVersionRegex); err != nil {
+		return err
+	}
+	generated, generatedReadErr := os.ReadFile(tmp.Name())
+	if generatedReadErr != nil {
+		return fmt.Errorf("read generated assertion file: %w", generatedReadErr)
+	}
+	if len(previous) > 0 {
+		merged, mergeErr := preserveDatapointMatchers(previous, generated)
+		if mergeErr != nil {
+			return fmt.Errorf("preserve assertion matchers in %s: %w", file, mergeErr)
+		}
+		generated = merged
+	}
+	if err := os.WriteFile(tmp.Name(), generated, 0o600); err != nil {
+		return fmt.Errorf("write generated assertion for validation: %w", err)
+	}
+	if err := pmetricassert.AssertMetrics(tmp.Name(), actual); err != nil {
+		return fmt.Errorf("generated assertion does not match live metrics: %w", err)
+	}
+	//nolint:gosec // Assertion snapshots are committed testdata.
+	if err := os.WriteFile(file, generated, 0o644); err != nil {
+		return fmt.Errorf("write assertion file %s: %w", file, err)
+	}
+	return nil
+}
+
+// preserveDatapointMatchers keeps deliberate include and count constraints when
+// refreshing an assertion. The upstream writer emits exact datapoint lists.
+func preserveDatapointMatchers(previous, generated []byte) ([]byte, error) {
+	var oldDoc, newDoc map[string]any
+	if err := yaml.Unmarshal(previous, &oldDoc); err != nil {
+		return nil, fmt.Errorf("parse existing assertion: %w", err)
+	}
+	if err := yaml.Unmarshal(generated, &newDoc); err != nil {
+		return nil, fmt.Errorf("parse generated assertion: %w", err)
+	}
+	selections := map[string]map[string]any{}
+	if err := visitAssertionMetrics(oldDoc, func(metric map[string]any) error {
+		include, hasInclude := metric["datapoints/include"]
+		count, hasCount := metric["datapoints/count"]
+		if !hasInclude && !hasCount {
+			return nil
+		}
+		name, ok := metric["name"].(string)
+		if !ok || name == "" {
+			return errors.New("metric with datapoint matchers has no name")
+		}
+		if _, duplicate := selections[name]; duplicate {
+			return fmt.Errorf("metric %q has duplicate datapoint matchers", name)
+		}
+		selection := map[string]any{}
+		if hasInclude {
+			selection["datapoints/include"] = include
+		}
+		if hasCount {
+			selection["datapoints/count"] = count
+		}
+		selections[name] = selection
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	if len(selections) == 0 {
+		return generated, nil
+	}
+	seen := map[string]bool{}
+	if err := visitAssertionMetrics(newDoc, func(metric map[string]any) error {
+		name, _ := metric["name"].(string)
+		selection, ok := selections[name]
+		if !ok {
+			return nil
+		}
+		if seen[name] {
+			return fmt.Errorf("generated assertion has duplicate metric %q", name)
+		}
+		seen[name] = true
+		delete(metric, "datapoints")
+		for key, value := range selection {
+			metric[key] = value
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	for name := range selections {
+		if !seen[name] {
+			return nil, fmt.Errorf("generated assertion is missing metric %q", name)
+		}
+	}
+	return yaml.Marshal(newDoc)
+}
+
+func visitAssertionMetrics(doc map[string]any, visit func(map[string]any) error) error {
+	resources, resourcesOK := doc["resources"].([]any)
+	if !resourcesOK {
+		return errors.New("assertion resources must be a list")
+	}
+	for _, rawResource := range resources {
+		resource, resourceOK := rawResource.(map[string]any)
+		if !resourceOK {
+			return errors.New("assertion resource must be a map")
+		}
+		scopes, scopesOK := resource["scopes"].([]any)
+		if !scopesOK {
+			return errors.New("assertion scopes must be a list")
+		}
+		for _, rawScope := range scopes {
+			scope, scopeOK := rawScope.(map[string]any)
+			if !scopeOK {
+				return errors.New("assertion scope must be a map")
+			}
+			metrics, metricsOK := scope["metrics"].([]any)
+			if !metricsOK {
+				return errors.New("assertion metrics must be a list")
+			}
+			for _, rawMetric := range metrics {
+				metric, metricOK := rawMetric.(map[string]any)
+				if !metricOK {
+					return errors.New("assertion metric must be a map")
+				}
+				if err := visit(metric); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func nonIdentityDatapointAttrs(metrics pmetric.Metrics, exact map[string]struct{}) map[string]struct{} {
