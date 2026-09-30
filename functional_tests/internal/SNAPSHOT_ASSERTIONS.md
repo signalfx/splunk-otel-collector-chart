@@ -36,3 +36,8 @@ an existing snapshot, the helper preserves its `datapoints/include` and
 `datapoints/count` constraints, including selected exact attribute values. It
 checks the refreshed assertion against the selected live batch before replacing
 the file.
+
+For checks that only require metric names across received batches, use
+`internal.AssertMetricNames`. Its optional filter selects which live metrics
+contribute names. The assertion file uses canonical gauge metrics so the test
+does not constrain the live metric type, resource, scope, datapoints, or values.

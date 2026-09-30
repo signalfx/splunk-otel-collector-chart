@@ -339,26 +339,20 @@ func testTargetAllocator(t *testing.T) {
 
 func testPrometheusAnnotationMetrics(t *testing.T) {
 	agentMetricsConsumer := globalSinks.agentMetricsConsumer
-
-	// metrics from the local prometheus_test_app.
-	metricNames := []string{
-		"test_requests_total",
-		"test_connections_active",
-		"test_uptime_seconds_total",
-	}
+	assertionFile := filepath.Join(testDir, "expected_prometheus_metric_names_assertion.yaml")
 	// The "pod" and "service" labels are Prometheus target labels added by
 	// k8s SD relabeling in the TA-generated scrape configs.
 	t.Logf("Checking via prometheus.io/scrape")
-	checkMetrics(t, agentMetricsConsumer, metricNames, "annotation", func(_ pcommon.Map, metric pmetric.Metric) bool {
+	internal.AssertMetricNames(t, agentMetricsConsumer, assertionFile, 3*time.Minute, 10*time.Second, func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return !metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service")
 	})
 
 	t.Logf("Checking via pod monitor")
-	checkMetrics(t, agentMetricsConsumer, metricNames, "podMonitor", func(_ pcommon.Map, metric pmetric.Metric) bool {
+	internal.AssertMetricNames(t, agentMetricsConsumer, assertionFile, 3*time.Minute, 10*time.Second, func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return metricDataPointsHaveKey(metric, "pod") && !metricDataPointsHaveKey(metric, "service") && metricDataPointsHaveAttrs(metric, "service.name", "default/pod-monitor")
 	})
 	t.Logf("Checking via service monitor")
-	checkMetrics(t, agentMetricsConsumer, metricNames, "serviceMonitor", func(_ pcommon.Map, metric pmetric.Metric) bool {
+	internal.AssertMetricNames(t, agentMetricsConsumer, assertionFile, 3*time.Minute, 10*time.Second, func(_ pcommon.Map, metric pmetric.Metric) bool {
 		return metricDataPointsHaveKey(metric, "pod") && metricDataPointsHaveKey(metric, "service") && metricDataPointsHaveAttrs(metric, "service.name", "prometheus-annotation-service")
 	})
 }

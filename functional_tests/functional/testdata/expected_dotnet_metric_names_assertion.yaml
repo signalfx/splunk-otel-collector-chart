@@ -1,0 +1,8 @@
+# AssertMetricNames projects observed metric names into canonical gauge metrics.
+version: 1
+signal: metrics
+resources:
+  - scopes:
+      - metrics/include:
+          - name: process.runtime.dotnet.gc.collections.count
+            type: gauge

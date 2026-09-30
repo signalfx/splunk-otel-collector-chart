@@ -144,11 +144,20 @@ func WithDatapointAttributesAsExistsExcept(exactAttrs ...string) MetricsAssertio
 	}
 }
 
+// MetricNameFilter optionally limits which observed metrics contribute names.
+type MetricNameFilter func(pcommon.Map, pmetric.Metric) bool
+
 // AssertMetricNames checks names observed across every batch in the sink.
 // Projecting to one canonical resource and scope preserves name-only checks:
 // resource, scope, metric type, datapoints, and values remain unconstrained.
-func AssertMetricNames(t *testing.T, sink *consumertest.MetricsSink, assertionFile string, timeout, interval time.Duration) {
+// An optional filter can restrict which observed metrics contribute names.
+func AssertMetricNames(t *testing.T, sink *consumertest.MetricsSink, assertionFile string, timeout, interval time.Duration, filters ...MetricNameFilter) {
 	t.Helper()
+	require.LessOrEqual(t, len(filters), 1)
+	var filter MetricNameFilter
+	if len(filters) == 1 {
+		filter = filters[0]
+	}
 	require.EventuallyWithT(t, func(tt *assert.CollectT) {
 		names := make(map[string]struct{})
 		for _, batch := range sink.AllMetrics() {
@@ -157,7 +166,10 @@ func AssertMetricNames(t *testing.T, sink *consumertest.MetricsSink, assertionFi
 				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
 					metrics := rm.ScopeMetrics().At(j).Metrics()
 					for k := 0; k < metrics.Len(); k++ {
-						names[metrics.At(k).Name()] = struct{}{}
+						metric := metrics.At(k)
+						if filter == nil || filter(rm.Resource().Attributes(), metric) {
+							names[metric.Name()] = struct{}{}
+						}
 					}
 				}
 			}
