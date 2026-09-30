@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/require"
@@ -318,77 +317,35 @@ func Test_IstioMetrics(t *testing.T) {
 
 	flakyMetrics := []string{"galley_validation_config_update_error"} // only shows up when config validation fails - removed if present when comparing
 	t.Run("istiod metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istiod.yaml", "pilot_services",
+		testIstioMetrics(t, "testdata/expected_istiod_assertion.yaml", "pilot_services",
 			flakyMetrics, metricsSink)
 	})
 
 	flakyMetrics = []string{"istio_agent_pilot_xds_expired_nonce"}
 	t.Run("istio ingress metrics captured", func(t *testing.T) {
-		testIstioMetrics(t, "testdata/expected_istioingress.yaml",
+		testIstioMetrics(t, "testdata/expected_istioingress_assertion.yaml",
 			"istio_requests_total", flakyMetrics, metricsSink)
 	})
 }
 
-func testIstioMetrics(t *testing.T, expectedMetricsFile string, includeMetricName string, flakyMetricNames []string, metricsSink *consumertest.MetricsSink) {
-	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
-	require.NoError(t, err)
+// The previous comparison checked these attribute keys but ignored their values.
+var istioMetricVolatileAttrs = []string{
+	"host.name", "k8s.pod.name", "k8s.pod.uid", "os.type",
+	"server.address", "service.instance.id", "service.name", "url.scheme",
+	"type", "event",
+}
 
+func testIstioMetrics(t *testing.T, assertionFile, targetMetric string, flakyMetricNames []string, metricsSink *consumertest.MetricsSink) {
 	internal.WaitForMetrics(t, 2, metricsSink)
-
-	var metricNames []string
-	for i := 0; i < expectedMetrics.ResourceMetrics().Len(); i++ {
-		for j := 0; j < expectedMetrics.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-			for k := 0; k < expectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-				metric := expectedMetrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-				metricNames = append(metricNames, metric.Name())
-
-				if metric.Type() == pmetric.MetricTypeHistogram {
-					err = internal.CheckHistogramBucketCount(metric.Histogram())
-					require.NoError(t, err, "metric %s hit error: %s", metric.Name(), err)
-				}
-			}
-		}
-	}
-
-	require.Eventually(t, func() bool {
-		for _, receivedMetrics := range metricsSink.AllMetrics() {
-			if flakyMetricNames != nil {
-				internal.RemoveFlakyMetrics(&receivedMetrics, flakyMetricNames)
-			}
-
-			err = pmetrictest.CompareMetrics(expectedMetrics, receivedMetrics,
-				pmetrictest.IgnoreTimestamp(),
-				pmetrictest.IgnoreStartTimestamp(),
-				pmetrictest.IgnoreScopeVersion(),
-				pmetrictest.IgnoreMetricValues(metricNames...),
-				pmetrictest.IgnoreMetricAttributeValue("host.name"),
-				pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
-				pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
-				pmetrictest.IgnoreMetricAttributeValue("os.type"),
-				pmetrictest.IgnoreMetricAttributeValue("server.address"),
-				pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-				pmetrictest.IgnoreMetricAttributeValue("service.name"),
-				pmetrictest.IgnoreMetricAttributeValue("url.scheme"),
-				pmetrictest.IgnoreMetricAttributeValue("type", "pilot_xds_expired_nonce"),
-				pmetrictest.IgnoreResourceMetricsOrder(),
-				pmetrictest.IgnoreMetricsOrder(),
-				pmetrictest.IgnoreScopeMetricsOrder(),
-				pmetrictest.IgnoreMetricDataPointsOrder(),
-				pmetrictest.IgnoreMetricAttributeValue("event"),
-				pmetrictest.IgnoreSubsequentDataPoints(metricNames...),
-			)
-			if err == nil {
-				return true
-			}
-			t.Logf("Comparison error: %v", err)
-		}
-
-		selectedMetrics, _ := internal.SelectMetricSet(t, expectedMetrics, includeMetricName, metricsSink)
-		if selectedMetrics != nil {
-			internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
-		}
-		return false
-	}, 5*time.Minute, 1*time.Second, "Expected metrics not found")
+	internal.AssertMetricsSnapshot(t, metricsSink, targetMetric, assertionFile,
+		5*time.Minute, time.Second,
+		internal.WithWaitForSnapshotMatch(),
+		internal.WithVolatileAttributes(istioMetricVolatileAttrs...),
+		internal.WithScopeVersionRegex(".*"),
+		internal.WithMetricsFilter(func(metrics *pmetric.Metrics) {
+			internal.RemoveFlakyMetrics(metrics, flakyMetricNames)
+		}),
+	)
 }
 
 func Test_IstioTraces(t *testing.T) {

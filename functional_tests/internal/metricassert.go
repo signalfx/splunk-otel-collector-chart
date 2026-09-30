@@ -26,6 +26,7 @@ type metricsAssertionConfig struct {
 	exactDatapointAttrs            map[string]struct{}
 	includeHistogramExplicitBounds bool
 	waitForSnapshotMatch           bool
+	metricsFilter                  func(*pmetric.Metrics)
 }
 
 // MetricsAssertionOption configures snapshot selection and generation.
@@ -117,6 +118,13 @@ func WithWaitForSnapshotMatch() MetricsAssertionOption {
 	}
 }
 
+// WithMetricsFilter applies a test-specific filter to a copy of each live batch.
+func WithMetricsFilter(filter func(*pmetric.Metrics)) MetricsAssertionOption {
+	return func(cfg *metricsAssertionConfig) {
+		cfg.metricsFilter = filter
+	}
+}
+
 // WithHistogramExplicitBounds includes histogram bucket boundaries in the snapshot.
 func WithHistogramExplicitBounds() MetricsAssertionOption {
 	return func(cfg *metricsAssertionConfig) {
@@ -138,16 +146,17 @@ func WithDatapointAttributesAsExistsExcept(exactAttrs ...string) MetricsAssertio
 // AssertMetricsSnapshot selects a complete live batch and checks its assertion.
 func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetMetric, assertionFile string, timeout, interval time.Duration, opts ...MetricsAssertionOption) {
 	t.Helper()
+	filter := newMetricsAssertionConfig(opts...).metricsFilter
 
 	if shouldUpdateExpectedResults() {
 		var selected *pmetric.Metrics
 		if _, err := os.Stat(assertionFile); err == nil {
 			wantResources, wantMetrics, countErr := assertionExpectedCounts(assertionFile)
 			require.NoError(t, countErr, "Failed to read expected counts from %s", assertionFile)
-			selected = selectMetricSetByCountsWithTimeout(targetMetric, sink, wantResources, wantMetrics, timeout, interval)
+			selected = selectMetricSetByCountsWithTimeout(targetMetric, sink, wantResources, wantMetrics, timeout, interval, filter)
 		} else {
 			require.True(t, os.IsNotExist(err), "Failed to inspect assertion file %s: %v", assertionFile, err)
-			selected = waitForMetricSet(targetMetric, sink, timeout, interval)
+			selected = waitForMetricSet(targetMetric, sink, timeout, interval, filter)
 		}
 		require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
 		require.NoError(t, WriteMetricsAssertion(t, assertionFile, *selected, opts...))
@@ -158,23 +167,23 @@ func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetM
 	wantResources, wantMetrics, err := assertionExpectedCounts(assertionFile)
 	require.NoError(t, err, "Failed to read expected counts from %s", assertionFile)
 	if newMetricsAssertionConfig(opts...).waitForSnapshotMatch {
-		selected, assertErr := selectMetricSetByAssertionWithTimeout(targetMetric, sink, wantResources, wantMetrics, assertionFile, timeout, interval)
+		selected, assertErr := selectMetricSetByAssertionWithTimeout(targetMetric, sink, wantResources, wantMetrics, assertionFile, timeout, interval, filter)
 		require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
 		require.NoError(t, assertErr, "Metric assertion failed for %s", assertionFile)
 		t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
 		return
 	}
 
-	selected := selectMetricSetByCountsWithTimeout(targetMetric, sink, wantResources, wantMetrics, timeout, interval)
+	selected := selectMetricSetByCountsWithTimeout(targetMetric, sink, wantResources, wantMetrics, timeout, interval, filter)
 	require.NotNil(t, selected, "No metrics batch found containing target metric: %s", targetMetric)
 	require.NoError(t, pmetricassert.AssertMetrics(assertionFile, *selected), "Metric assertion failed for %s", assertionFile)
 	t.Logf("Metric assertion passed for %d metrics (%s)", selected.MetricCount(), assertionFile)
 }
 
-func selectMetricSetByAssertionWithTimeout(targetMetric string, sink *consumertest.MetricsSink, wantResources, wantMetrics int, assertionFile string, timeout, interval time.Duration) (*pmetric.Metrics, error) {
+func selectMetricSetByAssertionWithTimeout(targetMetric string, sink *consumertest.MetricsSink, wantResources, wantMetrics int, assertionFile string, timeout, interval time.Duration, filter func(*pmetric.Metrics)) (*pmetric.Metrics, error) {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
-		if selected := selectMetricSetByCounts(targetMetric, sink, wantResources, wantMetrics); selected != nil {
+		if selected := selectMetricSetByCounts(targetMetric, sink, wantResources, wantMetrics, filter); selected != nil {
 			if err := pmetricassert.AssertMetrics(assertionFile, *selected); err == nil {
 				return selected, nil
 			}
@@ -182,30 +191,33 @@ func selectMetricSetByAssertionWithTimeout(targetMetric string, sink *consumerte
 		time.Sleep(interval)
 	}
 
-	selected := richestMetricSet(targetMetric, sink)
+	selected := richestMetricSet(targetMetric, sink, filter)
 	if selected == nil {
 		return nil, nil
 	}
 	return selected, pmetricassert.AssertMetrics(assertionFile, *selected)
 }
 
-func selectMetricSetByCountsWithTimeout(targetMetric string, sink *consumertest.MetricsSink, wantResources, wantMetrics int, timeout, interval time.Duration) *pmetric.Metrics {
+func selectMetricSetByCountsWithTimeout(targetMetric string, sink *consumertest.MetricsSink, wantResources, wantMetrics int, timeout, interval time.Duration, filter func(*pmetric.Metrics)) *pmetric.Metrics {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
-		if selected := selectMetricSetByCounts(targetMetric, sink, wantResources, wantMetrics); selected != nil {
+		if selected := selectMetricSetByCounts(targetMetric, sink, wantResources, wantMetrics, filter); selected != nil {
 			return selected
 		}
 		time.Sleep(interval)
 	}
-	return richestMetricSet(targetMetric, sink)
+	return richestMetricSet(targetMetric, sink, filter)
 }
 
-func selectMetricSetByCounts(targetMetric string, sink *consumertest.MetricsSink, wantResources, wantMetrics int) *pmetric.Metrics {
+func selectMetricSetByCounts(targetMetric string, sink *consumertest.MetricsSink, wantResources, wantMetrics int, filter func(*pmetric.Metrics)) *pmetric.Metrics {
 	batches := sink.AllMetrics()
 	for i := len(batches) - 1; i >= 0; i-- {
-		metrics := batches[i]
-		if containsMetric(metrics, targetMetric) && metrics.ResourceMetrics().Len() == wantResources && metrics.MetricCount() == wantMetrics {
-			return &batches[i]
+		if !containsMetric(batches[i], targetMetric) {
+			continue
+		}
+		metrics := filteredMetricSet(batches[i], filter)
+		if metrics.ResourceMetrics().Len() == wantResources && metrics.MetricCount() == wantMetrics {
+			return &metrics
 		}
 	}
 	return nil
@@ -238,10 +250,10 @@ func assertionExpectedCounts(file string) (int, int, error) {
 	return len(doc.Resources), metricCount, nil
 }
 
-func waitForMetricSet(targetMetric string, sink *consumertest.MetricsSink, timeout, interval time.Duration) *pmetric.Metrics {
+func waitForMetricSet(targetMetric string, sink *consumertest.MetricsSink, timeout, interval time.Duration, filter func(*pmetric.Metrics)) *pmetric.Metrics {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
-		if current := richestMetricSet(targetMetric, sink); current != nil {
+		if current := richestMetricSet(targetMetric, sink, filter); current != nil {
 			return current
 		}
 		time.Sleep(interval)
@@ -249,24 +261,31 @@ func waitForMetricSet(targetMetric string, sink *consumertest.MetricsSink, timeo
 	return nil
 }
 
-func richestMetricSet(targetMetric string, metricSink *consumertest.MetricsSink) *pmetric.Metrics {
+func richestMetricSet(targetMetric string, metricSink *consumertest.MetricsSink, filter func(*pmetric.Metrics)) *pmetric.Metrics {
 	metrics := metricSink.AllMetrics()
-	bestIndex := -1
+	var best *pmetric.Metrics
 	bestCount := -1
 	for h := len(metrics) - 1; h >= 0; h-- {
-		m := metrics[h]
-		if !containsMetric(m, targetMetric) {
+		if !containsMetric(metrics[h], targetMetric) {
 			continue
 		}
+		m := filteredMetricSet(metrics[h], filter)
 		if m.MetricCount() > bestCount {
-			bestIndex = h
+			best = &m
 			bestCount = m.MetricCount()
 		}
 	}
-	if bestIndex < 0 {
-		return nil
+	return best
+}
+
+func filteredMetricSet(metrics pmetric.Metrics, filter func(*pmetric.Metrics)) pmetric.Metrics {
+	if filter == nil {
+		return metrics
 	}
-	return &metrics[bestIndex]
+	filtered := pmetric.NewMetrics()
+	metrics.CopyTo(filtered)
+	filter(&filtered)
+	return filtered
 }
 
 // WriteMetricsAssertion writes an assertion snapshot with flexible attribute matchers.
