@@ -877,11 +877,6 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		internal.WithWaitForSnapshotMatch(),
 		internal.WithVolatileAttributes(existsAttrs...),
 		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
-		internal.WithFirstDatapointOnly(
-			"k8s.container.ready",
-			"k8s.container.restarts",
-			"k8s.pod.phase",
-		),
 	)
 }
 

@@ -14,7 +14,7 @@ resources:
         url.scheme: http
       scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     ip_family/exists: true
                   explicit_bounds:
@@ -52,7 +52,7 @@ resources:
               name: kubeproxy_network_programming_duration_seconds
               temporality: cumulative
               type: histogram
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     ip_family/exists: true
                   explicit_bounds:
