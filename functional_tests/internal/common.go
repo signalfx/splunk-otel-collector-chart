@@ -42,7 +42,6 @@ var DefaultNamespace = "default"
 const (
 	AgentLabelSelector           = "component=otel-collector-agent"
 	CollectorContainerName       = "otel-collector"
-	maxHistogramBucketCount      = 32
 	TargetAllocatorContainerName = "targetallocator"
 	TargetAllocatorLabelSelector = "app.kubernetes.io/name=targetallocator"
 	waitTimeout                  = 3 * time.Minute
@@ -156,13 +155,6 @@ func ClearTraceSchemaURLs(td ptrace.Traces) {
 		for j := 0; j < td.ResourceSpans().At(i).ScopeSpans().Len(); j++ {
 			td.ResourceSpans().At(i).ScopeSpans().At(j).SetSchemaUrl("")
 		}
-	}
-}
-
-func MaybeUpdateExpectedMetricsResults(t *testing.T, file string, metrics *pmetric.Metrics) {
-	if shouldUpdateExpectedResults() {
-		require.NoError(t, golden.WriteMetrics(t, file, *metrics))
-		t.Logf("Wrote updated expected metric results to %s", file)
 	}
 }
 

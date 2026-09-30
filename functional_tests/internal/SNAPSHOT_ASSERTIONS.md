@@ -14,9 +14,8 @@ internal.AssertMetricsSnapshot(t, metricsSink, "target.metric", assertionFile,
     internal.WithRegexAttributes(regexAttrs))
 ```
 
-Start with `internal.CommonK8sMetricAssertionExistsAttrs` and
-`internal.CommonK8sMetricAssertionRegexAttrs`, then extend them near the test for
-test-specific attributes.
+Use `internal.CommonK8sMetricAssertionRegexAttrs` for shared Kubernetes
+attribute patterns and add test-specific attributes near the test.
 
 For metrics with additional live series, use `datapoints/include` in the YAML
 snapshot to require the listed series and allow others. Use `datapoints/count`
@@ -36,3 +35,8 @@ an existing snapshot, the helper preserves its `datapoints/include` and
 `datapoints/count` constraints, including selected exact attribute values. It
 checks the refreshed assertion against the selected live batch before replacing
 the file.
+
+For checks that only require metric names across received batches, use
+`internal.AssertMetricNames`. Its optional filter selects which live metrics
+contribute names. The assertion file uses canonical gauge metrics so the test
+does not constrain the live metric type, resource, scope, datapoints, or values.

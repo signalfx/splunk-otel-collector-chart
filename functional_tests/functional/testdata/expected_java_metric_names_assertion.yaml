@@ -1,0 +1,10 @@
+# AssertMetricNames projects observed metric names into canonical gauge metrics.
+version: 1
+signal: metrics
+resources:
+  - scopes:
+      - metrics/include:
+          - name: jvm.memory.used
+            type: gauge
+          - name: jvm.thread.count
+            type: gauge

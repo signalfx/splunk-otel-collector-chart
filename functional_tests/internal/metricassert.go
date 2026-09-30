@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetricassert"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -46,9 +47,6 @@ const (
 	OtelCollectorVersionRegex = `v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?`
 )
 
-// CommonK8sMetricAssertionExistsAttrs holds shared attrs asserted as present-only.
-var CommonK8sMetricAssertionExistsAttrs []string
-
 // CommonK8sMetricAssertionRegexAttrs holds shared Kubernetes attrs with stable value shapes.
 var CommonK8sMetricAssertionRegexAttrs = map[string]string{
 	"container.id":         ContainerIDRegex,
@@ -64,13 +62,6 @@ var CommonK8sMetricAssertionRegexAttrs = map[string]string{
 	"k8s.pod.uid":          K8sUIDRegex,
 	"k8s.replicaset.name":  K8sNameRegex,
 	"k8s.replicaset.uid":   K8sUIDRegex,
-}
-
-// ExtendMetricAssertionAttrs copies a shared attr list before adding test-specific attrs.
-func ExtendMetricAssertionAttrs(base []string, attrs ...string) []string {
-	out := make([]string, 0, len(base)+len(attrs))
-	out = append(out, base...)
-	return append(out, attrs...)
 }
 
 // ExtendMetricAssertionRegexAttrs copies shared regex attrs before adding test-specific attrs.
@@ -141,6 +132,48 @@ func WithDatapointAttributesAsExistsExcept(exactAttrs ...string) MetricsAssertio
 			cfg.exactDatapointAttrs[attr] = struct{}{}
 		}
 	}
+}
+
+// MetricNameFilter optionally limits which observed metrics contribute names.
+type MetricNameFilter func(pcommon.Map, pmetric.Metric) bool
+
+// AssertMetricNames checks names observed across every batch in the sink.
+// Projecting to one canonical resource and scope preserves name-only checks:
+// resource, scope, metric type, datapoints, and values remain unconstrained.
+// An optional filter can restrict which observed metrics contribute names.
+func AssertMetricNames(t *testing.T, sink *consumertest.MetricsSink, assertionFile string, timeout, interval time.Duration, filters ...MetricNameFilter) {
+	t.Helper()
+	require.LessOrEqual(t, len(filters), 1)
+	var filter MetricNameFilter
+	if len(filters) == 1 {
+		filter = filters[0]
+	}
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		names := make(map[string]struct{})
+		for _, batch := range sink.AllMetrics() {
+			for i := 0; i < batch.ResourceMetrics().Len(); i++ {
+				rm := batch.ResourceMetrics().At(i)
+				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+					metrics := rm.ScopeMetrics().At(j).Metrics()
+					for k := 0; k < metrics.Len(); k++ {
+						metric := metrics.At(k)
+						if filter == nil || filter(rm.Resource().Attributes(), metric) {
+							names[metric.Name()] = struct{}{}
+						}
+					}
+				}
+			}
+		}
+
+		projected := pmetric.NewMetrics()
+		metrics := projected.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics()
+		for name := range names {
+			metric := metrics.AppendEmpty()
+			metric.SetName(name)
+			metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(0)
+		}
+		assert.NoError(tt, pmetricassert.AssertMetrics(assertionFile, projected))
+	}, timeout, interval, "Metric name assertion failed for %s", assertionFile)
 }
 
 // AssertMetricsSnapshot selects a complete live batch and checks its assertion.

@@ -73,7 +73,7 @@ func Test_Discovery(t *testing.T) {
 				internal.ChartUninstall(t, testKubeConfig)
 			})
 			assertRedisEntities(t, eventsSink)
-			assertRedisMetrics(t, metricsSink)
+			internal.AssertMetricNames(t, metricsSink, "testdata/expected_redis_metric_names_assertion.yaml", 5*time.Minute, 3*time.Second)
 		})
 	}
 }
@@ -112,55 +112,6 @@ func assertAttr(t *testing.T, attrs pcommon.Map, name string, val any) {
 	if ok {
 		assert.Equal(t, val, entityType.AsRaw())
 	}
-}
-
-func assertRedisMetrics(t *testing.T, sink *consumertest.MetricsSink) {
-	expectedRedisMetrics := []string{
-		"redis.clients.blocked",
-		"redis.clients.connected",
-		"redis.clients.max_input_buffer",
-		"redis.clients.max_output_buffer",
-		"redis.commands",
-		"redis.commands.processed",
-		"redis.connections.received",
-		"redis.connections.rejected",
-		"redis.cpu.time",
-		"redis.keys.evicted",
-		"redis.keys.expired",
-		"redis.keyspace.hits",
-		"redis.keyspace.misses",
-		"redis.latest_fork",
-		"redis.memory.fragmentation_ratio",
-		"redis.memory.lua",
-		"redis.memory.peak",
-		"redis.memory.rss",
-		"redis.memory.used",
-		"redis.net.input",
-		"redis.net.output",
-		"redis.rdb.changes_since_last_save",
-		"redis.replication.backlog_first_byte_offset",
-		"redis.replication.offset",
-		"redis.slaves.connected",
-		"redis.uptime",
-	}
-	require.EventuallyWithT(t, func(tt *assert.CollectT) {
-		foundMetrics := make(map[string]bool)
-		for _, m := range sink.AllMetrics() {
-			for i := 0; i < m.ResourceMetrics().Len(); i++ {
-				rm := m.ResourceMetrics().At(i)
-				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
-					sm := rm.ScopeMetrics().At(j)
-					for k := 0; k < sm.Metrics().Len(); k++ {
-						foundMetrics[sm.Metrics().At(k).Name()] = true
-					}
-				}
-			}
-		}
-
-		for _, rm := range expectedRedisMetrics {
-			assert.Contains(tt, foundMetrics, rm)
-		}
-	}, 5*time.Minute, 3*time.Second, "Missing expected redis metrics")
 }
 
 func installRedisDeployment(t *testing.T, kubeConfig string) {

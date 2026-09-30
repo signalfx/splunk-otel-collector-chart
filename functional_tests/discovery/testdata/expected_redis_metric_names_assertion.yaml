@@ -1,0 +1,58 @@
+# AssertMetricNames projects observed metric names into canonical gauge metrics.
+version: 1
+signal: metrics
+resources:
+  - scopes:
+      - metrics/include:
+          - name: redis.clients.blocked
+            type: gauge
+          - name: redis.clients.connected
+            type: gauge
+          - name: redis.clients.max_input_buffer
+            type: gauge
+          - name: redis.clients.max_output_buffer
+            type: gauge
+          - name: redis.commands
+            type: gauge
+          - name: redis.commands.processed
+            type: gauge
+          - name: redis.connections.received
+            type: gauge
+          - name: redis.connections.rejected
+            type: gauge
+          - name: redis.cpu.time
+            type: gauge
+          - name: redis.keys.evicted
+            type: gauge
+          - name: redis.keys.expired
+            type: gauge
+          - name: redis.keyspace.hits
+            type: gauge
+          - name: redis.keyspace.misses
+            type: gauge
+          - name: redis.latest_fork
+            type: gauge
+          - name: redis.memory.fragmentation_ratio
+            type: gauge
+          - name: redis.memory.lua
+            type: gauge
+          - name: redis.memory.peak
+            type: gauge
+          - name: redis.memory.rss
+            type: gauge
+          - name: redis.memory.used
+            type: gauge
+          - name: redis.net.input
+            type: gauge
+          - name: redis.net.output
+            type: gauge
+          - name: redis.rdb.changes_since_last_save
+            type: gauge
+          - name: redis.replication.backlog_first_byte_offset
+            type: gauge
+          - name: redis.replication.offset
+            type: gauge
+          - name: redis.slaves.connected
+            type: gauge
+          - name: redis.uptime
+            type: gauge
