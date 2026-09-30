@@ -56,25 +56,6 @@ func RetainNumberMetricDatapointsForPod(metrics *pmetric.Metrics, podNamePrefix 
 	}
 }
 
-// GetMetricNames returns a slice of unique metric names from the input metrics.
-func GetMetricNames(metrics *pmetric.Metrics) []string {
-	names := make(map[string]struct{})
-	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
-		for j := 0; j < metrics.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-			for k := 0; k < metrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().Len(); k++ {
-				metric := metrics.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().At(k)
-				names[metric.Name()] = struct{}{}
-			}
-		}
-	}
-
-	uniqueNames := make([]string, 0, len(names))
-	for name := range names {
-		uniqueNames = append(uniqueNames, name)
-	}
-	return uniqueNames
-}
-
 // GetMetric returns metric with given name. Boolean signifies whether metric name was found.
 func GetMetric(metrics *pmetric.Metrics, name string) (pmetric.Metric, bool) {
 	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
