@@ -20,7 +20,6 @@ const (
 	kubectlApply    = "apply"
 	kubectlDelete   = "delete"
 	testDir         = "testdata"
-	testMetricName  = "cpu.num_processors"
 	testPodManifest = "standalone-collector-pod.yaml"
 )
 
@@ -70,23 +69,7 @@ func Test_GatewayOnly(t *testing.T) {
 				internal.ChartUninstall(t, testKubeConfig)
 			})
 
-			require.Eventually(t, func() bool {
-				foundExpectedMetric := false
-				for _, m := range metricSink.AllMetrics() {
-					for i := 0; i < m.ResourceMetrics().Len(); i++ {
-						rm := m.ResourceMetrics().At(i)
-						for j := 0; j < rm.ScopeMetrics().Len(); j++ {
-							sm := rm.ScopeMetrics().At(j)
-							for k := 0; k < sm.Metrics().Len(); k++ {
-								if sm.Metrics().At(k).Name() == testMetricName {
-									foundExpectedMetric = true
-								}
-							}
-						}
-					}
-				}
-				return foundExpectedMetric
-			}, 1*time.Minute, 1*time.Second, "failed to find expected metric %s", testMetricName)
+			internal.AssertMetricNames(t, metricSink, filepath.Join(testDir, "expected_cpu_metric_names_assertion.yaml"), time.Minute, time.Second)
 		})
 	}
 }

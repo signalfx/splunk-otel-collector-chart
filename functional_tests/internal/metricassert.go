@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetricassert"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -141,6 +142,36 @@ func WithDatapointAttributesAsExistsExcept(exactAttrs ...string) MetricsAssertio
 			cfg.exactDatapointAttrs[attr] = struct{}{}
 		}
 	}
+}
+
+// AssertMetricNames checks names observed across every batch in the sink.
+// Projecting to one canonical resource and scope preserves name-only checks:
+// resource, scope, metric type, datapoints, and values remain unconstrained.
+func AssertMetricNames(t *testing.T, sink *consumertest.MetricsSink, assertionFile string, timeout, interval time.Duration) {
+	t.Helper()
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		names := make(map[string]struct{})
+		for _, batch := range sink.AllMetrics() {
+			for i := 0; i < batch.ResourceMetrics().Len(); i++ {
+				rm := batch.ResourceMetrics().At(i)
+				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+					metrics := rm.ScopeMetrics().At(j).Metrics()
+					for k := 0; k < metrics.Len(); k++ {
+						names[metrics.At(k).Name()] = struct{}{}
+					}
+				}
+			}
+		}
+
+		projected := pmetric.NewMetrics()
+		metrics := projected.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics()
+		for name := range names {
+			metric := metrics.AppendEmpty()
+			metric.SetName(name)
+			metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(0)
+		}
+		assert.NoError(tt, pmetricassert.AssertMetrics(assertionFile, projected))
+	}, timeout, interval, "Metric name assertion failed for %s", assertionFile)
 }
 
 // AssertMetricsSnapshot selects a complete live batch and checks its assertion.
