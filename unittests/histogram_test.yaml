@@ -1,0 +1,53 @@
+suite: splunk-otel-collector.histograms
+values:
+  - ./values/basic.yaml
+templates:
+  - configmap-agent.yaml
+  - configmap-cluster-receiver.yaml
+
+tests:
+  - it: limits agent histogram buckets before exporting
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: true
+    template: configmap-agent.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "transform/limit_histogram_buckets:\\n\\s+error_mode: ignore\\n\\s+metric_statements:\\n\\s+- context: datapoint\\n\\s+statements:\\n\\s+- merge_histogram_buckets\\(31, method=\"limit_buckets\"\\)"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics/histograms:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- transform/limit_histogram_buckets\\n\\s+receivers:"
+
+  - it: does not render the agent histogram bucket transform when disabled
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: false
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "merge_histogram_buckets"
+
+  - it: limits cluster receiver histogram buckets before exporting
+    set:
+      distribution: eks
+      featureGates.enableEKSApiServerMetrics: true
+      splunkObservability.metricsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "transform/limit_histogram_buckets:\\n\\s+error_mode: ignore\\n\\s+metric_statements:\\n\\s+- context: datapoint\\n\\s+statements:\\n\\s+- merge_histogram_buckets\\(31, method=\"limit_buckets\"\\)"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics/histograms:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- transform/limit_histogram_buckets\\n\\s+receivers:"
+
+  - it: does not render the cluster receiver histogram bucket transform outside EKS
+    set:
+      distribution: gke
+      featureGates.enableEKSApiServerMetrics: true
+      splunkObservability.metricsEnabled: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "merge_histogram_buckets"

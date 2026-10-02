@@ -152,6 +152,15 @@ processors:
       - set(resource.attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
         where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
 
+  {{- if and (and (hasPrefix "eks" .Values.distribution) .Values.featureGates.enableEKSApiServerMetrics) (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+  transform/limit_histogram_buckets:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - merge_histogram_buckets(31, method="limit_buckets")
+  {{- end }}
+
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
   resource/add_event_k8s:
     attributes:
@@ -536,6 +545,7 @@ service:
         - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
+        - transform/limit_histogram_buckets
       exporters:
         - signalfx/histograms
     {{- end }}
