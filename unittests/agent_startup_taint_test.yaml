@@ -1,0 +1,163 @@
+suite: Agent startup taint
+templates:
+  - "daemonset.yaml"
+  - "clusterRole.yaml"
+  - "configmap-agent.yaml"
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+
+tests:
+  - it: should not tolerate the Splunk agent-not-ready startup taint by default
+    template: daemonset.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.tolerations
+          content:
+            key: splunk.net/agent-not-ready
+            operator: Exists
+
+  - it: should not add the taint-removal init container by default
+    template: daemonset.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            name: remove-not-ready-taint
+          any: true
+
+  - it: should not grant node patch RBAC by default
+    template: clusterRole.yaml
+    asserts:
+      - notContains:
+          path: rules
+          content:
+            resources:
+              - nodes
+            verbs:
+              - patch
+          any: true
+
+  - it: should tolerate the startup taint when removal is enabled
+    template: daemonset.yaml
+    set:
+      agent:
+        removeNotReadyTaint:
+          enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: splunk.net/agent-not-ready
+            operator: Exists
+
+  - it: should keep user tolerations when removal is enabled
+    template: daemonset.yaml
+    set:
+      agent:
+        removeNotReadyTaint:
+          enabled: true
+      tolerations:
+        - key: custom.example/taint
+          operator: Exists
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: splunk.net/agent-not-ready
+            operator: Exists
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: custom.example/taint
+            operator: Exists
+
+  - it: should add the taint-removal init container when enabled
+    template: daemonset.yaml
+    set:
+      agent:
+        removeNotReadyTaint:
+          enabled: true
+          key: splunk.net/agent-not-ready
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].image
+          value: docker.io/bitnami/kubectl:1.32.3
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].env[?(@.name=="K8S_NODE_NAME")].valueFrom.fieldRef.fieldPath
+          value: spec.nodeName
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].command[2]
+          pattern: kubectl taint node "\$\{K8S_NODE_NAME\}"
+
+  - it: should use a custom taint key in the toleration and init command
+    template: daemonset.yaml
+    set:
+      agent:
+        removeNotReadyTaint:
+          enabled: true
+          key: custom.example/agent-not-ready
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: custom.example/agent-not-ready
+            operator: Exists
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].command[2]
+          pattern: KEY="custom.example/agent-not-ready"
+
+  - it: should still remove the startup taint when skipInitContainers is true
+    template: daemonset.yaml
+    set:
+      agent:
+        skipInitContainers: true
+        removeNotReadyTaint:
+          enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: splunk.net/agent-not-ready
+            operator: Exists
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].name
+          value: remove-not-ready-taint
+
+  - it: should not add the startup taint on Windows nodes
+    template: daemonset.yaml
+    set:
+      isWindows: true
+      agent:
+        removeNotReadyTaint:
+          enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.tolerations
+          content:
+            key: splunk.net/agent-not-ready
+            operator: Exists
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            name: remove-not-ready-taint
+          any: true
+
+  - it: should grant node patch RBAC when taint removal is enabled
+    template: clusterRole.yaml
+    set:
+      agent:
+        removeNotReadyTaint:
+          enabled: true
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - ""
+            resources:
+              - nodes
+            verbs:
+              - patch

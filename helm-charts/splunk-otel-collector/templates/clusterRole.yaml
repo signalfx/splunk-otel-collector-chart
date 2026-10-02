@@ -94,7 +94,7 @@ rules:
   - get
   - list
   - watch
-{{- if eq .Values.distribution "eks/fargate" }}
+{{- if or .Values.agent.removeNotReadyTaint.enabled (eq .Values.distribution "eks/fargate") }}
 - apiGroups:
     - ""
   resources:

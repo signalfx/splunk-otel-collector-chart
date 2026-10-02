@@ -75,13 +75,62 @@ spec:
       affinity:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- $removeNotReadyTaint := and .Values.agent.removeNotReadyTaint.enabled (not .Values.isWindows) }}
+      {{- if or .Values.tolerations $removeNotReadyTaint }}
       tolerations:
+        {{- if $removeNotReadyTaint }}
+        - key: {{ .Values.agent.removeNotReadyTaint.key | quote }}
+          operator: Exists
+        {{- end }}
+        {{- with .Values.tolerations }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
-      {{- if and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers) }}
+      {{- $patchLogDirs := and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers) .Values.agent.securityContext.runAsUser .Values.agent.securityContext.runAsGroup }}
+      {{- if or $removeNotReadyTaint (and (eq (include "splunk-otel-collector.logsEnabled" .) "true") (not .Values.isWindows) (not .Values.agent.skipInitContainers)) }}
       initContainers:
-        {{- if and .Values.agent.securityContext.runAsUser .Values.agent.securityContext.runAsGroup }}
+        {{- if $removeNotReadyTaint }}
+        - name: remove-not-ready-taint
+          image: {{ template "splunk-otel-collector.image.initRemoveNotReadyTaint" . }}
+          imagePullPolicy: {{ .Values.image.initRemoveNotReadyTaint.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              KEY="{{ .Values.agent.removeNotReadyTaint.key }}"
+              i=0
+              while [ "$i" -lt 12 ]; do
+                if out=$(kubectl taint node "${K8S_NODE_NAME}" "${KEY}-" 2>&1); then
+                  exit 0
+                fi
+                case "$out" in
+                  *"not found"*) exit 0 ;;
+                esac
+                i=$((i + 1))
+                sleep 5
+              done
+              echo "$out" >&2
+              exit 1
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          {{- if .Values.featureGates.explicitMountServiceAccountToken }}
+          volumeMounts:
+            - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              name: serviceaccount-token
+              readOnly: true
+          {{- end }}
+        {{- end }}
+        {{- if $patchLogDirs }}
         - name: patch-log-dirs
           image: {{ template "splunk-otel-collector.image.initPatchLogDirs" . }}
           imagePullPolicy: {{ .Values.image.initPatchLogDirs.pullPolicy }}
