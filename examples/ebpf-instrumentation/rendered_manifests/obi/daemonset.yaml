@@ -6,7 +6,7 @@ metadata:
   name: default-obi
   namespace: default
   labels:
-    helm.sh/chart: obi-0.14.1
+    helm.sh/chart: obi-0.14.2
     app.kubernetes.io/name: obi
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "v0.13.0"
@@ -23,10 +23,10 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: b711438d7663b76f665bba88d1770682c2fbf590bad740b392a4f26c9cc60c9a
+        checksum/config: 488fb129f43255869735acd272adf6e84e4597808aaa4921f8537e23e70a5fce
         
       labels:
-        helm.sh/chart: obi-0.14.1
+        helm.sh/chart: obi-0.14.2
         app.kubernetes.io/name: obi
         app.kubernetes.io/instance: default
         app.kubernetes.io/version: "v0.13.0"
