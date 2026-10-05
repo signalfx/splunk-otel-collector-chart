@@ -158,7 +158,7 @@ processors:
     metric_statements:
       - context: datapoint
         statements:
-          - merge_histogram_buckets(31, method="limit_buckets")
+          - merge_histogram_buckets(32, method="limit_buckets")
   {{- end }}
 
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}

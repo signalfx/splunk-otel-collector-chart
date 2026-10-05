@@ -13,7 +13,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "transform/limit_histogram_buckets:\\n\\s+error_mode: ignore\\n\\s+metric_statements:\\n\\s+- context: datapoint\\n\\s+statements:\\n\\s+- merge_histogram_buckets\\(31, method=\"limit_buckets\"\\)"
+          pattern: "transform/limit_histogram_buckets:\\n\\s+error_mode: ignore\\n\\s+metric_statements:\\n\\s+- context: datapoint\\n\\s+statements:\\n\\s+- merge_histogram_buckets\\(32, method=\"limit_buckets\"\\)"
       - matchRegex:
           path: data["relay"]
           pattern: "metrics/histograms:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- transform/limit_histogram_buckets\\n\\s+receivers:"
@@ -36,7 +36,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "transform/limit_histogram_buckets:\\n\\s+error_mode: ignore\\n\\s+metric_statements:\\n\\s+- context: datapoint\\n\\s+statements:\\n\\s+- merge_histogram_buckets\\(31, method=\"limit_buckets\"\\)"
+          pattern: "transform/limit_histogram_buckets:\\n\\s+error_mode: ignore\\n\\s+metric_statements:\\n\\s+- context: datapoint\\n\\s+statements:\\n\\s+- merge_histogram_buckets\\(32, method=\"limit_buckets\"\\)"
       - matchRegex:
           path: data["relay"]
           pattern: "metrics/histograms:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- transform/limit_histogram_buckets\\n\\s+receivers:"
