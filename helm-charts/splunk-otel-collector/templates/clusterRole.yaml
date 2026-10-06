@@ -94,7 +94,7 @@ rules:
   - get
   - list
   - watch
-{{- if or .Values.agent.removeNotReadyTaint.enabled (eq .Values.distribution "eks/fargate") }}
+{{- if or (and .Values.agent.removeNotReadyTaint.enabled (not .Values.isWindows)) (eq .Values.distribution "eks/fargate") }}
 - apiGroups:
     - ""
   resources:

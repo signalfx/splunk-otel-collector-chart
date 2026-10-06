@@ -18,6 +18,7 @@ tests:
           content:
             key: splunk.net/agent-not-ready
             operator: Exists
+            effect: NoSchedule
 
   - it: should not add the taint-removal init container by default
     template: daemonset.yaml
@@ -52,6 +53,7 @@ tests:
           content:
             key: splunk.net/agent-not-ready
             operator: Exists
+            effect: NoSchedule
 
   - it: should keep user tolerations when removal is enabled
     template: daemonset.yaml
@@ -68,6 +70,7 @@ tests:
           content:
             key: splunk.net/agent-not-ready
             operator: Exists
+            effect: NoSchedule
       - contains:
           path: spec.template.spec.tolerations
           content:
@@ -90,7 +93,7 @@ tests:
           value: spec.nodeName
       - matchRegex:
           path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].command[2]
-          pattern: kubectl taint node "\$\{K8S_NODE_NAME\}"
+          pattern: kubectl taint node "\$\{K8S_NODE_NAME\}" "\$\{KEY\}:NoSchedule-"
 
   - it: should use a custom taint key in the toleration and init command
     template: daemonset.yaml
@@ -105,6 +108,7 @@ tests:
           content:
             key: custom.example/agent-not-ready
             operator: Exists
+            effect: NoSchedule
       - matchRegex:
           path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].command[2]
           pattern: KEY="custom.example/agent-not-ready"
@@ -122,6 +126,7 @@ tests:
           content:
             key: splunk.net/agent-not-ready
             operator: Exists
+            effect: NoSchedule
       - equal:
           path: spec.template.spec.initContainers[?(@.name=="remove-not-ready-taint")].name
           value: remove-not-ready-taint
@@ -139,10 +144,28 @@ tests:
           content:
             key: splunk.net/agent-not-ready
             operator: Exists
+            effect: NoSchedule
       - notContains:
           path: spec.template.spec.initContainers
           content:
             name: remove-not-ready-taint
+          any: true
+
+  - it: should not grant node patch RBAC on Windows
+    template: clusterRole.yaml
+    set:
+      isWindows: true
+      agent:
+        removeNotReadyTaint:
+          enabled: true
+    asserts:
+      - notContains:
+          path: rules
+          content:
+            resources:
+              - nodes
+            verbs:
+              - patch
           any: true
 
   - it: should grant node patch RBAC when taint removal is enabled

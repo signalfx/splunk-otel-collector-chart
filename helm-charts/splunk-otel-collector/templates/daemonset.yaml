@@ -81,6 +81,7 @@ spec:
         {{- if $removeNotReadyTaint }}
         - key: {{ .Values.agent.removeNotReadyTaint.key | quote }}
           operator: Exists
+          effect: NoSchedule
         {{- end }}
         {{- with .Values.tolerations }}
         {{- toYaml . | nindent 8 }}
@@ -100,7 +101,7 @@ spec:
               KEY="{{ .Values.agent.removeNotReadyTaint.key }}"
               i=0
               while [ "$i" -lt 12 ]; do
-                if out=$(kubectl taint node "${K8S_NODE_NAME}" "${KEY}-" 2>&1); then
+                if out=$(kubectl taint node "${K8S_NODE_NAME}" "${KEY}:NoSchedule-" 2>&1); then
                   exit 0
                 fi
                 case "$out" in
