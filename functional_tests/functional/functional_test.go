@@ -8,13 +8,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
@@ -79,8 +77,6 @@ const (
 	roleClusterReceiver    collectorRole = "cluster_receiver"
 	roleClusterReceiverK8s collectorRole = "cluster_receiver_k8s_cluster"
 )
-
-var archRe = regexp.MustCompile("-amd64$|-arm64$|-ppc64le$")
 
 var globalSinks *sinks
 
@@ -831,57 +827,13 @@ func findResourceByAttr(t *testing.T, filePath string, attrKey string, skipKeys 
 	return pcommon.NewMap()
 }
 
-func containerImageShorten(value string) string {
-	return archRe.ReplaceAllString(value[(strings.LastIndex(value, "/")+1):], "")
-}
-
-func shortenNames(value string) string {
-	if strings.HasPrefix(value, "kube-proxy") {
-		return "kube-proxy"
-	}
-	if strings.HasPrefix(value, "local-path-provisioner") {
-		return "local-path-provisioner"
-	}
-	if strings.HasPrefix(value, "kindnet") {
-		return "kindnet"
-	}
-	if strings.HasPrefix(value, "coredns") {
-		return "coredns"
-	}
-	if strings.HasPrefix(value, "otelcol") {
-		return "otelcol"
-	}
-	if strings.HasPrefix(value, kindAgentPodNamePrefix) {
-		return kindAgentPodNamePrefix
-	}
-	if strings.HasPrefix(value, "sock-splunk-otel-collector-k8s-cluster-receiver") {
-		return "sock-splunk-otel-collector-k8s-cluster-receiver"
-	}
-	if strings.HasPrefix(value, "sock-operator") {
-		return "sock-operator"
-	}
-	if strings.HasPrefix(value, "nodejs-test") {
-		return "nodejs-test"
-	}
-	return value
-}
-
 func testK8sClusterReceiverMetrics(t *testing.T) {
 	assertionFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver_assertion.yaml")
-	existsAttrs := internal.ExtendMetricAssertionAttrs(
-		internal.CommonK8sMetricAssertionExistsAttrs,
-		"k8s.container.status.last_terminated_reason",
-	)
 	internal.AssertMetricsSnapshot(t, globalSinks.k8sclusterReceiverMetricsConsumer,
 		"k8s.pod.phase", assertionFile, 3*time.Minute, 10*time.Second,
 		internal.WithWaitForSnapshotMatch(),
-		internal.WithVolatileAttributes(existsAttrs...),
+		internal.WithVolatileAttributes("k8s.container.status.last_terminated_reason"),
 		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
-		internal.WithFirstDatapointOnly(
-			"k8s.container.ready",
-			"k8s.container.restarts",
-			"k8s.pod.phase",
-		),
 	)
 }
 
@@ -1083,220 +1035,57 @@ func generateRequiredTelemetry(t *testing.T) {
 }
 
 func testAgentMetrics(t *testing.T) {
-	agentMetricsConsumer := globalSinks.agentMetricsConsumer
-
 	generateRequiredTelemetry(t)
 
 	t.Run("internal metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_internal_metrics.yaml", "otelcol_processor_memory_limiter_accepted_log_records", "")
+		testAgentMetricsAssertion(t, "expected_internal_metrics_assertion.yaml",
+			"otelcol_processor_memory_limiter_accepted_log_records", "", nil)
 	})
-
 	t.Run("kubelet_stats metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(
-			t,
-			agentMetricsConsumer,
-			"expected_kubelet_stats_metrics.yaml",
-			"container.memory.usage",
-			kindAgentPodNamePrefix,
-			// Kubelet CPU stats are not emitted consistently across supported Kubernetes versions.
-			"container.cpu.usage",
-		)
+		// Kubelet CPU stats are not emitted consistently across supported Kubernetes versions.
+		testAgentMetricsAssertion(t, "expected_kubelet_stats_metrics_assertion.yaml",
+			"container.memory.usage", kindAgentPodNamePrefix, []string{"container.cpu.usage"})
 	})
-
 	t.Run("host_metrics", func(t *testing.T) {
-		testAgentMetricsTemplate(t, agentMetricsConsumer, "expected_host_metrics.yaml", "system.memory.usage", "")
+		testAgentMetricsAssertion(t, "expected_host_metrics_assertion.yaml",
+			"system.memory.usage", "", nil)
 	})
 }
 
-// testAgentMetricsTemplate tests metrics using template matching with target metric detection
-func testAgentMetricsTemplate(t *testing.T, metricsSink *consumertest.MetricsSink, expectedFileName string, targetMetric string, podNamePrefix string, flakyMetricNames ...string) {
-	expectedMetricsFile := filepath.Join(testDir, expectedValuesDir, expectedFileName)
-	expectedMetrics, err := golden.ReadMetrics(expectedMetricsFile)
-	require.NoError(t, err, "Failed to read expected metrics from %s", expectedFileName)
-
-	selectedMetrics, exactMatch := internal.SelectMetricSetWithTimeout(t, expectedMetrics, targetMetric, metricsSink, 3*time.Minute, 10*time.Second)
-	require.NotNil(t, selectedMetrics, "No metrics batch found containing target metric: %s", targetMetric)
-
-	testName := t.Name()
-	if lastSlash := strings.LastIndex(testName, "/"); lastSlash != -1 {
-		testName = testName[lastSlash+1:]
-	}
-
-	comparisonExpected := pmetric.NewMetrics()
-	expectedMetrics.CopyTo(comparisonExpected)
-	comparisonActual := pmetric.NewMetrics()
-	selectedMetrics.CopyTo(comparisonActual)
-	internal.RemoveFlakyMetrics(&comparisonExpected, flakyMetricNames)
-	internal.RemoveFlakyMetrics(&comparisonActual, flakyMetricNames)
-
-	var podPrefixes []string
-	if podNamePrefix != "" {
-		podPrefixes = []string{podNamePrefix}
-	}
-	err = tryMetricsComparison(comparisonExpected, comparisonActual, podPrefixes...)
-	if err != nil {
-		if !exactMatch {
-			t.Logf("No exact count match: expected %d metrics, selected payload has %d", expectedMetrics.MetricCount(), selectedMetrics.MetricCount())
-		}
-		t.Logf("Metric comparison failed for %s: %v", testName, err)
-		internal.MaybeUpdateExpectedMetricsResults(t, expectedMetricsFile, selectedMetrics)
-		require.NoError(t, err, "Metric comparison failed for %s test. Error: %v", testName, err)
-	}
-
-	t.Logf("Metric comparison passed for %d metrics in %s test", selectedMetrics.MetricCount(), testName)
+// These values were ignored by the previous metric comparison. Their presence
+// remains required by the assertion snapshots.
+var agentMetricVolatileAttrs = []string{
+	"container.id", "k8s.daemonset.uid", "k8s.deployment.uid", "k8s.pod.uid",
+	"k8s.pod.name", "k8s.container.name", "pod_identifier", "otelcol_signal",
+	"k8s.replicaset.uid", "k8s.replicaset.name", "k8s.namespace.name",
+	"k8s.namespace.uid", "k8s.node.name", "container.image.name",
+	"container.image.tag", "k8s.node.uid", "net.host.name", "processor",
+	"service.instance.id", "service.version", "receiver", "transport",
+	"exporter", "server.address", "com.splunk.sourcetype", "device",
 }
 
-// preparePodMetricsComparison keeps one stable pod from kubeletstats payloads, whose pod set is timing-dependent.
-func preparePodMetricsComparison(expected, actual pmetric.Metrics, podNamePrefix string) (pmetric.Metrics, pmetric.Metrics) {
-	normalizedExpected := pmetric.NewMetrics()
-	normalizedActual := pmetric.NewMetrics()
-	expected.CopyTo(normalizedExpected)
-	actual.CopyTo(normalizedActual)
-	internal.RetainNumberMetricDatapointsForPod(&normalizedExpected, podNamePrefix)
-	internal.RetainNumberMetricDatapointsForPod(&normalizedActual, podNamePrefix)
-	return normalizedExpected, normalizedActual
-}
-
-// tryMetricsComparison performs metric comparison using pmetrictest.CompareMetrics and returns error.
-// When podNamePrefix is provided, it compares every number datapoint retained for that pod.
-func tryMetricsComparison(expected pmetric.Metrics, actual pmetric.Metrics, podNamePrefix ...string) error {
-	compareAllDatapoints := len(podNamePrefix) > 0
-	if compareAllDatapoints {
-		expected, actual = preparePodMetricsComparison(expected, actual, podNamePrefix[0])
+func testAgentMetricsAssertion(t *testing.T, assertionFileName, targetMetric, podNamePrefix string, flakyMetricNames []string) {
+	assertionFile := filepath.Join(testDir, expectedValuesDir, assertionFileName)
+	options := []internal.MetricsAssertionOption{
+		internal.WithWaitForSnapshotMatch(),
+		internal.WithVolatileAttributes(agentMetricVolatileAttrs...),
+		internal.WithScopeVersionRegex(".*"),
 	}
-
-	replaceWithStar := func(string) string { return "*" }
-	metricNames := internal.GetMetricNames(&expected)
-
-	options := []pmetrictest.CompareMetricsOption{
-		pmetrictest.IgnoreTimestamp(),
-		pmetrictest.IgnoreStartTimestamp(),
-		pmetrictest.IgnoreMetricAttributeValue("container.id", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.daemonset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.deployment.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.uid"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.pod.name"),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.container.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("pod_identifier", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("otelcol_signal", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.replicaset.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.namespace.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("container.image.tag", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("k8s.node.uid", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("net.host.name", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("processor", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("service.instance.id"),
-		pmetrictest.IgnoreMetricAttributeValue("service.version", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("receiver", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("transport", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("exporter", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("server.address", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("com.splunk.sourcetype", metricNames...),
-		pmetrictest.IgnoreMetricAttributeValue("device", metricNames...),
-		pmetrictest.IgnoreMetricValues(),
-		pmetrictest.ChangeResourceAttributeValue("k8s.container.name", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.pod.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.name", shortenNames),
-		pmetrictest.ChangeResourceAttributeValue("k8s.deployment.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.pod.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.replicaset.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.id", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.image.tag", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.node.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.namespace.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("k8s.daemonset.uid", replaceWithStar),
-		pmetrictest.ChangeResourceAttributeValue("container.image.name", containerImageShorten),
-		pmetrictest.ChangeResourceAttributeValue("host.name", replaceWithStar),
-		pmetrictest.IgnoreScopeVersion(),
-		pmetrictest.IgnoreResourceMetricsOrder(),
-		pmetrictest.IgnoreMetricsOrder(),
-		pmetrictest.IgnoreScopeMetricsOrder(),
-		pmetrictest.IgnoreMetricDataPointsOrder(),
-		pmetrictest.IgnoreDatapointAttributesOrder(),
+	if podNamePrefix != "" || len(flakyMetricNames) > 0 {
+		options = append(options, internal.WithMetricsFilter(func(metrics *pmetric.Metrics) {
+			internal.RemoveFlakyMetrics(metrics, flakyMetricNames)
+			if podNamePrefix != "" {
+				internal.RetainNumberMetricDatapointsForPod(metrics, podNamePrefix)
+			}
+		}))
 	}
-	if !compareAllDatapoints {
-		options = append(options, pmetrictest.IgnoreSubsequentDataPoints(metricNames...))
-	}
-
-	return pmetrictest.CompareMetrics(expected, actual, options...)
+	internal.AssertMetricsSnapshot(t, globalSinks.agentMetricsConsumer,
+		targetMetric, assertionFile, 3*time.Minute, 10*time.Second, options...)
 }
 
 func testHECMetrics(t *testing.T) {
-	hecMetricsConsumer := globalSinks.hecMetricsConsumer
-
-	metricNames := []string{
-		"container.cpu.time",
-		"container.filesystem.available",
-		"container.filesystem.capacity",
-		"container.filesystem.usage",
-		"container.memory.available",
-		"container.memory.major_page_faults",
-		"container.memory.page_faults",
-		"container.memory.rss",
-		"container.memory.usage",
-		"container.memory.working_set",
-		"k8s.node.network.errors",
-		"k8s.node.network.io",
-		"k8s.pod.cpu.time",
-		"k8s.pod.filesystem.available",
-		"k8s.pod.filesystem.capacity",
-		"k8s.pod.filesystem.usage",
-		"k8s.pod.memory.available",
-		"k8s.pod.memory.major_page_faults",
-		"k8s.pod.memory.page_faults",
-		"k8s.pod.memory.rss",
-		"k8s.pod.memory.usage",
-		"k8s.pod.memory.working_set",
-		"k8s.pod.network.errors",
-		"k8s.pod.network.io",
-		"otelcol_exporter_queue_size",
-		"otelcol_exporter_sent_metric_points",
-		"otelcol_exporter_sent_log_records",
-		"otelcol.k8s.watcher.namespace.added",
-		"otelcol.k8s.watcher.pod.added",
-		"otelcol.k8s.watcher.pod_cache.size",
-		"otelcol.k8s.watcher.pod.updated",
-		"otelcol_processor_memory_limiter_accepted_log_records",
-		"otelcol_process_cpu_seconds",
-		"otelcol_process_memory_rss",
-		"otelcol_process_runtime_heap_alloc_bytes",
-		"otelcol_process_runtime_total_alloc_bytes",
-		"otelcol_process_runtime_total_sys_memory_bytes",
-		"otelcol_process_uptime",
-		"otelcol_processor_memory_limiter_accepted_metric_points",
-		"otelcol_receiver_accepted_metric_points",
-		"otelcol_receiver_refused_metric_points",
-		"otelcol_scraper_errored_metric_points",
-		"otelcol_scraper_scraped_metric_points",
-		"system.cpu.load_average.15m",
-		"system.cpu.load_average.1m",
-		"system.cpu.load_average.5m",
-		"system.cpu.time",
-		"system.disk.io",
-		"system.disk.io_time",
-		"system.disk.merged",
-		"system.disk.operation_time",
-		"system.disk.operations",
-		"system.disk.pending_operations",
-		"system.disk.weighted_io_time",
-		"system.memory.usage",
-		"system.network.connections",
-		"system.network.dropped",
-		"system.network.errors",
-		"system.network.io",
-		"system.network.packets",
-		"system.paging.faults",
-		"system.paging.operations",
-		"system.paging.usage",
-		"system.processes.count",
-		"system.processes.created",
-	}
-	checkMetricsAreEmitted(t, hecMetricsConsumer, metricNames)
+	internal.AssertMetricNames(t, globalSinks.hecMetricsConsumer,
+		filepath.Join(testDir, "expected_hec_metric_names_assertion.yaml"), 3*time.Minute, 10*time.Second)
 }
 
 func waitForAllNamespacesToBeCreated(t *testing.T, client *kubernetes.Clientset) {

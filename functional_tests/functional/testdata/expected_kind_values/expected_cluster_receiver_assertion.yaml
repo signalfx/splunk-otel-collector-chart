@@ -358,7 +358,7 @@ resources:
                     receiver: k8scluster
               name: k8s.container.memory_request
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     cluster_name: ci-k8s-cluster
                     container.id/regex: (containerd://|cri-o://|docker://)?[0-9a-f]{64}
@@ -376,7 +376,7 @@ resources:
                     receiver: k8scluster
               name: k8s.container.ready
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     cluster_name: ci-k8s-cluster
                     container.id/regex: (containerd://|cri-o://|docker://)?[0-9a-f]{64}
@@ -2615,7 +2615,7 @@ resources:
                     receiver: k8scluster
               name: k8s.node.condition_ready
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     cluster_name: ci-k8s-cluster
                     customfield1: customvalue1

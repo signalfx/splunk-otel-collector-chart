@@ -311,41 +311,32 @@ func testDotNetTraces(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// checkMetricsFromApp waits until all named metrics appear in the sink from a
-// specific application identified by telemetry.sdk.language + service.name.
-func checkMetricsFromApp(t *testing.T, mc *consumertest.MetricsSink, sdkLanguage, serviceName string, metricNames []string) {
-	checkMetrics(t, mc, metricNames, sdkLanguage+"/"+serviceName, func(resAttrs pcommon.Map, metric pmetric.Metric) bool {
-		if hasAttrMatch(resAttrs, "telemetry.sdk.language", sdkLanguage) && hasAttrMatch(resAttrs, "service.name", serviceName) {
-			return true
-		}
-		return metricDataPointsHaveAttrs(metric, "telemetry.sdk.language", sdkLanguage, "service.name", serviceName)
-	})
+// assertMetricsFromApp checks names from a specific application identified by
+// telemetry.sdk.language and service.name.
+func assertMetricsFromApp(t *testing.T, mc *consumertest.MetricsSink, sdkLanguage, serviceName, assertionFile string) {
+	internal.AssertMetricNames(t, mc, filepath.Join(testDir, assertionFile), 3*time.Minute, 10*time.Second,
+		func(resAttrs pcommon.Map, metric pmetric.Metric) bool {
+			if hasAttrMatch(resAttrs, "telemetry.sdk.language", sdkLanguage) && hasAttrMatch(resAttrs, "service.name", serviceName) {
+				return true
+			}
+			return metricDataPointsHaveAttrs(metric, "telemetry.sdk.language", sdkLanguage, "service.name", serviceName)
+		})
 }
 
 func testJavaMetrics(t *testing.T) {
-	checkMetricsFromApp(t, globalSinks.agentMetricsConsumer, "java", "java-test", []string{
-		"jvm.memory.used",
-		"jvm.thread.count",
-	})
+	assertMetricsFromApp(t, globalSinks.agentMetricsConsumer, "java", "java-test", "expected_java_metric_names_assertion.yaml")
 }
 
 func testNodeJSMetrics(t *testing.T) {
-	checkMetricsFromApp(t, globalSinks.agentMetricsConsumer, "nodejs", "nodejs-test", []string{
-		"process.runtime.nodejs.memory.heap.used",
-		"process.runtime.nodejs.memory.rss",
-	})
+	assertMetricsFromApp(t, globalSinks.agentMetricsConsumer, "nodejs", "nodejs-test", "expected_nodejs_metric_names_assertion.yaml")
 }
 
 func testDotNetMetrics(t *testing.T) {
-	checkMetricsFromApp(t, globalSinks.agentMetricsConsumer, "dotnet", "dotnet-test", []string{
-		"process.runtime.dotnet.gc.collections.count",
-	})
+	assertMetricsFromApp(t, globalSinks.agentMetricsConsumer, "dotnet", "dotnet-test", "expected_dotnet_metric_names_assertion.yaml")
 }
 
 func testPythonMetrics(t *testing.T) {
-	checkMetricsFromApp(t, globalSinks.agentMetricsConsumer, "python", "python-test", []string{
-		"process.runtime.cpython.gc_count",
-	})
+	assertMetricsFromApp(t, globalSinks.agentMetricsConsumer, "python", "python-test", "expected_python_metric_names_assertion.yaml")
 }
 
 // Profiling tests — verify expected profiling types arrive for each language.
