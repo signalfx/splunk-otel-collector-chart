@@ -72,7 +72,7 @@ jobs:
           repository: ${{ github.repository }}
 
   kubernetes-test:
-    name: ${{ matrix.test-job }} (${{ matrix.k8s-kind-version }}, ${{ matrix.ip-family || 'ipv4' }})
+    name: kubernetes-test (${{ matrix.k8s-kind-version }}, ${{ matrix.test-job }})
     env:
       KUBE_TEST_ENV: kind
       UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}

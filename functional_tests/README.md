@@ -66,6 +66,19 @@ make functionaltest SUITE=functional
 kind delete cluster --name=kind
 ```
 
+## IPv6 control plane coverage
+
+CI runs the existing `histogram` suite on the newest kind Kubernetes version with
+IPv6; its other Kubernetes versions use IPv4. This keeps the matrix at 36 jobs.
+The version updater moves that IPv6 selection when the newest kind version changes.
+
+The suite tests receiver creator endpoints. On IPv6 clusters, its values override
+the static health check listener and kubelet endpoint, which still require explicit
+IPv6 configuration. Passing this suite does not establish IPv6 support for all chart
+defaults. The overrides follow the Kubernetes Service's IP family;
+`EXPECT_COREDNS_IPV6` separately verifies the CoreDNS pod addresses so an IPv6 CI job
+cannot silently pass on an IPv4 cluster.
+
 ## Build Test Images for a Different Platform
 
 `kind-build-test-images` builds the four application images used by the

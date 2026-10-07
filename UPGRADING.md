@@ -1,5 +1,16 @@
 # Upgrade guidelines
 
+## Receiver creator image compatibility
+
+Chart-generated receiver creator endpoints use `joinHostPort`, which requires
+Splunk OpenTelemetry Collector 0.162.0 or newer. If you pin `image.otelcol.tag`,
+update it to a compatible version before upgrading. The default image tag follows
+the chart's `appVersion` and already meets this requirement.
+
+The function also validates port annotations: `prometheus.io/port` must be a
+decimal number between 1 and 65535. Invalid values cannot be scraped and now
+produce an error during receiver configuration expansion.
+
 ## 0.160.0 to 0.161.0
 
 ### `useLightPrometheusReceiver` feature gate is deprecated
