@@ -105,7 +105,7 @@ runs:
         OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
         UPDATE_EXPECTED_RESULTS: ${{ inputs.update-expected-results }}
         SUITE: ${{ inputs.suite }}
-        EXPECT_IPV6: ${{ inputs.ip-family == 'ipv6' && 'true' || 'false' }}
+        EXPECT_COREDNS_IPV6: ${{ inputs.ip-family == 'ipv6' && 'true' || 'false' }}
         UPGRADE_FROM_VALUES: ${{ inputs.upgrade-from-values }}
         UPGRADE_FROM_CHART_DIR: ${{ inputs.mode == 'upgrade' && 'base/splunk-otel-collector' || '' }}
       run: |

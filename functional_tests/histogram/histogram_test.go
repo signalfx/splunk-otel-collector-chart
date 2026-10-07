@@ -175,10 +175,10 @@ func performDNSQueries(t *testing.T, clientset *kubernetes.Clientset) {
 	for _, pod := range coreDNSPods.Items {
 		if pod.Status.PodIP != "" {
 			t.Logf("Scraping %s at %s", pod.Name, pod.Status.PodIP)
-			if os.Getenv("EXPECT_IPV6") == "true" {
+			if os.Getenv("EXPECT_COREDNS_IPV6") == "true" {
 				ip := net.ParseIP(pod.Status.PodIP)
 				require.NotNil(t, ip, "expected a valid CoreDNS pod address")
-				require.Nil(t, ip.To4(), "expected an IPv6 receiver creator endpoint")
+				require.Nil(t, ip.To4(), "expected an IPv6 CoreDNS pod address")
 			}
 			coreDNSPodIPs = append(coreDNSPodIPs, pod.Status.PodIP)
 		}
