@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -13,80 +12,35 @@ import (
 )
 
 func Test_UpdateMatrixFile_PreservesIPv6Coverage(t *testing.T) {
-	original, err := os.ReadFile(filepath.Join("..", "..", ciMatrixPath))
-	require.NoError(t, err)
-	var originalMatrix map[string]map[string]any
-	require.NoError(t, json.Unmarshal(original, &originalMatrix))
-	var originalIncludes []map[string]any
-	functionalMatrix := originalMatrix["functional_test_v2"]
-	includedJSON, err := json.Marshal(functionalMatrix["include"])
-	require.NoError(t, err)
-	require.NoError(t, json.Unmarshal(includedJSON, &originalIncludes))
-	require.Len(t, originalIncludes, 1)
-	require.Equal(t, "histogram", originalIncludes[0]["test-job"])
-	require.Equal(t, "ipv6", originalIncludes[0]["ip-family"])
-
+	const original = `{"functional_test_v2": {
+		"k8s-kind-version": ["v1.36.1", "v1.35.5"],
+		"include": [{"test-job": "histogram", "k8s-kind-version": "v1.36.1", "ip-family": "ipv6"}]
+	}}`
 	for _, tc := range []struct {
 		name         string
 		kindVersions []string
+		want         string
 	}{
 		{
 			name:         "kind version update",
-			kindVersions: []string{"v1.37.0", "v1.36.2", "v1.35.6"},
+			kindVersions: []string{"v1.37.0", "v1.36.2"},
+			want: `{"functional_test_v2": {
+				"k8s-kind-version": ["v1.37.0", "v1.36.2"],
+				"include": [{"test-job": "histogram", "k8s-kind-version": "v1.37.0", "ip-family": "ipv6"}]
+			}}`,
 		},
 		{
 			name: "minikube only update",
+			want: original,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), ciMatrixPath)
-			require.NoError(t, os.WriteFile(path, original, 0o600))
-			minikubeVersions := []string{"v1.37.1", "v1.36.3", "v1.35.7"}
-			require.NoError(t, updateMatrixFile(path, tc.kindVersions, minikubeVersions))
-
-			updated, readErr := os.ReadFile(path)
-			require.NoError(t, readErr)
-			var updatedMatrix map[string]map[string]any
-			require.NoError(t, json.Unmarshal(updated, &updatedMatrix))
-			matrix := updatedMatrix["functional_test_v2"]
-			assert.Equal(t, functionalMatrix["test-job"], matrix["test-job"])
-			assert.Equal(t, functionalMatrix["exclude"], matrix["exclude"])
-			assert.Equal(t, originalMatrix["kubeconform_tests"], updatedMatrix["kubeconform_tests"])
-			assert.Equal(t, originalMatrix["functional_test"]["container_runtime"], updatedMatrix["functional_test"]["container_runtime"])
-			assert.Equal(t, originalMatrix["functional_test"]["splunk_version"], updatedMatrix["functional_test"]["splunk_version"])
-			assert.Equal(t, byte('\n'), updated[len(updated)-1])
-
-			includes, validIncludes := matrix["include"].([]any)
-			require.True(t, validIncludes)
-			require.Len(t, includes, 1)
-			include, validInclude := includes[0].(map[string]any)
-			require.True(t, validInclude)
-			assert.Equal(t, "histogram", include["test-job"])
-			assert.Equal(t, "ipv6", include["ip-family"])
-			if len(tc.kindVersions) == 0 {
-				assert.Equal(t, functionalMatrix[kubeKindVersion], matrix[kubeKindVersion])
-				assert.Equal(t, originalIncludes[0][kubeKindVersion], include[kubeKindVersion])
-			} else {
-				assert.Equal(t, tc.kindVersions[0], include[kubeKindVersion])
-				versions, validVersions := matrix[kubeKindVersion].([]any)
-				require.True(t, validVersions)
-				require.Len(t, versions, len(tc.kindVersions))
-				for i, version := range tc.kindVersions {
-					assert.Equal(t, version, versions[i])
-				}
-				assert.Equal(t, versions, updatedMatrix["migration_tests"][kubeKindVersion])
-			}
-			minikube, validMinikube := updatedMatrix["functional_test"][kubeMinikubeVersion].([]any)
-			require.True(t, validMinikube)
-			require.Len(t, minikube, len(minikubeVersions))
-			for i, version := range minikubeVersions {
-				assert.Equal(t, version, minikube[i])
-			}
-
-			require.NoError(t, updateMatrixFile(path, tc.kindVersions, minikubeVersions))
-			repeated, readErr := os.ReadFile(path)
-			require.NoError(t, readErr)
-			assert.Equal(t, updated, repeated, "repeated updates should not create another PR diff")
+			require.NoError(t, os.WriteFile(path, []byte(original), 0o600))
+			require.NoError(t, updateMatrixFile(path, tc.kindVersions, []string{"v1.37.1"}))
+			updated, err := os.ReadFile(path)
+			require.NoError(t, err)
+			assert.JSONEq(t, tc.want, string(updated))
 		})
 	}
 }

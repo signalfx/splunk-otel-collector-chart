@@ -28,7 +28,7 @@ const (
 	expectedDir          = "expected"
 )
 
-func deployChart(t *testing.T) {
+func deployChart(t *testing.T, clientset *kubernetes.Clientset) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
 
@@ -36,8 +36,14 @@ func deployChart(t *testing.T) {
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
+	kubernetesService, err := clientset.CoreV1().Services(corev1.NamespaceDefault).Get(
+		t.Context(), "kubernetes", metav1.GetOptions{},
+	)
+	require.NoError(t, err)
+	require.NotEmpty(t, kubernetesService.Spec.IPFamilies)
 	replacements := map[string]any{
 		"IngestURL": internal.HostPortHTTP(hostEp, signalFxReceiverPort),
+		"IPv6":      kubernetesService.Spec.IPFamilies[0] == corev1.IPv6Protocol,
 	}
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
@@ -118,7 +124,7 @@ func Test_ControlPlaneMetrics(t *testing.T) {
 		clientset, err := internal.GetKubeClient(testKubeConfig)
 		require.NoError(t, err)
 		performDNSQueries(t, clientset)
-		deployChart(t)
+		deployChart(t, clientset)
 	}
 
 	if os.Getenv("SKIP_TESTS") == "true" {

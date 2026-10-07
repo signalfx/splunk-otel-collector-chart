@@ -12,16 +12,20 @@ agent:
     - name: SPLUNK_DEBUG_CONFIG_SERVER
       value: "true"
   config:
+    {{- if .IPv6 }}
     extensions:
       health_check:
         endpoint: "[::]:13133"
+    {{- end }}
     service:
+      {{- if .IPv6 }}
       pipelines:
-        # Exercise receiver creator without unrelated node-IP endpoint templates.
+        # Exercise IPv6 receiver creator without unrelated node-IP endpoint templates.
         metrics:
           receivers: [nop]
         metrics/agent:
           receivers: [nop]
+      {{- end }}
       telemetry:
         logs:
           level: debug
