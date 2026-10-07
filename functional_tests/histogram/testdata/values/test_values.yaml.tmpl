@@ -12,7 +12,16 @@ agent:
     - name: SPLUNK_DEBUG_CONFIG_SERVER
       value: "true"
   config:
+    extensions:
+      health_check:
+        endpoint: "[::]:13133"
     service:
+      pipelines:
+        # Exercise receiver creator without unrelated node-IP endpoint templates.
+        metrics:
+          receivers: [nop]
+        metrics/agent:
+          receivers: [nop]
       telemetry:
         logs:
           level: debug
@@ -33,7 +42,7 @@ agent:
                       ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
                       insecure_skip_verify: true
                     static_configs:
-                      - targets: [ "`endpoint`:6443" ]
+                      - targets: [ '`joinHostPort(endpoint, 6443)`' ]
                     metric_relabel_configs:
                       - source_labels: [__name__]
                         action: keep

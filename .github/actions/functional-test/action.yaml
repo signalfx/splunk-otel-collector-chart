@@ -23,6 +23,10 @@ inputs:
   k8s-version:
     description: 'Kubernetes version for the kind cluster (e.g. v1.36.1)'
     required: true
+  ip-family:
+    description: 'IP family for the kind cluster: ipv4 or ipv6'
+    required: false
+    default: ipv4
   kubernetes-debug-info:
     description: 'Whether to collect and upload k8s debug info'
     required: false
@@ -68,7 +72,7 @@ runs:
         node_image: kindest/node:${{ inputs.k8s-version }}
         kubectl_version: ${{ inputs.k8s-version }}
         cluster_name: kind
-        config: ./.github/workflows/configs/kind-config.yaml
+        config: ${{ inputs.ip-family == 'ipv6' && './.github/workflows/configs/kind-config-ipv6.yaml' || './.github/workflows/configs/kind-config.yaml' }}
 
     - name: Fix kubelet TLS server certificates
       shell: bash
@@ -101,6 +105,7 @@ runs:
         OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
         UPDATE_EXPECTED_RESULTS: ${{ inputs.update-expected-results }}
         SUITE: ${{ inputs.suite }}
+        EXPECT_IPV6: ${{ inputs.ip-family == 'ipv6' && 'true' || 'false' }}
         UPGRADE_FROM_VALUES: ${{ inputs.upgrade-from-values }}
         UPGRADE_FROM_CHART_DIR: ${{ inputs.mode == 'upgrade' && 'base/splunk-otel-collector' || '' }}
       run: |

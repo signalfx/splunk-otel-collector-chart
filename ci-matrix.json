@@ -35,7 +35,14 @@
       "obi",
       "secureapp"
     ],
-    "exclude": []
+    "exclude": [],
+    "include": [
+      {
+        "test-job": "histogram",
+        "k8s-kind-version": "v1.36.1",
+        "ip-family": "ipv6"
+      }
+    ]
   },
   "kubeconform_tests": {
     "k8s-version": [

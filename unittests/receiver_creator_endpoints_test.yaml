@@ -1,0 +1,94 @@
+suite: splunk-otel-collector.receiverCreatorEndpoints
+values:
+  - ./values/basic.yaml
+templates:
+  - configmap-agent.yaml
+  - configmap-cluster-receiver.yaml
+tests:
+  - it: joins pod addresses and fixed control-plane ports
+    template: configmap-agent.yaml
+    set:
+      agent.controlPlaneMetrics.etcd.enabled: true
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, 9153\)`'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, 2381\)`'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, 10257\)`'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, 10249\)`'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, 10259\)`'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '(?s)job_name: kubernetes-apiserver.*?targets:\s*- ''`endpoint`'''
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: '`endpoint`:'
+
+  - it: joins the GKE DNS annotation port or its default
+    template: configmap-agent.yaml
+    set:
+      distribution: gke
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint,\s+"prometheus\.io/port"\s+in\s+annotations\s+\?\s+annotations\["prometheus\.io/port"\]\s+:\s+9153\)`'
+
+  - it: joins OpenShift pod addresses while preserving port endpoints
+    template: configmap-agent.yaml
+    set:
+      distribution: openshift
+      agent.controlPlaneMetrics.etcd.enabled: true
+      agent.controlPlaneMetrics.etcd.secret.name: etcd-certs
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, 9154\)`'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, 9979\)`'
+      - matchRegex:
+          path: data["relay"]
+          pattern: '(?s)job_name: kubernetes-proxy.*?targets:\s*- ''`endpoint`'''
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: '`endpoint`:'
+
+  - it: joins the default TLS etcd port
+    template: configmap-agent.yaml
+    set:
+      agent.controlPlaneMetrics.etcd.enabled: true
+      agent.controlPlaneMetrics.etcd.secret.name: etcd-certs
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, 2379\)`'
+
+  - it: joins a custom etcd port
+    template: configmap-agent.yaml
+    set:
+      agent.controlPlaneMetrics.etcd.enabled: true
+      agent.controlPlaneMetrics.etcd.port: 12379
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, 12379\)`'
+
+  - it: joins Fargate node addresses and observer kubelet ports
+    template: configmap-cluster-receiver.yaml
+    set:
+      distribution: eks/fargate
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: '`joinHostPort\(endpoint, kubelet_endpoint_port\)`'
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: '`endpoint`:'

@@ -6,6 +6,7 @@ package histogram
 import (
 	"bytes"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -173,13 +174,19 @@ func performDNSQueries(t *testing.T, clientset *kubernetes.Clientset) {
 	coreDNSPodIPs := make([]string, 0, len(coreDNSPods.Items))
 	for _, pod := range coreDNSPods.Items {
 		if pod.Status.PodIP != "" {
+			t.Logf("Scraping %s at %s", pod.Name, pod.Status.PodIP)
+			if os.Getenv("EXPECT_IPV6") == "true" {
+				ip := net.ParseIP(pod.Status.PodIP)
+				require.NotNil(t, ip, "expected a valid CoreDNS pod address")
+				require.Nil(t, ip.To4(), "expected an IPv6 receiver creator endpoint")
+			}
 			coreDNSPodIPs = append(coreDNSPodIPs, pod.Status.PodIP)
 		}
 	}
 	require.NotEmpty(t, coreDNSPodIPs, "did not find any CoreDNS pod IPs")
 
 	overrides := `{"spec": {"dnsPolicy": "ClusterFirst"}}`
-	// CoreDNS disables caching for cluster.local; reverse service lookups use the cacheable in-addr.arpa zone.
+	// CoreDNS disables caching for cluster.local; use reverse service lookups to exercise the cache.
 	queries := `target=$1
 	shift
 	for server in "$@"; do
