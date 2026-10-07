@@ -1637,6 +1637,9 @@ targetallocator:
 ################################################################################
 
 featureGates:
+  # Allow the telegraf/exec Smart Agent monitor, which can execute arbitrary commands.
+  # This is disabled by default due to the security risk. The monitor itself will be removed in December 2026.
+  enableTelegrafExec: false
   # Use Light Prometheus Receiver for metrics collection from discovered Prometheus endpoints.
   # https://github.com/signalfx/splunk-otel-collector/tree/main/internal/receiver/lightprometheusreceiver
   # Light Prometheus Receiver is optimized for performance and reduced memory footprint.

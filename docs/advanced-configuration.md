@@ -1275,6 +1275,11 @@ helm install {name} --set agent.featureGates=+feature1 --set clusterReceiver.fea
 Would result in the agent having feature1 enabled, the clusterReceiver having feature2 enabled, and the gateway having
 feature2 disabled.
 
+The `telegraf/exec` Smart Agent monitor is disabled by default because it can execute arbitrary commands in the
+Collector container. If you understand and accept this risk, set `featureGates.enableTelegrafExec: true` to enable it
+for the agent, cluster receiver, and gateway. The `telegraf/exec` monitor itself will be removed in December 2026;
+after that, this gate will no longer enable it.
+
 ## Override underlying OpenTelemetry agent configuration
 
 If you want to use your own OpenTelemetry Agent configuration, you can override it by providing a custom configuration in the `agent.config` parameter in the values.yaml, which will be merged into the default agent configuration, list parts of the configuration (for example, `service.pipelines.logs.processors`) to be fully re-defined.

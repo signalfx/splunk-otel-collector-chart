@@ -2,6 +2,19 @@
 
 ## 0.160.0 to 0.161.0
 
+### `telegraf/exec` monitor disabled by default
+
+The `telegraf/exec` Smart Agent monitor can execute arbitrary commands in the Collector container, so it is disabled by
+default. If you rely on this monitor and understand the security risk, set the following value to keep using it:
+
+```yaml
+featureGates:
+  enableTelegrafExec: true
+```
+
+The `telegraf/exec` monitor itself will be removed in December 2026. After that, this gate will no longer enable it.
+Migrate to a supported alternative before then.
+
 ### `useLightPrometheusReceiver` feature gate is deprecated
 
 The `featureGates.useLightPrometheusReceiver` feature gate is deprecated and will

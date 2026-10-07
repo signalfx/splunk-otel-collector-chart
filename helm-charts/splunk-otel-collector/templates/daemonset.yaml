@@ -147,9 +147,7 @@ spec:
         args:
         {{- end }}
         - --config=/conf/relay.yaml
-        {{- if .Values.agent.featureGates }}
-        - --feature-gates={{ .Values.agent.featureGates }}
-        {{- end }}
+        - --feature-gates={{ include "splunk-otel-collector.workloadFeatureGates" (dict "featureGates" .Values.agent.featureGates "enableTelegrafExec" .Values.featureGates.enableTelegrafExec) }}
         {{- if and .Values.agent.discovery.enabled }}
         - --discovery
         {{- end }}

@@ -486,9 +486,24 @@ Build the collector feature gates string for cluster receiver.
 {{- with .Values.clusterReceiver.featureGates -}}
 {{- $gates = append $gates . -}}
 {{- end -}}
+{{- $telegrafExecGate := ternary "+receiver.smartagentreceiver.TelegrafExec" "-receiver.smartagentreceiver.TelegrafExec" .Values.featureGates.enableTelegrafExec -}}
+{{- $gates = append $gates $telegrafExecGate -}}
 {{- if and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useEntityEventsForK8sProperties -}}
 {{- $gates = append $gates "exporter.signalfx.consumeEntityEvents" -}}
 {{- end -}}
+{{- join "," $gates -}}
+{{- end -}}
+
+{{/*
+Build collector feature gates for agent and gateway workloads.
+*/}}
+{{- define "splunk-otel-collector.workloadFeatureGates" -}}
+{{- $gates := list -}}
+{{- with .featureGates -}}
+{{- $gates = append $gates . -}}
+{{- end -}}
+{{- $telegrafExecGate := ternary "+receiver.smartagentreceiver.TelegrafExec" "-receiver.smartagentreceiver.TelegrafExec" .enableTelegrafExec -}}
+{{- $gates = append $gates $telegrafExecGate -}}
 {{- join "," $gates -}}
 {{- end -}}
 

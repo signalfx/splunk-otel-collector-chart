@@ -1,0 +1,14 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: deprecation
+# The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
+component: chart
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Disable the `telegraf/exec` Smart Agent monitor by default behind the `featureGates.enableTelegrafExec` opt-in.
+# One or more tracking issues related to the change
+issues: []
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: |-
+  This monitor can execute arbitrary commands in the Collector container. Enable it only if you understand and accept this security risk.
+  The monitor itself will be removed in December 2026, after which this gate will no longer enable it.

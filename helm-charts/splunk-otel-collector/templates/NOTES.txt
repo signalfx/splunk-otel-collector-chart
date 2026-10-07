@@ -63,6 +63,11 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
           Set this option to false to use the standard Prometheus receiver.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01600-to-01610
 {{ end }}
+{{- if .Values.featureGates.enableTelegrafExec }}
+[WARNING] "featureGates.enableTelegrafExec" enables telegraf/exec, which can execute arbitrary commands in the Collector container.
+          Enable it only if you understand and accept this security risk. The monitor itself will be removed in December 2026;
+          after that, this gate will no longer enable it.
+{{ end }}
 {{- if .Values.operator.enabled }}
 {{- $instrKeys := without (keys .Values.instrumentation) "spec" "enabled" "installationJob" }}
 {{- if gt (len $instrKeys) 0 }}
