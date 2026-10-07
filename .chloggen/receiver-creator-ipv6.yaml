@@ -2,3 +2,4 @@ change_type: bug_fix
 component: chart
 note: Fix receiver creator endpoints for IPv6.
 issues: [2639]
+subtext: Uses `joinHostPort` for safe host/port concatenation (available in appVersion 0.162.0).
