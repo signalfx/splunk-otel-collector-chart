@@ -1630,6 +1630,24 @@ targetallocator:
           component: otel-collector-agent
 
 ################################################################################
+# IBM Db2 receiver. Collects Db2 metrics and active query samples and exports them
+# over OTLP to this release's Collector, running as its own Deployment rather than
+# inside the Collector.
+#
+# With `db2.otlp.endpoint` unset the endpoint is derived from this release, targeting
+# the agent Service. That Service is `internalTrafficPolicy: Local`, so set
+# `db2.otlp.collectorTarget: gateway` when `gateway.enabled` is true.
+#
+# Related documentation: https://github.com/signalfx/splunk-otel-db2
+# Not available in EKS Add-on.
+################################################################################
+
+db2:
+  # Keep this key present even when false. Helm ignores a `condition` whose values
+  # path does not resolve and installs the subchart anyway.
+  enabled: false
+
+################################################################################
 # Helm Chart Feature Gates.
 # The following feature gates are used to enable/disable features in the Helm chart
 # that are not yet ready for general availability.

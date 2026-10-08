@@ -1864,6 +1864,16 @@
         }
       }
     },
+    "db2": {
+      "description": "IBM Db2 receiver configuration. A subchart that collects Db2 metrics and query samples and exports them over OTLP to this release's Collector, see https://github.com/signalfx/splunk-otel-db2 for more info.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "obi": {
       "description": "OpenTelemetry eBPF Instrumentation configuration. A subchart that is used to install the eBPF instrumentation, see https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-ebpf-instrumentation/values.schema.json for more info.",
       "type": "object",

@@ -42,3 +42,8 @@ dependencies:
     alias: targetallocator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: targetallocator.enabled
+  - name: splunk-otel-db2
+    version: 0.1.0
+    alias: db2
+    repository: https://signalfx.github.io/splunk-otel-db2
+    condition: db2.enabled
