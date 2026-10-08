@@ -4,6 +4,22 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.162.0] - 2026-10-08
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.162.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.162.0).
+
+### 💡 Enhancements 💡
+
+- `chart`: Bump obi to 0.14.3 in helm-charts/splunk-otel-collector/Chart.yaml ([#2618](https://github.com/signalfx/splunk-otel-collector-chart/pull/2618),[#2632](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2632),[#2633](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2633),[#2637](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2637))
+
+### 🧰 Bug fixes 🧰
+
+- `chart`: Default the OpAMP Bridge endpoint from `splunkObservability.realm` instead of `splunkObservability.ingestUrl`. ([#2622](https://github.com/signalfx/splunk-otel-collector-chart/pull/2622))
+- `chart`: Fix receiver creator endpoints for IPv6. ([#2639](https://github.com/signalfx/splunk-otel-collector-chart/pull/2639))
+  Uses `joinHostPort` (appVersion 0.162.0) for safe host/port concatenation. IPv6-only
+  clusters may still need static endpoint/listener overrides, such as `kubelet_stats.endpoint` and `health_check.endpoint`.
+  
+
 ## [0.161.0] - 2026-09-18
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.161.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.161.0).
