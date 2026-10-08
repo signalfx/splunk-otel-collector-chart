@@ -4,6 +4,29 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.162.0] - 2026-10-08
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.162.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.162.0).
+
+### 💡 Enhancements 💡
+
+- `chart`: Bump TargetAllocator to 0.160.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2627](https://github.com/signalfx/splunk-otel-collector-chart/pull/2627))
+- `chart`: Bump obi to 0.14.3 in helm-charts/splunk-otel-collector/Chart.yaml ([#2618](https://github.com/signalfx/splunk-otel-collector-chart/pull/2618),[#2632](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2632),[#2633](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2633),[#2637](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2637))
+- `opentelemetry-operator-crds`: Bump subchart opentelemetry-operator-crds to 0.0.8. Refer to further [instructions](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/helm-charts/splunk-otel-collector/charts/opentelemetry-operator-crds/README.md#upgrade-notes) for updating CRDs if using `operatorcrds.install` option. ([#2620](https://github.com/signalfx/splunk-otel-collector-chart/pull/2620))
+- `operator`: Bump java-csa to v2.31.3 in helm-charts/splunk-otel-collector/values.yaml ([#2629](https://github.com/signalfx/splunk-otel-collector-chart/pull/2629))
+- `operator`: Bump java to v2.31.3 in helm-charts/splunk-otel-collector/values.yaml ([#2628](https://github.com/signalfx/splunk-otel-collector-chart/pull/2628))
+- `operator`: Bump nodejs to v4.12.0 in helm-charts/splunk-otel-collector/values.yaml ([#2631](https://github.com/signalfx/splunk-otel-collector-chart/pull/2631))
+- `operator`: Bump operator to 0.124.1 in helm-charts/splunk-otel-collector/Chart.yaml ([#2620](https://github.com/signalfx/splunk-otel-collector-chart/pull/2620))
+- `operator`: Bump python-secureapp to v2-secureapp in helm-charts/splunk-otel-collector/values.yaml ([#2636](https://github.com/signalfx/splunk-otel-collector-chart/pull/2636))
+
+### 🧰 Bug fixes 🧰
+
+- `chart`: Default the OpAMP Bridge endpoint from `splunkObservability.realm` instead of `splunkObservability.ingestUrl`. ([#2622](https://github.com/signalfx/splunk-otel-collector-chart/pull/2622))
+- `chart`: Fix receiver creator endpoints for IPv6. ([#2639](https://github.com/signalfx/splunk-otel-collector-chart/pull/2639))
+  Uses `joinHostPort` (appVersion 0.162.0) for safe host/port concatenation. IPv6-only
+  clusters may still need static endpoint/listener overrides, such as `kubelet_stats.endpoint` and `health_check.endpoint`.
+  
+
 ## [0.161.0] - 2026-09-18
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.161.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.161.0).
