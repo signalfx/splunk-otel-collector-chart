@@ -868,7 +868,7 @@ agent:
                     key_file: /otel/etc/etcd/tls.key
                     ca_file: /otel/etc/etcd/cacert.pem
                   static_configs:
-                    - targets: ["`endpoint`:2379"]
+                    - targets: ['`joinHostPort(endpoint, 2379)`']
                   metric_relabel_configs:
                     - source_labels: [__name__]
                       action: keep
@@ -906,7 +906,7 @@ agent:
                 scrape_configs:
                 - job_name: "kubernetes-apiserver"
                   static_configs:
-                    - targets: ["`endpoint`:3443"]
+                    - targets: ["`endpoint`"]
                   scheme: https
                   authorization:
                     credentials_file: "/etc/myapiserver/clients-ca.key"

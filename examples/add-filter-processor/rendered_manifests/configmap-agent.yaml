@@ -10,7 +10,7 @@ metadata:
     helm.sh/chart: splunk-otel-collector-0.161.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.161.0"
+    app.kubernetes.io/version: "0.162.0"
     app: splunk-otel-collector
     chart: splunk-otel-collector-0.161.0
     release: default
@@ -357,7 +357,7 @@ data:
                   scrape_interval: 10s
                   static_configs:
                   - targets:
-                    - '`endpoint`:9153'
+                    - '`joinHostPort(endpoint, 9153)`'
             rule: type == "pod" && labels["k8s-app"] == "kube-dns"
           prometheus/kube-controller-manager:
             config:
@@ -376,7 +376,7 @@ data:
                   scrape_interval: 10s
                   static_configs:
                   - targets:
-                    - '`endpoint`:10257'
+                    - '`joinHostPort(endpoint, 10257)`'
                   tls_config:
                     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                     insecure_skip_verify: true
@@ -423,7 +423,7 @@ data:
                   scrape_interval: 10s
                   static_configs:
                   - targets:
-                    - '`endpoint`:10249'
+                    - '`joinHostPort(endpoint, 10249)`'
             rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
           prometheus/kubernetes-scheduler:
             config:
@@ -442,7 +442,7 @@ data:
                   scrape_interval: 10s
                   static_configs:
                   - targets:
-                    - '`endpoint`:10259'
+                    - '`joinHostPort(endpoint, 10259)`'
                   tls_config:
                     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                     insecure_skip_verify: true

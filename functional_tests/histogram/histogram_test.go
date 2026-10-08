@@ -6,6 +6,7 @@ package histogram
 import (
 	"bytes"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,7 +28,7 @@ const (
 	expectedDir          = "expected"
 )
 
-func deployChart(t *testing.T) {
+func deployChart(t *testing.T, clientset *kubernetes.Clientset) {
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
 
@@ -35,8 +36,14 @@ func deployChart(t *testing.T) {
 	if len(hostEp) == 0 {
 		require.Fail(t, "Host endpoint not found")
 	}
+	kubernetesService, err := clientset.CoreV1().Services(corev1.NamespaceDefault).Get(
+		t.Context(), "kubernetes", metav1.GetOptions{},
+	)
+	require.NoError(t, err)
+	require.NotEmpty(t, kubernetesService.Spec.IPFamilies)
 	replacements := map[string]any{
 		"IngestURL": internal.HostPortHTTP(hostEp, signalFxReceiverPort),
+		"IPv6":      kubernetesService.Spec.IPFamilies[0] == corev1.IPv6Protocol,
 	}
 	valuesFile, err := filepath.Abs(filepath.Join("testdata", valuesDir, "test_values.yaml.tmpl"))
 	require.NoError(t, err)
@@ -117,7 +124,7 @@ func Test_ControlPlaneMetrics(t *testing.T) {
 		clientset, err := internal.GetKubeClient(testKubeConfig)
 		require.NoError(t, err)
 		performDNSQueries(t, clientset)
-		deployChart(t)
+		deployChart(t, clientset)
 	}
 
 	if os.Getenv("SKIP_TESTS") == "true" {
@@ -173,13 +180,19 @@ func performDNSQueries(t *testing.T, clientset *kubernetes.Clientset) {
 	coreDNSPodIPs := make([]string, 0, len(coreDNSPods.Items))
 	for _, pod := range coreDNSPods.Items {
 		if pod.Status.PodIP != "" {
+			t.Logf("Scraping %s at %s", pod.Name, pod.Status.PodIP)
+			if os.Getenv("EXPECT_COREDNS_IPV6") == "true" {
+				ip := net.ParseIP(pod.Status.PodIP)
+				require.NotNil(t, ip, "expected a valid CoreDNS pod address")
+				require.Nil(t, ip.To4(), "expected an IPv6 CoreDNS pod address")
+			}
 			coreDNSPodIPs = append(coreDNSPodIPs, pod.Status.PodIP)
 		}
 	}
 	require.NotEmpty(t, coreDNSPodIPs, "did not find any CoreDNS pod IPs")
 
 	overrides := `{"spec": {"dnsPolicy": "ClusterFirst"}}`
-	// CoreDNS disables caching for cluster.local; reverse service lookups use the cacheable in-addr.arpa zone.
+	// CoreDNS disables caching for cluster.local; use reverse service lookups to exercise the cache.
 	queries := `target=$1
 	shift
 	for server in "$@"; do

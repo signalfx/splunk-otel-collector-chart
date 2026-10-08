@@ -80,7 +80,7 @@ receivers:
         config:
           auth_type: serviceAccount
           collection_interval: 10s
-          endpoint: "`endpoint`:`kubelet_endpoint_port`"
+          endpoint: "`joinHostPort(endpoint, kubelet_endpoint_port)`"
           extra_metadata_labels:
             - container.id
           metric_groups:

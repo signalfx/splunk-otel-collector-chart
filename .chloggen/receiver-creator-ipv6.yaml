@@ -1,0 +1,7 @@
+change_type: bug_fix
+component: chart
+note: Fix receiver creator endpoints for IPv6.
+issues: [2639]
+subtext: |
+  Uses `joinHostPort` (appVersion 0.162.0) for safe host/port concatenation. IPv6-only
+  clusters may still need static endpoint/listener overrides, such as `kubelet_stats.endpoint` and `health_check.endpoint`.

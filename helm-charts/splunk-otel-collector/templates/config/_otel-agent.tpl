@@ -114,7 +114,7 @@ receivers:
         {{- if .Values.autodetect.prometheus }}
         # Enable prometheus scraping for pods with standard prometheus annotations
         {{- if .Values.featureGates.useLightPrometheusReceiver }}
-        # The light receiver concatenates these values into a URL, so only allow a numeric port and an absolute path.
+        # Only allow a numeric port and an absolute path in the light receiver URL.
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && (! ("prometheus.io/port" in annotations) || annotations["prometheus.io/port"] matches "^[0-9]+$") && (! ("prometheus.io/path" in annotations) || annotations["prometheus.io/path"] matches "^/(?:$|[^/].*)$")
         {{- else }}
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
@@ -122,7 +122,7 @@ receivers:
         {{- else }}
         # Enable prometheus scraping for Istio pods only
         {{- if .Values.featureGates.useLightPrometheusReceiver }}
-        # The light receiver concatenates these values into a URL, so only allow a numeric port and an absolute path.
+        # Only allow a numeric port and an absolute path in the light receiver URL.
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev" in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot" or name matches "istio.*") && (! ("prometheus.io/port" in annotations) || annotations["prometheus.io/port"] matches "^[0-9]+$") && (! ("prometheus.io/path" in annotations) || annotations["prometheus.io/path"] matches "^/(?:$|[^/].*)$")
         {{- else }}
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev" in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot" or name matches "istio.*")
@@ -130,7 +130,7 @@ receivers:
         {{- end }}
         config:
           {{- if .Values.featureGates.useLightPrometheusReceiver }}
-          endpoint: 'http://`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090``"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
+          endpoint: 'http://`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090)``"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
           resource_attributes:
             service.name:
               enabled: false
@@ -143,7 +143,7 @@ receivers:
                 metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
                 scrape_interval: 10s
                 static_configs:
-                  - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`']
+                  - targets: ['`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090)`']
                 {{- if not .Values.autodetect.prometheus }}
                 metric_relabel_configs:
                   - source_labels: [__name__]
@@ -360,7 +360,7 @@ receivers:
             - job_name: "kubedns"
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
-                - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9153`']
+                - targets: ['`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9153)`']
               tls_config:
                 insecure_skip_verify: true
       {{- else }}
@@ -377,7 +377,7 @@ receivers:
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               {{- if eq .Values.distribution "openshift" }}
               static_configs:
-                - targets: ["`endpoint`:9154"]
+                - targets: ['`joinHostPort(endpoint, 9154)`']
               scheme: https
               tls_config:
                 insecure_skip_verify: true
@@ -385,7 +385,7 @@ receivers:
               bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
               {{- else }}
               static_configs:
-                - targets: ["`endpoint`:9153"]
+                - targets: ['`joinHostPort(endpoint, 9153)`']
               {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
@@ -414,7 +414,7 @@ receivers:
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               {{- if and (or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name) (eq .Values.distribution "openshift") }}
               static_configs:
-                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 9979 }}"]
+                - targets: ['`joinHostPort(endpoint, {{ .Values.agent.controlPlaneMetrics.etcd.port | default 9979 }})`']
               scheme: https
               tls_config:
                 insecure_skip_verify: {{ .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
@@ -425,7 +425,7 @@ receivers:
                 {{- end }}
               {{- else if or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name }}
               static_configs:
-                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 2379 }}"]
+                - targets: ['`joinHostPort(endpoint, {{ .Values.agent.controlPlaneMetrics.etcd.port | default 2379 }})`']
               scheme: https
               tls_config:
                 insecure_skip_verify: {{ .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
@@ -436,7 +436,7 @@ receivers:
                 {{- end }}
               {{- else }}
               static_configs:
-                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 2381 }}"]
+                - targets: ['`joinHostPort(endpoint, {{ .Values.agent.controlPlaneMetrics.etcd.port | default 2381 }})`']
               {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
@@ -462,7 +462,7 @@ receivers:
             - job_name: "kube-controller-manager"
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
-                - targets: ["`endpoint`:10257"]
+                - targets: ['`joinHostPort(endpoint, 10257)`']
               scheme: https
               authorization:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -538,7 +538,7 @@ receivers:
                 - targets: ["`endpoint`"]
               {{- else }}
               static_configs:
-                - targets: ["`endpoint`:10249"]
+                - targets: ['`joinHostPort(endpoint, 10249)`']
               {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
@@ -565,7 +565,7 @@ receivers:
             - job_name: "kubernetes-scheduler"
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
-                - targets: ["`endpoint`:10259"]
+                - targets: ['`joinHostPort(endpoint, 10259)`']
               scheme: https
               tls_config:
                 ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"

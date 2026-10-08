@@ -3,11 +3,47 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func Test_UpdateMatrixFile_PreservesIPv6Coverage(t *testing.T) {
+	const original = `{"functional_test_v2": {
+		"k8s-kind-version": ["v1.36.1", "v1.35.5"],
+		"include": [{"test-job": "histogram", "k8s-kind-version": "v1.36.1", "ip-family": "ipv6"}]
+	}}`
+	for _, tc := range []struct {
+		name         string
+		kindVersions []string
+		want         string
+	}{
+		{
+			name:         "kind version update",
+			kindVersions: []string{"v1.37.0", "v1.36.2"},
+			want: `{"functional_test_v2": {
+				"k8s-kind-version": ["v1.37.0", "v1.36.2"],
+				"include": [{"test-job": "histogram", "k8s-kind-version": "v1.37.0", "ip-family": "ipv6"}]
+			}}`,
+		},
+		{
+			name: "minikube only update",
+			want: original,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), ciMatrixPath)
+			require.NoError(t, os.WriteFile(path, []byte(original), 0o600))
+			require.NoError(t, updateMatrixFile(path, tc.kindVersions, []string{"v1.37.1"}))
+			updated, err := os.ReadFile(path)
+			require.NoError(t, err)
+			assert.JSONEq(t, tc.want, string(updated))
+		})
+	}
+}
 
 type mockResponse struct {
 	responseBody       []byte
