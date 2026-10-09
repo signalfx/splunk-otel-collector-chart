@@ -7,4 +7,10 @@ note: Enable all Kubernetes persistent volume and persistent volume claim metric
 # One or more tracking issues related to the change
 issues: [2586]
 # (Optional) One or more lines of additional information to render under the primary note.
-subtext:
+subtext: |
+  Enabled metrics:
+    - k8s.persistentvolume.status.phase
+    - k8s.persistentvolume.storage.capacity
+    - k8s.persistentvolumeclaim.status.phase
+    - k8s.persistentvolumeclaim.storage.capacity
+    - k8s.persistentvolumeclaim.storage.request
