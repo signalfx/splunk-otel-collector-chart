@@ -25,6 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -444,6 +445,8 @@ func Test_Functions(t *testing.T) {
 		deployCharts(t, testKubeConfig, client, extensionsClient)
 		if !skipTests && kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
 			t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
+			deployPersistentVolumeResources(t, client)
+			t.Run("kubernetes persistent volume metrics", testK8sPersistentVolumeMetrics)
 		}
 		deployTestResources(t, client, dynamicClient)
 	} else {
@@ -835,6 +838,132 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 		internal.WithVolatileAttributes("k8s.container.status.last_terminated_reason"),
 		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
 	)
+}
+
+const (
+	persistentVolumeTestName      = "splunk-otel-collector-functional-test-pv"
+	persistentVolumeClaimTestName = "splunk-otel-collector-functional-test-pvc"
+	persistentVolumeStorageClass  = "splunk-otel-collector-functional-test"
+)
+
+func deployPersistentVolumeResources(t *testing.T, client *kubernetes.Clientset) {
+	storage := resource.MustParse("1Gi")
+	pv := &corev1.PersistentVolume{
+		ObjectMeta: metav1.ObjectMeta{Name: persistentVolumeTestName},
+		Spec: corev1.PersistentVolumeSpec{
+			Capacity: corev1.ResourceList{
+				corev1.ResourceStorage: storage,
+			},
+			AccessModes:                   []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+			PersistentVolumeReclaimPolicy: corev1.PersistentVolumeReclaimRetain,
+			StorageClassName:              persistentVolumeStorageClass,
+			PersistentVolumeSource: corev1.PersistentVolumeSource{
+				HostPath: &corev1.HostPathVolumeSource{Path: "/tmp/splunk-otel-collector-functional-test"},
+			},
+		},
+	}
+	_, err := client.CoreV1().PersistentVolumes().Create(t.Context(), pv, metav1.CreateOptions{})
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
+		defer cancel()
+
+		if deleteErr := client.CoreV1().PersistentVolumeClaims(internal.DefaultNamespace).Delete(cleanupCtx, persistentVolumeClaimTestName, metav1.DeleteOptions{}); deleteErr != nil && !k8serrors.IsNotFound(deleteErr) {
+			t.Errorf("failed to delete test PVC: %v", deleteErr)
+		}
+		if deleteErr := client.CoreV1().PersistentVolumes().Delete(cleanupCtx, persistentVolumeTestName, metav1.DeleteOptions{}); deleteErr != nil && !k8serrors.IsNotFound(deleteErr) {
+			t.Errorf("failed to delete test PV: %v", deleteErr)
+		}
+	})
+
+	pvc := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      persistentVolumeClaimTestName,
+			Namespace: internal.DefaultNamespace,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+			StorageClassName: stringPtr(persistentVolumeStorageClass),
+			VolumeName:       persistentVolumeTestName,
+			Resources: corev1.VolumeResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: storage,
+				},
+			},
+		},
+	}
+	_, err = client.CoreV1().PersistentVolumeClaims(internal.DefaultNamespace).Create(t.Context(), pvc, metav1.CreateOptions{})
+	require.NoError(t, err)
+
+	require.Eventually(t, func() bool {
+		claim, getErr := client.CoreV1().PersistentVolumeClaims(internal.DefaultNamespace).Get(t.Context(), persistentVolumeClaimTestName, metav1.GetOptions{})
+		return getErr == nil && claim.Status.Phase == corev1.ClaimBound
+	}, 2*time.Minute, 2*time.Second, "PVC %q did not bind to PV %q", persistentVolumeClaimTestName, persistentVolumeTestName)
+}
+
+func stringPtr(value string) *string {
+	return &value
+}
+
+func testK8sPersistentVolumeMetrics(t *testing.T) {
+	type expectedMetric struct {
+		attribute string
+		name      string
+	}
+	expectedMetrics := map[string]expectedMetric{
+		"k8s.persistentvolume.status.phase": {
+			attribute: "k8s.persistentvolume.name",
+			name:      persistentVolumeTestName,
+		},
+		"k8s.persistentvolume.storage.capacity": {
+			attribute: "k8s.persistentvolume.name",
+			name:      persistentVolumeTestName,
+		},
+		"k8s.persistentvolumeclaim.status.phase": {
+			attribute: "k8s.persistentvolumeclaim.name",
+			name:      persistentVolumeClaimTestName,
+		},
+		"k8s.persistentvolumeclaim.storage.capacity": {
+			attribute: "k8s.persistentvolumeclaim.name",
+			name:      persistentVolumeClaimTestName,
+		},
+		"k8s.persistentvolumeclaim.storage.request": {
+			attribute: "k8s.persistentvolumeclaim.name",
+			name:      persistentVolumeClaimTestName,
+		},
+	}
+
+	require.Eventually(t, func() bool {
+		observed := make(map[string]struct{})
+		for _, batch := range globalSinks.k8sclusterReceiverMetricsConsumer.AllMetrics() {
+			for i := 0; i < batch.ResourceMetrics().Len(); i++ {
+				for j := 0; j < batch.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+					metrics := batch.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics()
+					for k := 0; k < metrics.Len(); k++ {
+						metric := metrics.At(k)
+						expected, ok := expectedMetrics[metric.Name()]
+						if ok && metricHasDatapointAttribute(metric, expected.attribute, expected.name) {
+							observed[metric.Name()] = struct{}{}
+						}
+					}
+				}
+			}
+		}
+		return len(observed) == len(expectedMetrics)
+	}, 3*time.Minute, 10*time.Second, "expected all PV/PVC metrics with test resource identities")
+}
+
+func metricHasDatapointAttribute(metric pmetric.Metric, attribute, expectedValue string) bool {
+	if metric.Type() != pmetric.MetricTypeGauge {
+		return false
+	}
+	for i := 0; i < metric.Gauge().DataPoints().Len(); i++ {
+		value, ok := metric.Gauge().DataPoints().At(i).Attributes().Get(attribute)
+		if ok && value.AsString() == expectedValue {
+			return true
+		}
+	}
+	return false
 }
 
 func testAgentLogs(t *testing.T) {

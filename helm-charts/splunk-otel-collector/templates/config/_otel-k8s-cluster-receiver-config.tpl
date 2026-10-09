@@ -43,6 +43,16 @@ receivers:
         enabled: true
       k8s.pod.status_reason:
         enabled: true
+      k8s.persistentvolume.status.phase:
+        enabled: true
+      k8s.persistentvolume.storage.capacity:
+        enabled: true
+      k8s.persistentvolumeclaim.status.phase:
+        enabled: true
+      k8s.persistentvolumeclaim.storage.capacity:
+        enabled: true
+      k8s.persistentvolumeclaim.storage.request:
+        enabled: true
     {{- end }}
     {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
