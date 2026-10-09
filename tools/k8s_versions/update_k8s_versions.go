@@ -32,6 +32,8 @@ const (
 	ciMatrixPath        string = "ci-matrix.json"
 )
 
+const maxKubernetesVersions = 3
+
 type KubernetesVersion struct {
 	Cycle       string `json:"cycle"`
 	ReleaseDate string `json:"releaseDate"`
@@ -43,8 +45,8 @@ type DockerImage struct {
 	Count int `json:"count"`
 }
 
-// getSupportedKubernetesVersions returns the supported Kubernetes versions
-// by checking the EOL date of the collected versions.
+// getSupportedKubernetesVersions returns the three newest Kubernetes release cycles
+// whose EOL dates have not passed.
 func getSupportedKubernetesVersions(url string) ([]KubernetesVersion, error) {
 	body, err := getRequestBody(url)
 	if err != nil {
@@ -66,6 +68,14 @@ func getSupportedKubernetesVersions(url string) ([]KubernetesVersion, error) {
 		} else {
 			logDebug("Skipping version %s, EOL date %s", kubernetesVersion.Cycle, kubernetesVersion.EOLDate)
 		}
+	}
+	// EOL periods can overlap across four cycles when a new version is released.
+	// Keep the test matrix on the newest three, independent of the API response order.
+	sort.Slice(supportedKubernetesVersions, func(i, j int) bool {
+		return supportedKubernetesVersions[i].ReleaseDate > supportedKubernetesVersions[j].ReleaseDate
+	})
+	if len(supportedKubernetesVersions) > maxKubernetesVersions {
+		supportedKubernetesVersions = supportedKubernetesVersions[:maxKubernetesVersions]
 	}
 	return supportedKubernetesVersions, nil
 }
