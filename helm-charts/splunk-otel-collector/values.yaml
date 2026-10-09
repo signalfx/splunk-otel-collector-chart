@@ -502,6 +502,11 @@ agent:
   # you must ensure to handle patching of log directories on the host filesystem manually.
   skipInitContainers: false
 
+  # Remove `splunk.net/agent-not-ready` after the agent schedules. Adds nodes/patch RBAC.
+  removeNotReadyTaint:
+    enabled: false
+    key: splunk.net/agent-not-ready
+
   # OTel agent annotations
   annotations: {}
   podAnnotations: {}
@@ -854,6 +859,12 @@ image:
     # The tag of the Universal Base Image 9, default value is latest
     tag: ""
     # The policy that specifies when the user wants the Universal Base images to be pulled
+    pullPolicy: IfNotPresent
+
+  # Image for the remove-not-ready-taint init container.
+  initRemoveNotReadyTaint:
+    repository: docker.io/bitnami/kubectl
+    tag: "1.32.3"
     pullPolicy: IfNotPresent
 
   # Image to be used by a container to validate the secret's presence ahead of starting a helm install or upgrade using pre-install and pre-upgrade Helm hooks.
