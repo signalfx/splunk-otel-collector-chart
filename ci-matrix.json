@@ -6,9 +6,10 @@
       "crio"
     ],
     "k8s-minikube-version": [
-      "v1.36.2",
-      "v1.35.6",
-      "v1.34.9"
+      "v1.37.0",
+      "v1.36.4",
+      "v1.35.8",
+      "v1.34.11"
     ],
     "splunk_version": [
       "9.4.4",
@@ -16,10 +17,19 @@
     ]
   },
   "functional_test_v2": {
+    "exclude": [],
+    "include": [
+      {
+        "ip-family": "ipv6",
+        "k8s-kind-version": "v1.37.0",
+        "test-job": "histogram"
+      }
+    ],
     "k8s-kind-version": [
-      "v1.36.1",
-      "v1.35.5",
-      "v1.34.8"
+      "v1.37.0",
+      "v1.36.4",
+      "v1.35.8",
+      "v1.34.11"
     ],
     "test-job": [
       "functional",
@@ -34,14 +44,6 @@
       "logs",
       "obi",
       "secureapp"
-    ],
-    "exclude": [],
-    "include": [
-      {
-        "test-job": "histogram",
-        "k8s-kind-version": "v1.36.1",
-        "ip-family": "ipv6"
-      }
     ]
   },
   "kubeconform_tests": {
@@ -58,9 +60,10 @@
   },
   "migration_tests": {
     "k8s-kind-version": [
-      "v1.36.1",
-      "v1.35.5",
-      "v1.34.8"
+      "v1.37.0",
+      "v1.36.4",
+      "v1.35.8",
+      "v1.34.11"
     ]
   }
 }
