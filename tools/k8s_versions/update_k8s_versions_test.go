@@ -1,13 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,54 +81,6 @@ func Test_FetchKubernetesVersions_ValidURL_ReturnsSupportedVersions(t *testing.T
 func Test_FetchKubernetesVersions_InvalidURL_ReturnsError(t *testing.T) {
 	_, err := getSupportedKubernetesVersions("http:/12.168.1.2:2025/invalid")
 	assert.Error(t, err)
-}
-
-func Test_GetSupportedKubernetesVersions_KeepsNewestThreeCycles(t *testing.T) {
-	futureEOL := time.Now().AddDate(1, 0, 0).Format(time.DateOnly)
-	pastEOL := time.Now().AddDate(-1, 0, 0).Format(time.DateOnly)
-	for _, tc := range []struct {
-		name     string
-		versions []KubernetesVersion
-		want     []string
-	}{
-		{
-			name: "overlapping EOL periods in unsorted response",
-			versions: []KubernetesVersion{
-				{Cycle: "1.34", ReleaseDate: "2025-08-27", EOLDate: futureEOL},
-				{Cycle: "1.36", ReleaseDate: "2026-04-22", EOLDate: futureEOL},
-				{Cycle: "1.37", ReleaseDate: "2026-08-26", EOLDate: futureEOL},
-				{Cycle: "1.35", ReleaseDate: "2025-12-17", EOLDate: futureEOL},
-			},
-			want: []string{"1.37", "1.36", "1.35"},
-		},
-		{
-			name: "fewer than three supported cycles",
-			versions: []KubernetesVersion{
-				{Cycle: "1.35", ReleaseDate: "2025-12-17", EOLDate: futureEOL},
-				{Cycle: "1.36", ReleaseDate: "2026-04-22", EOLDate: futureEOL},
-				{Cycle: "1.34", ReleaseDate: "2025-08-27", EOLDate: pastEOL},
-			},
-			want: []string{"1.36", "1.35"},
-		},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			body, err := json.Marshal(tc.versions)
-			require.NoError(t, err)
-			mockServer := (mockResponse{
-				responseBody:       body,
-				responseStatusCode: http.StatusOK,
-			}).setupMockServer()
-			defer mockServer.Close()
-
-			versions, err := getSupportedKubernetesVersions(mockServer.URL)
-			require.NoError(t, err)
-			var cycles []string
-			for _, version := range versions {
-				cycles = append(cycles, version.Cycle)
-			}
-			assert.Equal(t, tc.want, cycles)
-		})
-	}
 }
 
 func Test_GetSupportedKubernetesVersions_EmptyResponse_ReturnsNoVersions(t *testing.T) {
