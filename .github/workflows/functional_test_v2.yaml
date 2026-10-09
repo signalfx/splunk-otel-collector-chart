@@ -48,7 +48,7 @@ jobs:
         id: test_matrix
         run: |
           echo "Getting test matrix"
-          matrix=$(jq -r '.functional_test_v2 | tostring' ci-matrix.json | tr -d '\n')
+          matrix=$(jq -c '.functional_test_v2' ci-matrix.json)
           echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
     outputs:
       matrix: ${{ steps.test_matrix.outputs.matrix }}
@@ -72,6 +72,7 @@ jobs:
           repository: ${{ github.repository }}
 
   kubernetes-test:
+    name: kubernetes-test (${{ matrix.k8s-kind-version }}, ${{ matrix.test-job }})
     env:
       KUBE_TEST_ENV: kind
       UPDATE_EXPECTED_RESULTS: ${{ github.event.inputs.UPDATE_EXPECTED_RESULTS || 'false' }}
@@ -91,6 +92,7 @@ jobs:
         with:
           artifact-suffix: ${{ matrix.test-job }}-${{ matrix.k8s-kind-version }}
           go-version: ${{ env.GO_VERSION }}
+          ip-family: ${{ matrix.ip-family || 'ipv4' }}
           k8s-version: ${{ matrix.k8s-kind-version }}
           kubernetes-debug-info: ${{ env.KUBERNETES_DEBUG_INFO }}
           otelcol-image: ${{ needs.collector-image-config.outputs.otelcol-image }}

@@ -1,7 +1,7 @@
 resources:
     - scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     code/exists: true
                     host.name: kind-control-plane
@@ -22,7 +22,7 @@ resources:
               name: rest_client_requests_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -39,7 +39,7 @@ resources:
                     url.scheme: https
               name: scheduler_pending_pods
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -57,7 +57,7 @@ resources:
               name: scheduler_preemption_attempts_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     event/exists: true
                     host.name: kind-control-plane
@@ -77,7 +77,7 @@ resources:
               name: scheduler_queue_incoming_pods_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -97,7 +97,7 @@ resources:
               name: scheduler_schedule_attempts_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -113,7 +113,7 @@ resources:
                     url.scheme: https
               name: scrape_duration_seconds
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -129,7 +129,7 @@ resources:
                     url.scheme: https
               name: scrape_samples_post_metric_relabeling
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -145,7 +145,7 @@ resources:
                     url.scheme: https
               name: scrape_samples_scraped
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -161,7 +161,7 @@ resources:
                     url.scheme: https
               name: scrape_series_added
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock

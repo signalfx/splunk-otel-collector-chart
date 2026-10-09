@@ -15,7 +15,7 @@ jobs:
     - name: Install Helm
       uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 #v5.0.1
       with:
-        version: v4.1.4
+        version: v4.2.4
     - name: Checkout code
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
     - name: Run pre-commit

@@ -1,7 +1,7 @@
 resources:
     - scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -17,7 +17,7 @@ resources:
                     url.scheme: http
               name: etcd_server_is_leader
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -35,7 +35,7 @@ resources:
               name: etcd_server_leader_changes_seen_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -51,7 +51,7 @@ resources:
                     url.scheme: http
               name: etcd_server_proposals_applied_total
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -67,7 +67,7 @@ resources:
                     url.scheme: http
               name: etcd_server_proposals_committed_total
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -85,7 +85,7 @@ resources:
               name: etcd_server_proposals_failed_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -101,7 +101,7 @@ resources:
                     url.scheme: http
               name: etcd_server_proposals_pending
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -117,7 +117,7 @@ resources:
                     url.scheme: http
               name: scrape_duration_seconds
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -133,7 +133,7 @@ resources:
                     url.scheme: http
               name: scrape_samples_post_metric_relabeling
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -149,7 +149,7 @@ resources:
                     url.scheme: http
               name: scrape_samples_scraped
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -165,7 +165,7 @@ resources:
                     url.scheme: http
               name: scrape_series_added
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock

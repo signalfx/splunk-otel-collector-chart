@@ -14,7 +14,7 @@ resources:
         url.scheme: http
       scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     ip_family/exists: true
                   explicit_bounds:
@@ -52,7 +52,7 @@ resources:
               name: kubeproxy_network_programming_duration_seconds
               temporality: cumulative
               type: histogram
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     ip_family/exists: true
                   explicit_bounds:
@@ -75,6 +75,6 @@ resources:
               temporality: cumulative
               type: histogram
           name: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver
-          version/regex: v[0-9]+\.[0-9]+\.[0-9]+
+          version/regex: v[0-9]+\.[0-9]+\.[0-9]+([-+][-.0-9A-Za-z]+)?
 signal: metrics
 version: 1

@@ -51,7 +51,7 @@ func testVerifyLogsIngestionUsingAnnotations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fmt.Printf("Test: %s - %s", tt.name, tt.label)
-			searchQuery := EVENT_SEARCH_QUERY_STRING + "index=" + tt.index + " k8s.pod.labels.app::" + tt.label
+			searchQuery := EVENT_SEARCH_QUERY_STRING + "index=" + tt.index + " k8s.pod.label.app::" + tt.label
 			startTime := "-1h@h"
 			events := waitForExactEventCount(t, searchQuery, startTime, tt.expectedNoOfEvents)
 			fmt.Println(" =========>  Events received: ", len(events))
@@ -74,7 +74,7 @@ func testVerifyCustomMetadataFieldsAnnotations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fmt.Printf("Testing custom metadata annotation label=%s value=%s expected=%d event(s)", tt.label, tt.value, tt.expectedNoOfEvents)
-			searchQuery := EVENT_SEARCH_QUERY_STRING + "index=" + tt.index + " k8s.pod.labels.app::" + tt.label + " customField::" + tt.value
+			searchQuery := EVENT_SEARCH_QUERY_STRING + "index=" + tt.index + " k8s.pod.label.app::" + tt.label + " customField::" + tt.value
 			startTime := "-1h@h"
 			events := waitForExactEventCount(t, searchQuery, startTime, tt.expectedNoOfEvents)
 			fmt.Println(" =========>  Events received: ", len(events))

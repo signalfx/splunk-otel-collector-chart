@@ -58,6 +58,11 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
 [WARNING] "logsEngine" parameter is deprecated and will be removed in a future release. Only native OpenTelemetry logs collection is supported.
           You can safely remove this parameter from your values.yaml.
 {{ end }}
+{{- if .Values.featureGates.useLightPrometheusReceiver }}
+[WARNING] "featureGates.useLightPrometheusReceiver" is deprecated and will be removed in a future release.
+          Set this option to false to use the standard Prometheus receiver.
+          Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01600-to-01610
+{{ end }}
 {{- if .Values.operator.enabled }}
 {{- $instrKeys := without (keys .Values.instrumentation) "spec" "enabled" "installationJob" }}
 {{- if gt (len $instrKeys) 0 }}

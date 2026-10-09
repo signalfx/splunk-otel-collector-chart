@@ -52,15 +52,17 @@ resourceSpans:
         - key: k8s.pod.uid
           value:
             stringValue: 8d1aa871-35a6-4211-91d3-648f1b1d5adb
-        - key: k8s.pod.labels.app
+        - key: k8s.pod.label.app
           value:
             stringValue: java-test
         - key: container.image.name
           value:
             stringValue: java_test
-        - key: container.image.tag
+        - key: container.image.tags
           value:
-            stringValue: latest
+            arrayValue:
+              values:
+                - stringValue: latest
         - key: host.name
           value:
             stringValue: kind-control-plane

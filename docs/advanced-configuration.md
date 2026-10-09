@@ -35,7 +35,8 @@ collector workloads created by this chart. At least one chart-created workload
 or extra agent must be managed when Remote Management is enabled.
 
 By default, the bridge connects to
-`https://ingest.<realm>.observability.splunkcloud.com/v1/opamp` and sends the
+the Splunk Observability OpAMP endpoint for the configured realm,
+`https://ingest.<realm>.observability.splunkcloud.com/v1/opamp`, and sends the
 `splunkObservability.accessToken` as the `X-SF-Token` header. Use
 `remoteManagement.opampBridge.endpoint`, `headers`, and `tls` when the bridge
 must connect to another OpAMP endpoint or use custom connection settings. When
@@ -64,6 +65,20 @@ read, update, and patch managed DaemonSets, Deployments, and StatefulSets so it
 can apply remote configuration and roll out workload changes. When Remote
 Management is enabled, chart-created collectors do not open their own direct
 OpAMP sessions to Splunk Observability Cloud; the bridge owns that connection.
+
+When Remote Management manages a chart-created collector, Helm marks the
+collector ConfigMap and preserves its live `data.relay` value on later upgrades
+so remote configuration applied by the bridge is not overwritten. Set
+`remoteManagement.collectorConfig.upgradeStrategy: resetFromHelm` to force Helm
+to render collector config from chart values again. Because OpAMP Bridge owns the
+live `data.relay` field after applying remote config, use Helm's
+`--force-conflicts` flag with `resetFromHelm`:
+
+```bash
+helm upgrade <release> <chart> \
+  --set remoteManagement.collectorConfig.upgradeStrategy=resetFromHelm \
+  --force-conflicts
+```
 
 By default, the bridge is configured to manage every enabled collector workload
 installed by this chart: the agent, gateway, and cluster receiver. If you do not
@@ -853,7 +868,7 @@ agent:
                     key_file: /otel/etc/etcd/tls.key
                     ca_file: /otel/etc/etcd/cacert.pem
                   static_configs:
-                    - targets: ["`endpoint`:2379"]
+                    - targets: ['`joinHostPort(endpoint, 2379)`']
                   metric_relabel_configs:
                     - source_labels: [__name__]
                       action: keep
@@ -891,7 +906,7 @@ agent:
                 scrape_configs:
                 - job_name: "kubernetes-apiserver"
                   static_configs:
-                    - targets: ["`endpoint`:3443"]
+                    - targets: ["`endpoint`"]
                   scheme: https
                   authorization:
                     credentials_file: "/etc/myapiserver/clients-ca.key"

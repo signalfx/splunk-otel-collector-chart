@@ -381,13 +381,13 @@ Splunk OpenTelemetry Collector for Kubernetes follows naming convention for Open
 | Splunk Connect for Kubernetes | Splunk OpenTelemetry Collector for Kubernetes |
 |-------------------------------|-----------------------------------------------|
 | container_id                  | container.id                                  |
-| container_image               | container.image.name and container.image.tag  |
+| container_image               | container.image.name and container.image.tags  |
 | container_name                | k8s.container.name                            |
 | cluster_name                  | k8s.cluster.name                              |
 | namespace                     | k8s.namespace.name                            |
 | pod                           | k8s.pod.name                                  |
 | pod_uid                       | k8s.pod_uid                                   |
-| label_app                     | k8s.pod.labels.app                            |
+| label_app                     | k8s.pod.label.app                             |
 
 If you wish to continue using Splunk Connect for Kubernetes's naming convention, you can use the following configuration:
 

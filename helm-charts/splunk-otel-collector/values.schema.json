@@ -1387,6 +1387,20 @@
           "description": "Deploy the OpAMP Bridge and configure it to manage chart-created collectors.",
           "type": "boolean"
         },
+        "collectorConfig": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "upgradeStrategy": {
+              "description": "Controls how Helm upgrades handle collector ConfigMaps managed by OpAMP Bridge.",
+              "type": "string",
+              "enum": [
+                "preserve",
+                "resetFromHelm"
+              ]
+            }
+          }
+        },
         "opampBridge": {
           "type": "object",
           "additionalProperties": false,

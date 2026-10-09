@@ -51,7 +51,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 #v5.0.1
         with:
-          version: v4.1.4
+          version: v4.2.4
 
       - name: Install chloggen
         run: make install-chloggen

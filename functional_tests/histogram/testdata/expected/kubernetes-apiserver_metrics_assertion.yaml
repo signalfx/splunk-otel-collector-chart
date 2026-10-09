@@ -1,7 +1,7 @@
 resources:
     - scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     component/exists: true
                     host.name: kind-control-plane
@@ -22,10 +22,10 @@ resources:
                     version/exists: true
               name: apiserver_longrunning_requests
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
-                    code/exists: true
-                    component/exists: true
+                    code: "200"
+                    component: apiserver
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
                     k8s.namespace.name: kube-system
@@ -33,20 +33,20 @@ resources:
                     k8s.pod.name: kube-apiserver-kind-control-plane
                     k8s.pod.uid/regex: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
                     os.type: linux
-                    resource/exists: true
-                    scope/exists: true
+                    resource: services
+                    scope: resource
                     server.address/exists: true
                     server.port/exists: true
                     service.instance.id/exists: true
                     service.name: kubernetes-apiserver
                     url.scheme: https
-                    verb/regex: ^(APPLY|CONNECT|CREATE|DELETE|DELETECOLLECTION|GET|LIST|PATCH|POST|PROXY|PUT|UPDATE|WATCH|WATCHLIST|other)$
-                    version/exists: true
+                    verb: GET
+                    version: v1
               monotonic: true
               name: apiserver_request_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -64,7 +64,7 @@ resources:
                     version/exists: true
               name: apiserver_requested_deprecated_apis
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -81,7 +81,7 @@ resources:
                     url.scheme: https
               name: apiserver_storage_objects
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -98,7 +98,7 @@ resources:
                     url.scheme: https
               name: apiserver_storage_size_bytes
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     build_date/exists: true
                     compiler/exists: true
@@ -123,7 +123,7 @@ resources:
                     url.scheme: https
               name: kubernetes_build_info
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     code/exists: true
                     host.name: kind-control-plane
@@ -144,7 +144,7 @@ resources:
               name: rest_client_requests_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -160,7 +160,7 @@ resources:
                     url.scheme: https
               name: scrape_duration_seconds
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -176,7 +176,7 @@ resources:
                     url.scheme: https
               name: scrape_samples_post_metric_relabeling
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -192,7 +192,7 @@ resources:
                     url.scheme: https
               name: scrape_samples_scraped
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -208,7 +208,7 @@ resources:
                     url.scheme: https
               name: scrape_series_added
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
