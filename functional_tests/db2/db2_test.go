@@ -67,7 +67,7 @@ func Test_Db2_Subchart_Wiring(t *testing.T) {
 
 	// The receiver has to come up without a reachable Db2: it retries the connection and
 	// logs collection failures rather than exiting, so a crash here would mean the chart
-	// produced an unusable Deployment or an unparseable config.
+	// produced an unusable Deployment or an unparsable config.
 	internal.CheckPodsReady(t, client, internal.DefaultNamespace,
 		"app.kubernetes.io/name=db2", 5*time.Minute, 10*time.Second)
 
