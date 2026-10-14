@@ -6,7 +6,7 @@ require (
 	github.com/client9/misspell v0.3.4
 	github.com/daixiang0/gci v0.13.6
 	github.com/golangci/golangci-lint/v2 v2.1.5
-	go.opentelemetry.io/build-tools/chloggen v0.29.0
+	go.opentelemetry.io/build-tools/chloggen v0.30.0
 	golang.org/x/tools v0.52.0
 	golang.org/x/vuln v1.9.0
 	mvdan.cc/gofumpt v0.8.0
@@ -164,7 +164,7 @@ require (
 	github.com/sourcegraph/go-diff v0.7.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/spf13/cobra v1.10.1 // indirect
+	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spf13/viper v1.12.0 // indirect
