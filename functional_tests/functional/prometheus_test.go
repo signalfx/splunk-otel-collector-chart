@@ -327,7 +327,7 @@ func testTargetAllocator(t *testing.T) {
 			if i > 0 {
 				combinedPodLogs.WriteString("\n")
 			}
-			combinedPodLogs.WriteString(fmt.Sprintf("%v\n%v", pod.Name, podLogs))
+			fmt.Fprintf(&combinedPodLogs, "%v\n%v", pod.Name, podLogs)
 		}
 		assert.True(c, containsReadyAgentPod, "No OTel Collector agent pod found ready")
 		// NOTE: The target allocator distributes scrape jobs across agents when there are more than one.

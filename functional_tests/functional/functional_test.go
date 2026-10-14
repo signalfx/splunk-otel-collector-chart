@@ -111,7 +111,7 @@ func Test_Functions(t *testing.T) {
 			}
 			t.Log("Cleaning up cluster")
 			// t.Context is cancelled before cleanup runs.
-			teardown(context.Background(), t, testKubeConfig) //nolint:usetesting
+			teardown(context.Background(), t, testKubeConfig)
 		})
 
 		deployCharts(t, testKubeConfig, client, extensionsClient)

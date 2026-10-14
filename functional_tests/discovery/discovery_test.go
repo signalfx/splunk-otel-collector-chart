@@ -153,7 +153,7 @@ metadata:
 
 	clientset, err := internal.GetKubeClient(kubeConfig)
 	require.NoError(t, err)
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting // teardown can run after t.Context is canceled
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) // Teardown can run after t.Context is canceled.
 	defer cancel()
 	require.EventuallyWithT(t, func(ct *assert.CollectT) {
 		_, deploymentErr := clientset.AppsV1().Deployments(internal.DefaultNamespace).Get(
