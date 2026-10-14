@@ -442,7 +442,7 @@ func Test_Functions(t *testing.T) {
 		dynamicClient, err := dynamic.NewForConfig(kubeConfig)
 		require.NoError(t, err)
 
-		if !skipTests && kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
+		if kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
 			deployPersistentVolumeResources(t, client)
 		}
 		deployCharts(t, testKubeConfig, client, extensionsClient)
@@ -836,40 +836,9 @@ func testK8sClusterReceiverMetrics(t *testing.T) {
 	internal.AssertMetricsSnapshot(t, globalSinks.k8sclusterReceiverMetricsConsumer,
 		"k8s.persistentvolume.status.phase", assertionFile, 3*time.Minute, 10*time.Second,
 		internal.WithWaitForSnapshotMatch(),
-		internal.WithMetricsFilter(filterTransientK8sClusterMetrics),
 		internal.WithVolatileAttributes("k8s.container.status.last_terminated_reason"),
 		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
 	)
-}
-
-func filterTransientK8sClusterMetrics(metrics *pmetric.Metrics) {
-	resourceMetrics := metrics.ResourceMetrics()
-	for resourceIndex := 0; resourceIndex < resourceMetrics.Len(); resourceIndex++ {
-		scopeMetrics := resourceMetrics.At(resourceIndex).ScopeMetrics()
-		for scopeIndex := 0; scopeIndex < scopeMetrics.Len(); scopeIndex++ {
-			metricSlice := scopeMetrics.At(scopeIndex).Metrics()
-			metricSlice.RemoveIf(func(metric pmetric.Metric) bool {
-				if strings.HasPrefix(metric.Name(), "k8s.job.") {
-					return true
-				}
-				if metric.Type() != pmetric.MetricTypeGauge {
-					return false
-				}
-
-				dataPoints := metric.Gauge().DataPoints()
-				dataPoints.RemoveIf(func(dataPoint pmetric.NumberDataPoint) bool {
-					for _, attribute := range []string{"k8s.container.name", "k8s.pod.name"} {
-						value, ok := dataPoint.Attributes().Get(attribute)
-						if ok && (value.AsString() == "apply-cr" || strings.Contains(value.AsString(), "inst-hook")) {
-							return true
-						}
-					}
-					return false
-				})
-				return dataPoints.Len() == 0
-			})
-		}
-	}
 }
 
 const (
@@ -897,6 +866,10 @@ func deployPersistentVolumeResources(t *testing.T, client *kubernetes.Clientset)
 	_, err := client.CoreV1().PersistentVolumes().Create(t.Context(), pv, metav1.CreateOptions{})
 	require.NoError(t, err)
 	t.Cleanup(func() {
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			t.Log("Skipping PV/PVC teardown as SKIP_TEARDOWN is set to true")
+			return
+		}
 		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
 		defer cancel()
 
