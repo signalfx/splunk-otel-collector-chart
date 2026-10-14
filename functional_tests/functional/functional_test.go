@@ -25,6 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -441,6 +442,9 @@ func Test_Functions(t *testing.T) {
 		dynamicClient, err := dynamic.NewForConfig(kubeConfig)
 		require.NoError(t, err)
 
+		if kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
+			deployPersistentVolumeResources(t, client)
+		}
 		deployCharts(t, testKubeConfig, client, extensionsClient)
 		if !skipTests && kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
 			t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
@@ -830,11 +834,80 @@ func findResourceByAttr(t *testing.T, filePath string, attrKey string, skipKeys 
 func testK8sClusterReceiverMetrics(t *testing.T) {
 	assertionFile := filepath.Join(testDir, expectedValuesDir, "expected_cluster_receiver_assertion.yaml")
 	internal.AssertMetricsSnapshot(t, globalSinks.k8sclusterReceiverMetricsConsumer,
-		"k8s.pod.phase", assertionFile, 3*time.Minute, 10*time.Second,
+		"k8s.persistentvolume.status.phase", assertionFile, 3*time.Minute, 10*time.Second,
 		internal.WithWaitForSnapshotMatch(),
 		internal.WithVolatileAttributes("k8s.container.status.last_terminated_reason"),
 		internal.WithRegexAttributes(internal.CommonK8sMetricAssertionRegexAttrs),
 	)
+}
+
+const (
+	persistentVolumeTestName      = "splunk-otel-collector-functional-test-pv"
+	persistentVolumeClaimTestName = "splunk-otel-collector-functional-test-pvc"
+	persistentVolumeStorageClass  = "splunk-otel-collector-functional-test"
+)
+
+func deployPersistentVolumeResources(t *testing.T, client *kubernetes.Clientset) {
+	storage := resource.MustParse("1Gi")
+	pv := &corev1.PersistentVolume{
+		ObjectMeta: metav1.ObjectMeta{Name: persistentVolumeTestName},
+		Spec: corev1.PersistentVolumeSpec{
+			Capacity: corev1.ResourceList{
+				corev1.ResourceStorage: storage,
+			},
+			AccessModes:                   []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+			PersistentVolumeReclaimPolicy: corev1.PersistentVolumeReclaimRetain,
+			StorageClassName:              persistentVolumeStorageClass,
+			PersistentVolumeSource: corev1.PersistentVolumeSource{
+				HostPath: &corev1.HostPathVolumeSource{Path: "/tmp/splunk-otel-collector-functional-test"},
+			},
+		},
+	}
+	_, err := client.CoreV1().PersistentVolumes().Create(t.Context(), pv, metav1.CreateOptions{})
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			t.Log("Skipping PV/PVC teardown as SKIP_TEARDOWN is set to true")
+			return
+		}
+		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
+		defer cancel()
+
+		if deleteErr := client.CoreV1().PersistentVolumeClaims(internal.DefaultNamespace).Delete(cleanupCtx, persistentVolumeClaimTestName, metav1.DeleteOptions{}); deleteErr != nil && !k8serrors.IsNotFound(deleteErr) {
+			t.Errorf("failed to delete test PVC: %v", deleteErr)
+		}
+		if deleteErr := client.CoreV1().PersistentVolumes().Delete(cleanupCtx, persistentVolumeTestName, metav1.DeleteOptions{}); deleteErr != nil && !k8serrors.IsNotFound(deleteErr) {
+			t.Errorf("failed to delete test PV: %v", deleteErr)
+		}
+	})
+
+	pvc := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      persistentVolumeClaimTestName,
+			Namespace: internal.DefaultNamespace,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+			StorageClassName: stringPtr(persistentVolumeStorageClass),
+			VolumeName:       persistentVolumeTestName,
+			Resources: corev1.VolumeResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: storage,
+				},
+			},
+		},
+	}
+	_, err = client.CoreV1().PersistentVolumeClaims(internal.DefaultNamespace).Create(t.Context(), pvc, metav1.CreateOptions{})
+	require.NoError(t, err)
+
+	require.Eventually(t, func() bool {
+		claim, getErr := client.CoreV1().PersistentVolumeClaims(internal.DefaultNamespace).Get(t.Context(), persistentVolumeClaimTestName, metav1.GetOptions{})
+		return getErr == nil && claim.Status.Phase == corev1.ClaimBound
+	}, 2*time.Minute, 2*time.Second, "PVC %q did not bind to PV %q", persistentVolumeClaimTestName, persistentVolumeTestName)
+}
+
+func stringPtr(value string) *string {
+	return &value
 }
 
 func testAgentLogs(t *testing.T) {
