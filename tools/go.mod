@@ -9,7 +9,7 @@ require (
 	go.opentelemetry.io/build-tools/chloggen v0.30.0
 	golang.org/x/tools v0.52.0
 	golang.org/x/vuln v1.9.0
-	mvdan.cc/gofumpt v0.8.0
+	mvdan.cc/gofumpt v0.12.0
 )
 
 require (
@@ -150,7 +150,7 @@ require (
 	github.com/quasilyte/stdinfo v0.0.0-20220114132959-f7386bf02567 // indirect
 	github.com/raeperd/recvcheck v0.2.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
+	github.com/rogpeppe/go-internal v1.16.0 // indirect
 	github.com/ryancurrah/gomodguard v1.4.1 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.5.1 // indirect
 	github.com/sanposhiho/wastedassign/v2 v2.1.0 // indirect
