@@ -64,10 +64,12 @@ func TestDeployTestResourcesKindFixtures(t *testing.T) {
 		name               string
 		skipTests          bool
 		existingDeployment bool
+		updateConflict     bool
 	}{
 		{name: "fresh cluster"},
 		{name: "setup only", skipTests: true},
 		{name: "existing deployment", existingDeployment: true},
+		{name: "concurrent deployment update", existingDeployment: true, updateConflict: true},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Setenv("KUBE_TEST_ENV", kindTestKubeEnv)
@@ -80,6 +82,7 @@ func TestDeployTestResourcesKindFixtures(t *testing.T) {
 				return false, nil, nil
 			})
 			updates := 0
+			updateAttempts := 0
 			if testCase.existingDeployment {
 				deployments := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
 				require.NoError(t, client.Tracker().Create(deployments, &appsv1.Deployment{
@@ -87,9 +90,24 @@ func TestDeployTestResourcesKindFixtures(t *testing.T) {
 				}, internal.DefaultNamespace))
 				client.PrependReactor("update", "deployments", func(action k8stesting.Action) (bool, runtime.Object, error) {
 					deployment := action.(k8stesting.UpdateAction).GetObject().(*appsv1.Deployment)
-					if deployment.ResourceVersion != "7" {
+					updateAttempts++
+					current, getErr := client.Tracker().Get(deployments, internal.DefaultNamespace, deployment.Name)
+					if getErr != nil {
+						return true, nil, getErr
+					}
+					existing := current.(*appsv1.Deployment)
+					if deployment.ResourceVersion != existing.ResourceVersion {
 						return true, nil, k8serrors.NewConflict(deployments.GroupResource(), deployment.Name,
 							errors.New("resourceVersion must match the existing deployment"))
+					}
+					if testCase.updateConflict && updateAttempts == 1 {
+						// Simulate a controller updating status between the GET and UPDATE.
+						existing.ResourceVersion = "8"
+						if updateErr := client.Tracker().Update(deployments, existing, internal.DefaultNamespace); updateErr != nil {
+							return true, nil, updateErr
+						}
+						return true, nil, k8serrors.NewConflict(deployments.GroupResource(), deployment.Name,
+							errors.New("deployment changed after GET"))
 					}
 					updates++
 					return false, nil, nil
@@ -123,6 +141,11 @@ func TestDeployTestResourcesKindFixtures(t *testing.T) {
 			assert.Contains(t, images, "prometheus-annotation-test")
 			if testCase.existingDeployment {
 				assert.Equal(t, 1, updates, "existing workload must be updated with its current resourceVersion")
+				if testCase.updateConflict {
+					assert.Equal(t, 2, updateAttempts, "a conflict must trigger a fresh GET and another UPDATE")
+				} else {
+					assert.Equal(t, 1, updateAttempts)
+				}
 			}
 			namespaces, err := client.CoreV1().Namespaces().List(t.Context(), metav1.ListOptions{})
 			require.NoError(t, err)

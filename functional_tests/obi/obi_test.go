@@ -19,6 +19,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
@@ -96,10 +97,15 @@ func deployApp(t *testing.T, kubeconfig string, app App) {
 	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
 	_, err = deployments.Create(t.Context(), deployment, metav1.CreateOptions{})
 	if k8serrors.IsAlreadyExists(err) {
-		existing, getErr := deployments.Get(t.Context(), deployment.Name, metav1.GetOptions{})
-		require.NoError(t, getErr)
-		deployment.ResourceVersion = existing.ResourceVersion
-		_, err = deployments.Update(t.Context(), deployment, metav1.UpdateOptions{})
+		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			existing, getErr := deployments.Get(t.Context(), deployment.Name, metav1.GetOptions{})
+			if getErr != nil {
+				return getErr
+			}
+			deployment.ResourceVersion = existing.ResourceVersion
+			_, updateErr := deployments.Update(t.Context(), deployment, metav1.UpdateOptions{})
+			return updateErr
+		})
 	}
 	require.NoError(t, err)
 
@@ -110,7 +116,9 @@ func deployApp(t *testing.T, kubeconfig string, app App) {
 		}
 		grace := int64(0)
 		// t.Context is canceled before cleanup runs.
-		_ = deployments.Delete(context.Background(), app.Name, metav1.DeleteOptions{GracePeriodSeconds: &grace}) //nolint:usetesting
+		ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
+		defer cancel()
+		_ = deployments.Delete(ctx, app.Name, metav1.DeleteOptions{GracePeriodSeconds: &grace})
 	})
 
 	// Wait for the pod(s) to be Ready for a short stabilization period.

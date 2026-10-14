@@ -25,6 +25,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
@@ -117,10 +118,15 @@ func deployTestResources(t *testing.T, client kubernetes.Interface, dynamicClien
 		dep := obj.(*appsv1.Deployment)
 		_, createErr := deployments.Create(t.Context(), dep, metav1.CreateOptions{})
 		if k8serrors.IsAlreadyExists(createErr) {
-			existing, getErr := deployments.Get(t.Context(), dep.Name, metav1.GetOptions{})
-			require.NoError(t, getErr)
-			dep.ResourceVersion = existing.ResourceVersion
-			_, updateErr := deployments.Update(t.Context(), dep, metav1.UpdateOptions{})
+			updateErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				existing, getErr := deployments.Get(t.Context(), dep.Name, metav1.GetOptions{})
+				if getErr != nil {
+					return getErr
+				}
+				dep.ResourceVersion = existing.ResourceVersion
+				_, err := deployments.Update(t.Context(), dep, metav1.UpdateOptions{})
+				return err
+			})
 			require.NoError(t, updateErr)
 		} else {
 			require.NoError(t, createErr)
