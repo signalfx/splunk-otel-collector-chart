@@ -58,5 +58,44 @@ subjects:
   - kind: ServiceAccount
     name: {{ $serviceAccountName }}
     namespace: {{ $namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ $bridgeName }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: opamp-bridge
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    resourceNames:
+      - kube-system
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ $bridgeName }}
+  labels:
+    {{- include "splunk-otel-collector.commonLabels" . | nindent 4 }}
+    app: {{ template "splunk-otel-collector.name" . }}
+    component: opamp-bridge
+    chart: {{ template "splunk-otel-collector.chart" . }}
+    release: {{ .Release.Name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $bridgeName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $serviceAccountName }}
+    namespace: {{ $namespace }}
 {{- end }}
 {{- end }}

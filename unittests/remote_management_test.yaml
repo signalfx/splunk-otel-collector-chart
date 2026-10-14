@@ -63,7 +63,7 @@ tests:
         enabled: true
     asserts:
       - hasDocuments:
-          count: 2
+          count: 4
 
   - it: should render opamp bridge service account when remote management is enabled
     template: opamp-bridge-serviceaccount.yaml
@@ -179,7 +179,7 @@ tests:
           value: test-release-splunk-otel-collector-opamp-bridge
       - equal:
           path: spec.template.spec.containers[0].image
-          value: ghcr.io/open-telemetry/opentelemetry-operator/operator-opamp-bridge:v0.158.0
+          value: ghcr.io/open-telemetry/opentelemetry-operator/operator-opamp-bridge:v0.161.0
       - contains:
           path: spec.template.spec.containers[0].args
           content: --config-file=/conf/config.yaml

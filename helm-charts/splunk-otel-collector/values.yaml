@@ -992,7 +992,7 @@ remoteManagement:
       # The registry and name of the OpenTelemetry Operator OpAMP Bridge image to pull
       repository: ghcr.io/open-telemetry/opentelemetry-operator/operator-opamp-bridge
       # The tag of the OpenTelemetry Operator OpAMP Bridge image to pull
-      tag: v0.158.0
+      tag: v0.161.0
       # The policy that specifies when the OpAMP Bridge image should be pulled
       pullPolicy: IfNotPresent
 
@@ -1359,7 +1359,7 @@ instrumentation:
       #   - name: APACHE_ENV_VAR
       #     value: apache_value
     dotnet:
-      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.15.0
+      image: ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.16.0
       env:
         # The Splunk .NET image uses linux-x64; the upstream operator defaults to linux.
         - name: CORECLR_PROFILER_PATH
@@ -1376,8 +1376,8 @@ instrumentation:
       #   - name: GO_ENV_VAR
       #     value: go_value
     java:
-      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.31.1
-      secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.31.1
+      image: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java:v2.31.3
+      secureAppImage: ghcr.io/signalfx/splunk-otel-java/splunk-otel-java-csa:v2.31.3
       env:
         - name: OTEL_RESOURCE_DISABLED_KEYS
           value: process.executable.path,process.command_args
@@ -1396,13 +1396,13 @@ instrumentation:
       #     cpu: 100m
       #     memory: 200Mi
     nodejs:
-      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.11.0
+      image: ghcr.io/signalfx/splunk-otel-js/splunk-otel-js:v4.12.0
       # env:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
     python:
       image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
-      secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2.12.1-secureapp
+      secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2-secureapp
       env:
         - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
           value: ""
@@ -1655,12 +1655,6 @@ db2:
 ################################################################################
 
 featureGates:
-  # Use Light Prometheus Receiver for metrics collection from discovered Prometheus endpoints.
-  # https://github.com/signalfx/splunk-otel-collector/tree/main/internal/receiver/lightprometheusreceiver
-  # Light Prometheus Receiver is optimized for performance and reduced memory footprint.
-  # From the other hand, it does not support all Prometheus configuration options.
-  # This feature gate is deprecated and will be removed in a future release.
-  useLightPrometheusReceiver: false
   # The feature gate enables experimental exporter batching instead of batch processor. This feature
   # ensures the backpressure is propagated to the file readers and no data is dropped.
   # Not recommended to use with enabled gateway.

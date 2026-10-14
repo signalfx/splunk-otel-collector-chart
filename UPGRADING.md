@@ -1,5 +1,14 @@
 # Upgrade guidelines
 
+## 0.162.0 to 0.163.0
+
+### Light Prometheus Receiver removed
+
+The `featureGates.useLightPrometheusReceiver` setting has been removed. The chart
+always uses the standard Prometheus receiver for metrics collected from discovered
+Prometheus endpoints. Remove `useLightPrometheusReceiver` from your values file;
+if it was enabled, the standard receiver now handles autodetected endpoints.
+
 ## 0.160.0 to 0.161.0
 
 ### `useLightPrometheusReceiver` feature gate is deprecated
