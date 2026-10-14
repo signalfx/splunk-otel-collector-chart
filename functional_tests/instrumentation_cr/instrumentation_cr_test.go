@@ -306,7 +306,7 @@ func deployTestWorkload(t *testing.T, cs *kubernetes.Clientset) {
 
 func deleteTestWorkload(t *testing.T, cs *kubernetes.Clientset) {
 	t.Helper()
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 	_ = cs.AppsV1().Deployments(internal.DefaultNamespace).Delete(
 		ctx, testDeploymentName, metav1.DeleteOptions{})
