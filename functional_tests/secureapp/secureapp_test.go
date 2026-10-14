@@ -23,6 +23,7 @@
 package secureapp
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,22 +64,23 @@ func Test_SecureApp_JavaAttackEvents(t *testing.T) {
 
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup")
-		internal.ChartUninstall(t, kubeconfig)
+		teardown(t.Context(), t, kubeconfig)
 	}
 
 	sink := internal.SetupOTLPLogsSinkOnPort(t, secureAppLogsPort, "/v3/event")
 	internal.SetupSignalFxAPIServer(t)
 
-	if os.Getenv("SKIP_SETUP") != "true" {
-		deployAll(t, kubeconfig)
-	}
-
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			return
 		}
-		internal.ChartUninstall(t, kubeconfig)
+		// t.Context is canceled before cleanup runs.
+		teardown(context.Background(), t, kubeconfig) //nolint:usetesting
 	})
+
+	if os.Getenv("SKIP_SETUP") != "true" {
+		deployAll(t, kubeconfig)
+	}
 
 	if os.Getenv("SKIP_TESTS") == "true" {
 		t.Log("Skipping tests as SKIP_TESTS is set to true")
@@ -152,11 +154,31 @@ func deployJavaApp(t *testing.T, clientset *kubernetes.Clientset) {
 	deployments := clientset.AppsV1().Deployments(internal.DefaultNamespace)
 	_, createErr := deployments.Create(t.Context(), dep, metav1.CreateOptions{})
 	if k8serrors.IsAlreadyExists(createErr) {
+		existing, getErr := deployments.Get(t.Context(), dep.Name, metav1.GetOptions{})
+		require.NoError(t, getErr)
+		dep.ResourceVersion = existing.ResourceVersion
 		_, updateErr := deployments.Update(t.Context(), dep, metav1.UpdateOptions{})
 		require.NoError(t, updateErr)
 	} else {
 		require.NoError(t, createErr)
 	}
+}
+
+// teardown removes the workload before the chart, including workloads retained
+// by an earlier test or reused with SKIP_SETUP.
+func teardown(ctx context.Context, t *testing.T, kubeconfig string) {
+	t.Helper()
+
+	restConfig, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	require.NoError(t, err)
+	clientset, err := kubernetes.NewForConfig(restConfig)
+	require.NoError(t, err)
+
+	grace := int64(0)
+	err = clientset.AppsV1().Deployments(internal.DefaultNamespace).Delete(
+		ctx, "java-test", metav1.DeleteOptions{GracePeriodSeconds: &grace})
+	require.True(t, err == nil || k8serrors.IsNotFound(err), "failed to delete java-test deployment: %v", err)
+	internal.ChartUninstall(t, kubeconfig)
 }
 
 // triggerAttacks execs into the java-test pod and fires a small set of
