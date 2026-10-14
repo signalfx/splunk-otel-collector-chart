@@ -992,7 +992,7 @@ remoteManagement:
       # The registry and name of the OpenTelemetry Operator OpAMP Bridge image to pull
       repository: ghcr.io/open-telemetry/opentelemetry-operator/operator-opamp-bridge
       # The tag of the OpenTelemetry Operator OpAMP Bridge image to pull
-      tag: v0.158.0
+      tag: v0.161.0
       # The policy that specifies when the OpAMP Bridge image should be pulled
       pullPolicy: IfNotPresent
 
@@ -1637,12 +1637,6 @@ targetallocator:
 ################################################################################
 
 featureGates:
-  # Use Light Prometheus Receiver for metrics collection from discovered Prometheus endpoints.
-  # https://github.com/signalfx/splunk-otel-collector/tree/main/internal/receiver/lightprometheusreceiver
-  # Light Prometheus Receiver is optimized for performance and reduced memory footprint.
-  # From the other hand, it does not support all Prometheus configuration options.
-  # This feature gate is deprecated and will be removed in a future release.
-  useLightPrometheusReceiver: false
   # The feature gate enables experimental exporter batching instead of batch processor. This feature
   # ensures the backpressure is propagated to the file readers and no data is dropped.
   # Not recommended to use with enabled gateway.

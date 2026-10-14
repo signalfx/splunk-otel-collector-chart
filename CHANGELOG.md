@@ -4,6 +4,19 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.162.1] - 2026-10-13
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.162.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.162.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Remove the Light Prometheus Receiver and its feature gate; autodetected Prometheus endpoints always use the standard Prometheus receiver. ([#2648](https://github.com/signalfx/splunk-otel-collector-chart/pull/2648))
+
+### 💡 Enhancements 💡
+
+- `chart`: Update the OpAMP Bridge image to v0.161.0 and grant it permission to read the kube-system namespace. ([#2652](https://github.com/signalfx/splunk-otel-collector-chart/pull/2652))
+  The bridge uses the Kubernetes cluster ID to create unique standalone agent instance IDs.
+
 ## [0.162.0] - 2026-10-08
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.162.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.162.0).
