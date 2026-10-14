@@ -28,6 +28,9 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Set up Helm
+      uses: ./.github/actions/setup-helm
+
     - name: Download the latest published release to use as a base for the upgrade
       if: inputs.mode == 'upgrade'
       shell: bash

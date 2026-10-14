@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-set -e
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
+set -eo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export LOCALBIN="${LOCALBIN:-$SCRIPT_DIR/../bin}"
+bash "$SCRIPT_DIR/install-helm.sh"
+export PATH="$(cd "$LOCALBIN" && pwd):$PATH"
 
 #Make sure to check and clean previously failed deployment
 echo "Checking if previous deployment exist..."
