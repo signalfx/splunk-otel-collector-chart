@@ -6,6 +6,8 @@
 splunkObservability:
   realm: test-realm
   accessToken: "dummy-token"
+  ingestUrl: {{ .IngestURL }}
+  apiUrl: {{ .ApiURL }}
 
 clusterName: db2-functional-test
 
@@ -17,9 +19,6 @@ db2:
   enabled: true
   receivers:
     - name: default
-      # No Db2 is deployed: this asserts the subchart's wiring, so the receiver only has to
-      # start and resolve its exporter target. Scraping a real Db2 is covered in the
-      # receiver's own suite, which already budgets for the image's long startup.
       hostname: db2.default.svc.cluster.local
       database: SAMPLE
       port: 50000

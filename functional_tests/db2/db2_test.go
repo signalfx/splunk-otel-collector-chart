@@ -12,8 +12,11 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -26,22 +29,27 @@ const (
 
 	// Rendered by the subchart from the release name; see assertDerivedEndpoint.
 	db2ConfigMapSuffix = "-db2-config"
+
+	// Matches the startupProbe budget in testdata/db2/deployment.yaml, plus slack for the
+	// image pull. Db2 answers on its port within seconds but takes minutes to create the
+	// instance and SAMPLE.
+	db2ReadyTimeout = 25 * time.Minute
 )
 
-// Test_Db2_Subchart_Wiring covers the part of the splunk-otel-db2 subchart that render and
-// unit tests cannot reach: that enabling it in a real release produces a receiver which
-// starts, and whose OTLP target is the Collector Service this release actually created.
+// Test_Db2_Metrics_Through_Collector exercises the whole path: a real Db2, a receiver
+// deployed by the subchart, the Collector this release creates, and metrics arriving at a
+// sink. Render and unit tests cover the subchart's output; only this covers the contract
+// between the two charts.
 //
-// It deliberately does not deploy Db2. The receiver scraping a real database is already
-// covered in the receiver's own suite by an end-to-end test that runs Db2 and a Collector
-// together, and which budgets for that image taking minutes to initialize. Repeating it
-// here measured a Db2 fixture rather than this chart: the first attempt sat at
-// "Running / Ready: false" for the whole 12-minute window and told us nothing about the
-// wiring.
+// It asserts two things that can fail independently:
+//
+//   - the address the subchart derived names a Service this release actually created, which
+//     a string comparison would not catch; and
+//   - Db2 metrics reach the sink, which is the data flow itself.
 //
 // db2.otlp.endpoint is left unset on purpose. The subchart deriving that address from the
 // parent release name is the contract under test, so hard-coding it would assert nothing.
-func Test_Db2_Subchart_Wiring(t *testing.T) {
+func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 	kubeconfig, ok := os.LookupEnv("KUBECONFIG")
 	require.True(t, ok, "KUBECONFIG must be set")
 
@@ -51,11 +59,20 @@ func Test_Db2_Subchart_Wiring(t *testing.T) {
 
 	client := k8sClient(t, kubeconfig)
 
+	// Db2 first. The receiver retries, but starting it against nothing only lengthens the
+	// run and turns a failure into "did Db2 come up, or did the wiring break".
+	deployDb2(t, client)
+
+	metricsSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
+
 	valuesFile, err := filepath.Abs(filepath.Join(testDir, valuesDir, "db2_values.yaml.tmpl"))
 	require.NoError(t, err)
 
-	internal.ChartInstallOrUpgrade(t, kubeconfig, valuesFile, map[string]any{}, 0,
-		internal.GetDefaultChartOptions())
+	hostEp := internal.HostEndpoint(t)
+	internal.ChartInstallOrUpgrade(t, kubeconfig, valuesFile, map[string]any{
+		"IngestURL": "http://" + internal.HostPort(hostEp, internal.SignalFxReceiverPort),
+		"ApiURL":    "http://" + internal.HostPort(hostEp, internal.SignalFxAPIPort),
+	}, 0, internal.GetDefaultChartOptions())
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
@@ -72,6 +89,52 @@ func Test_Db2_Subchart_Wiring(t *testing.T) {
 		"app.kubernetes.io/name=db2", 5*time.Minute, 10*time.Second)
 
 	assertDerivedEndpoint(t, client)
+
+	// The receiver scrapes on an interval and the Collector batches, so allow several
+	// cycles rather than expecting the first scrape to land.
+	internal.AssertMetricNames(t, metricsSink,
+		filepath.Join(testDir, "expected_db2_metric_names.yaml"), 5*time.Minute, 5*time.Second)
+}
+
+func deployDb2(t *testing.T, client *kubernetes.Clientset) {
+	t.Helper()
+
+	svc := decode[*corev1.Service](t, filepath.Join(testDir, "db2", "service.yaml"))
+	services := client.CoreV1().Services(internal.DefaultNamespace)
+	_, err := services.Create(t.Context(), svc, metav1.CreateOptions{})
+	require.NoError(t, err)
+
+	dep := decode[*appsv1.Deployment](t, filepath.Join(testDir, "db2", "deployment.yaml"))
+	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
+	_, err = deployments.Create(t.Context(), dep, metav1.CreateOptions{})
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			return
+		}
+		grace := int64(0)
+		_ = deployments.Delete(t.Context(), dep.Name, metav1.DeleteOptions{GracePeriodSeconds: &grace})
+		_ = services.Delete(t.Context(), svc.Name, metav1.DeleteOptions{})
+	})
+
+	// Waits on the startupProbe, which opens a real connection - so this returns when
+	// SAMPLE is usable, not merely when the port is listening.
+	internal.CheckPodsReady(t, client, internal.DefaultNamespace, "app=db2",
+		db2ReadyTimeout, 15*time.Second)
+}
+
+// decode reads a single-document manifest and asserts its kind, so a mistake in testdata
+// fails here rather than as a confusing nil later.
+func decode[T any](t *testing.T, path string) T {
+	t.Helper()
+	raw, err := os.ReadFile(path)
+	require.NoError(t, err)
+	obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(raw, nil, nil)
+	require.NoError(t, err)
+	typed, ok := obj.(T)
+	require.True(t, ok, "%s decoded to %T, not the expected type", path, obj)
+	return typed
 }
 
 // assertDerivedEndpoint is the actual contract: the address the subchart derived must name a
