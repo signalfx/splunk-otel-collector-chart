@@ -54,6 +54,9 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Set up Helm
+      uses: ./.github/actions/setup-helm
+
     - name: Set KUBECONFIG for all steps
       shell: bash
       run: echo "KUBECONFIG=/tmp/kube-config-splunk-otel-collector-chart-functional-testing" >> "$GITHUB_ENV"

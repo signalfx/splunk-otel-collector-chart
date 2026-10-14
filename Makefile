@@ -16,6 +16,7 @@ endif
 
 ## Location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin
+export PATH := $(if $(filter /%,$(LOCALBIN)),$(LOCALBIN),$(CURDIR)/$(LOCALBIN)):$(PATH)
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 CHLOGGEN ?= $(TOOLS_BIN_DIR)/chloggen
@@ -38,7 +39,7 @@ help: ## Display Makefile help information for all actions
 
 .PHONY: install-tools
 install-tools: ## Install tools (macOS/Linux)
-	LOCALBIN=$(LOCALBIN) GOBIN=$(LOCALBIN) ci_scripts/install-tools.sh || exit 1
+	LOCALBIN="$(LOCALBIN)" GOBIN="$(LOCALBIN)" ci_scripts/install-tools.sh || exit 1
 	$(MAKE) goinstall-tools
 
 .PHONY: install-chloggen
