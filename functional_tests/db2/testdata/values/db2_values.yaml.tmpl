@@ -1,14 +1,11 @@
 ---
-# Enables the splunk-otel-db2 subchart against the Db2 deployed by the test, and points the
-# Collector's metrics pipeline at the test's SignalFx sink rather than a real realm.
+# Enables the splunk-otel-db2 subchart.
 #
 # db2.otlp.endpoint is deliberately left unset: the subchart deriving it from this release is
-# the contract under test, so hard-coding it here would test nothing.
+# the contract under test, so hard-coding it here would assert nothing.
 splunkObservability:
   realm: test-realm
   accessToken: "dummy-token"
-  ingestUrl: {{ .IngestURL }}
-  apiUrl: {{ .ApiURL }}
 
 clusterName: db2-functional-test
 
@@ -20,6 +17,9 @@ db2:
   enabled: true
   receivers:
     - name: default
+      # No Db2 is deployed: this asserts the subchart's wiring, so the receiver only has to
+      # start and resolve its exporter target. Scraping a real Db2 is covered in the
+      # receiver's own suite, which already budgets for the image's long startup.
       hostname: db2.default.svc.cluster.local
       database: SAMPLE
       port: 50000
@@ -27,5 +27,4 @@ db2:
       username: db2inst1
       password: db2inst1-pwd
       tls:
-        # The test Db2 has no certificate configured, so there is nothing to encrypt to.
         insecure: true
