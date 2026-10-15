@@ -31,8 +31,8 @@ const (
 	db2ConfigMapSuffix = "-db2-config"
 
 	// Matches the startupProbe budget in testdata/db2/deployment.yaml, plus slack for the
-	// image pull. Db2 answers on its port within seconds but takes minutes to create the
-	// instance and SAMPLE.
+	// image pull. Db2 is ready in about 95s once probed with a real connection rather
+	// than a port check; this is a ceiling for a cold pull, not an expectation.
 	db2ReadyTimeout = 25 * time.Minute
 )
 

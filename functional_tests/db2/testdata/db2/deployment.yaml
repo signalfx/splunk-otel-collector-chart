@@ -40,10 +40,11 @@ spec:
           # budget to first boot, so a later stall is still reported promptly instead of
           # being absorbed by a large failureThreshold.
           #
-          # The budget is the point. Db2 answers on the port within seconds but takes
-          # minutes to create the instance and SAMPLE. Our own suite allows 10 minutes on
-          # bare Docker; nested in kind it is slower, and an earlier revision of this test
-          # budgeted exactly 12 minutes and expired at 719s with the pod still initializing.
+          # The probe command matters more than the budget. An earlier revision used a
+          # port check, timed out at 719s, and concluded Db2 was too slow for CI; the
+          # listener simply answers long before the database can be used. With a real
+          # connection Db2 is ready in about 95s. The threshold below is headroom for a
+          # cold image pull from icr.io, and a startupProbe only spends what Db2 needs.
           startupProbe:
             exec:
               # A real connection, not a port check: the listener answers long before the
