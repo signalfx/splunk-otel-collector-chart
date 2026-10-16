@@ -382,7 +382,7 @@ func WriteMetricsAssertion(tb testing.TB, file string, actual pmetric.Metrics, o
 		}
 		generated = merged
 	}
-	if err := os.WriteFile(tmp.Name(), generated, 0o600); err != nil {
+	if err := os.WriteFile(tmp.Name(), generated, 0o600); err != nil { // #nosec G703 -- The path comes from os.CreateTemp in tb.TempDir.
 		return fmt.Errorf("write generated assertion for validation: %w", err)
 	}
 	if err := pmetricassert.AssertMetrics(tmp.Name(), actual); err != nil {

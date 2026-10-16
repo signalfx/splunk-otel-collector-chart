@@ -12,12 +12,10 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-    - name: Install Helm
-      uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 #v5.0.1
-      with:
-        version: v4.2.4
     - name: Checkout code
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - name: Install Helm
+      uses: ./.github/actions/setup-helm
     - name: Run pre-commit
       run: |
         pip install pre-commit==4.5.1

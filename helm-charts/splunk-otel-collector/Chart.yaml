@@ -28,7 +28,7 @@ dependencies:
     alias: operatorcrds
     condition: operatorcrds.install
   - name: opentelemetry-operator
-    version: 0.124.1
+    version: 0.126.0
     alias: operator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: operator.enabled
@@ -38,7 +38,7 @@ dependencies:
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: obi.enabled
   - name: opentelemetry-target-allocator
-    version: 0.160.0
+    version: 0.161.0
     alias: targetallocator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: targetallocator.enabled

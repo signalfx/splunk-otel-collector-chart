@@ -43,6 +43,16 @@ receivers:
         enabled: true
       k8s.pod.status_reason:
         enabled: true
+      k8s.persistentvolume.status.phase:
+        enabled: true
+      k8s.persistentvolume.storage.capacity:
+        enabled: true
+      k8s.persistentvolumeclaim.status.phase:
+        enabled: true
+      k8s.persistentvolumeclaim.storage.capacity:
+        enabled: true
+      k8s.persistentvolumeclaim.storage.request:
+        enabled: true
     {{- end }}
     {{- if eq .Values.distribution "openshift" }}
     distribution: openshift
@@ -151,6 +161,15 @@ processors:
         where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
       - set(resource.attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
         where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
+
+  {{- if and (and (hasPrefix "eks" .Values.distribution) .Values.featureGates.enableEKSApiServerMetrics) (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
+  transform/limit_histogram_buckets:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - merge_histogram_buckets(32, method="limit_buckets")
+  {{- end }}
 
   {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
   resource/add_event_k8s:
@@ -536,6 +555,7 @@ service:
         - resource_detection/k8s_cluster_name
         {{- end }}
         - resource
+        - transform/limit_histogram_buckets
       exporters:
         - signalfx/histograms
     {{- end }}

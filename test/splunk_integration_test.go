@@ -207,7 +207,13 @@ func waitForExactEventCount(t *testing.T, searchQuery string, startTime string, 
 	t.Helper()
 
 	var events []any
+	firstCheck := true
 	require.Eventually(t, func() bool {
+		// Preserve the initial polling delay now that Eventually checks immediately.
+		if firstCheck {
+			firstCheck = false
+			return false
+		}
 		events = CheckEventsFromSplunk(searchQuery, startTime)
 		return len(events) == expected
 	}, splunkIngestionTimeout, splunkSearchInterval, "expected %d Splunk events for query %q", expected, searchQuery)
@@ -218,7 +224,14 @@ func waitForMinimumEventCount(t *testing.T, searchQuery string, startTime string
 	t.Helper()
 
 	var events []any
+	firstCheck := true
 	require.Eventually(t, func() bool {
+		// Preserve the initial polling delay now that Eventually checks immediately.
+		// Splunk rejects searches with equal start and end timestamps.
+		if firstCheck {
+			firstCheck = false
+			return false
+		}
 		events = CheckEventsFromSplunk(searchQuery, startTime)
 		return len(events) >= minimum
 	}, splunkIngestionTimeout, splunkSearchInterval, "expected at least %d Splunk events for query %q", minimum, searchQuery)

@@ -114,6 +114,12 @@ data:
             where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "StatefulSet")
           - set(resource.attributes["k8s.deployment.name"], resource.attributes["k8s.hpa.scaletargetref.name"])
             where IsMatch(resource.attributes["k8s.hpa.scaletargetref.kind"], "Deployment")
+      transform/limit_histogram_buckets:
+        error_mode: ignore
+        metric_statements:
+        - context: datapoint
+          statements:
+          - merge_histogram_buckets(32, method="limit_buckets")
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
@@ -123,6 +129,16 @@ data:
           k8s.container.status.reason:
             enabled: true
           k8s.node.condition:
+            enabled: true
+          k8s.persistentvolume.status.phase:
+            enabled: true
+          k8s.persistentvolume.storage.capacity:
+            enabled: true
+          k8s.persistentvolumeclaim.status.phase:
+            enabled: true
+          k8s.persistentvolumeclaim.storage.capacity:
+            enabled: true
+          k8s.persistentvolumeclaim.storage.request:
             enabled: true
           k8s.pod.status_reason:
             enabled: true
@@ -208,6 +224,7 @@ data:
           - batch
           - resource_detection/k8s_cluster_name
           - resource
+          - transform/limit_histogram_buckets
           receivers:
           - prometheus/kubernetes-apiserver
       telemetry:

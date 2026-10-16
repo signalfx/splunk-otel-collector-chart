@@ -2555,6 +2555,33 @@ resources:
                     receiver: k8scluster
               name: k8s.namespace.phase
               type: gauge
+            - datapoints/include:
+                - attributes/include:
+                    k8s.persistentvolume.status.phase: Bound
+              name: k8s.persistentvolume.status.phase
+              type: gauge
+            - datapoints/include:
+                - attributes/include:
+                    k8s.persistentvolume.name: splunk-otel-collector-functional-test-pv
+              name: k8s.persistentvolume.storage.capacity
+              type: gauge
+            - datapoints/include:
+                - attributes/include:
+                    k8s.persistentvolumeclaim.status.phase: Bound
+              name: k8s.persistentvolumeclaim.status.phase
+              type: gauge
+            - datapoints/include:
+                - attributes/include:
+                    k8s.persistentvolumeclaim.name: splunk-otel-collector-functional-test-pvc
+                    k8s.namespace.name: default
+              name: k8s.persistentvolumeclaim.storage.capacity
+              type: gauge
+            - datapoints/include:
+                - attributes/include:
+                    k8s.persistentvolumeclaim.name: splunk-otel-collector-functional-test-pvc
+                    k8s.namespace.name: default
+              name: k8s.persistentvolumeclaim.storage.request
+              type: gauge
             - datapoints:
                 - attributes:
                     cluster_name: ci-k8s-cluster
