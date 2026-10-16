@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db2
+  labels:
+    app: db2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db2
+  template:
+    metadata:
+      labels:
+        app: db2
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: db2
+          image: icr.io/db2_community/db2:11.5.9.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            # The image runs its own init, manages kernel params and writes outside the
+            # container filesystem; it does not start unprivileged.
+            privileged: true
+          env:
+            - name: LICENSE
+              value: accept
+            - name: DB2INST1_PASSWORD
+              value: db2inst1-pwd
+            - name: DBNAME
+              value: SAMPLE
+            - name: ARCHIVE_LOGS
+              value: "false"
+            - name: AUTOCONFIG
+              value: "false"
+          ports:
+            - containerPort: 50000
+          # A startupProbe rather than one long readinessProbe: it confines the generous
+          # budget to first boot, so a later stall is still reported promptly instead of
+          # being absorbed by a large failureThreshold.
+          #
+          # The probe command matters more than the budget. An earlier revision used a
+          # port check, timed out at 719s, and concluded Db2 was too slow for CI; the
+          # listener simply answers long before the database can be used. With a real
+          # connection Db2 is ready in about 95s. The threshold below is headroom for a
+          # cold image pull from icr.io, and a startupProbe only spends what Db2 needs.
+          startupProbe:
+            exec:
+              # A real connection, not a port check: the listener answers long before the
+              # database can be used.
+              command: ["/bin/bash", "-c", "su - db2inst1 -c 'db2 connect to SAMPLE'"]
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 15
+            failureThreshold: 80
+          readinessProbe:
+            exec:
+              command: ["/bin/bash", "-c", "su - db2inst1 -c 'db2 connect to SAMPLE'"]
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+          volumeMounts:
+            - name: database
+              mountPath: /database
+      volumes:
+        - name: database
+          emptyDir: {}
