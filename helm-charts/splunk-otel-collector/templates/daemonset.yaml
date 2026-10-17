@@ -271,7 +271,7 @@ spec:
         - mountPath: /hostfs/var/run/utmp
           name: host-var-run-utmp
           readOnly: true
-        {{- if and (ne .Values.distribution "gke/autopilot") (ne .Values.distribution "gke") }}
+        {{- if and (ne .Values.distribution "gke/autopilot") (ne .Values.distribution "gke") (ne .Values.distribution "talos") }}
         - mountPath: /hostfs/usr/lib/os-release
           name: host-usr-lib-osrelease
           readOnly: true
@@ -432,7 +432,7 @@ spec:
       - name: host-var-run-utmp
         hostPath:
           path: /var/run/utmp
-      {{- if and (ne .Values.distribution "gke/autopilot") (ne .Values.distribution "gke") }}
+      {{- if and (ne .Values.distribution "gke/autopilot") (ne .Values.distribution "gke") (ne .Values.distribution "talos") }}
       - name: host-usr-lib-osrelease
         hostPath:
           path: /usr/lib/os-release
