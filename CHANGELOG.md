@@ -4,6 +4,34 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.163.0] - 2026-10-17
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.163.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.163.0).
+
+### 💡 Enhancements 💡
+
+- `chart`: Enable all Kubernetes persistent volume and persistent volume claim metrics by default ([#2586](https://github.com/signalfx/splunk-otel-collector-chart/pull/2586))
+  Enabled metrics:
+    - k8s.persistentvolume.status.phase
+    - k8s.persistentvolume.storage.capacity
+    - k8s.persistentvolumeclaim.status.phase
+    - k8s.persistentvolumeclaim.storage.capacity
+    - k8s.persistentvolumeclaim.storage.request
+  
+- `chart`: Bump TargetAllocator to 0.161.1 in helm-charts/splunk-otel-collector/Chart.yaml ([#2674](https://github.com/signalfx/splunk-otel-collector-chart/pull/2674),[#2676](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2676))
+- `operator`: Bump java-csa to v2.32.0 in helm-charts/splunk-otel-collector/values.yaml ([#2673](https://github.com/signalfx/splunk-otel-collector-chart/pull/2673))
+- `operator`: Bump java to v2.32.0 in helm-charts/splunk-otel-collector/values.yaml ([#2662](https://github.com/signalfx/splunk-otel-collector-chart/pull/2662))
+- `operator`: Bump nodejs to v4.12.1 in helm-charts/splunk-otel-collector/values.yaml ([#2661](https://github.com/signalfx/splunk-otel-collector-chart/pull/2661))
+- `operator`: Bump operator to 0.126.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2660](https://github.com/signalfx/splunk-otel-collector-chart/pull/2660),[#2675](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2675))
+
+### 🧰 Bug fixes 🧰
+
+- `agent, clusterReceiver`: Merge histogram buckets as needed to meet Splunk Observability Cloud's 32-bucket ingest limit. ([#2606](https://github.com/signalfx/splunk-otel-collector-chart/pull/2606))
+  The `transform/limit_histogram_buckets` processor is added to the agent control-plane histogram
+  pipeline when `featureGates.useControlPlaneMetricsHistogramData` is enabled, and to the EKS
+  API server histogram pipeline when `featureGates.enableEKSApiServerMetrics` is enabled.
+  
+
 ## [0.162.1] - 2026-10-13
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.162.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.162.0).
