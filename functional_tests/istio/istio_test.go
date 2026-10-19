@@ -22,6 +22,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -45,6 +46,7 @@ type request struct {
 	host   string
 	header string
 	path   string
+	status int
 }
 
 // Env vars to control the test behavior
@@ -96,9 +98,9 @@ func deployIstioAndCollector(t *testing.T) {
 
 	// Send traffic through ingress gateways
 	requests := []request{
-		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
-		{"http://httpbin.example.com/status/404", "httpbin.example.com", "httpbin.example.com:80", "/status/404"},
-		{"http://httpbin.example.com/delay/1", "httpbin.example.com", "httpbin.example.com:80", "/delay/0"},
+		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200", http.StatusOK},
+		{"http://httpbin.example.com/status/404", "httpbin.example.com", "httpbin.example.com:80", "/status/404", http.StatusNotFound},
+		{"http://httpbin.example.com/delay/1", "httpbin.example.com", "httpbin.example.com:80", "/delay/0", http.StatusOK},
 	}
 	sendWorkloadHTTPRequests(t, requests)
 
@@ -257,17 +259,24 @@ func patchResource(t *testing.T, clientset *kubernetes.Clientset, namespace, nam
 	require.NoError(t, err)
 }
 
-func sendHTTPRequest(t *testing.T, client *http.Client, url, host, header, path string) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
+func sendHTTPRequest(t *testing.T, client *http.Client, url, host, header, path string, expectedStatus int) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(t.Context(), time.Minute)
+	defer cancel()
+	req, requestErr := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	require.NoError(t, requestErr)
 	req.Host = host
 	req.Header.Set("Host", header)
-	resp, err := client.Do(req)
-	require.NoError(t, err)
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	require.NoError(t, err)
-	t.Logf("Response for %s: %s", path, string(body))
+	// Pod readiness can precede the ingress gateway discovering healthy upstreams.
+	require.EventuallyWithT(t, func(tt *assert.CollectT) {
+		resp, err := client.Do(req)
+		require.NoError(tt, err)
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(tt, err)
+		require.Equal(tt, expectedStatus, resp.StatusCode, "Response for %s: %s", path, string(body))
+		t.Logf("Response for %s: %s", path, string(body))
+	}, time.Minute, time.Second, "Workload did not return the expected response for %s", path)
 }
 
 func sendWorkloadHTTPRequests(t *testing.T, requests []request) {
@@ -287,10 +296,11 @@ func sendWorkloadHTTPRequests(t *testing.T, requests []request) {
 
 	client := &http.Client{
 		Transport: transport,
+		Timeout:   10 * time.Second,
 	}
 
 	for _, req := range requests {
-		sendHTTPRequest(t, client, req.url, req.host, req.header, req.path)
+		sendHTTPRequest(t, client, req.url, req.host, req.header, req.path, req.status)
 	}
 }
 
@@ -379,7 +389,7 @@ func testIstioHTTPBinTraces(t *testing.T, expectedTracesFile string, tracesSink 
 	internal.ClearTraceSchemaURLs(expectedTraces)
 
 	requests := []request{
-		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200"},
+		{"http://httpbin.example.com/status/200", "httpbin.example.com", "httpbin.example.com:80", "/status/200", http.StatusOK},
 	}
 	for range 3 {
 		sendWorkloadHTTPRequests(t, requests)
