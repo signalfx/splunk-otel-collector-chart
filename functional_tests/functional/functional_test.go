@@ -144,6 +144,10 @@ func Test_Functions(t *testing.T) {
 	}
 }
 
+// deleteInstallationHookJob removes the instrumentation hook Job and waits for
+// its dependent Pods to disappear before the cluster metrics snapshot. Helm's
+// hook-succeeded policy deletes the Job with background propagation, so those
+// Pods can otherwise still appear in the snapshot briefly.
 func deleteInstallationHookJob(t *testing.T, client kubernetes.Interface) {
 	t.Helper()
 

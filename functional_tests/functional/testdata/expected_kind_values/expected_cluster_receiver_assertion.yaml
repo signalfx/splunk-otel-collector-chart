@@ -2922,7 +2922,7 @@ resources:
                     receiver: k8scluster
               name: k8s.replicaset.desired
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     cluster_name: ci-k8s-cluster
                     customfield1: customvalue1
