@@ -1,0 +1,10 @@
+# AssertMetricNames projects observed metric names into canonical gauge metrics.
+version: 1
+signal: metrics
+resources:
+  - scopes:
+      - metrics/include:
+          - name: process.runtime.nodejs.memory.heap.used
+            type: gauge
+          - name: process.runtime.nodejs.memory.rss
+            type: gauge

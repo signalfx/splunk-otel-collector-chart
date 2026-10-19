@@ -114,7 +114,7 @@ func ChartInstallOrUpgrade(t *testing.T, testKubeConfig string, valuesFile strin
 		newChartPath := filepath.Join("..", "..", defaultChartPath)
 
 		valuesDir := filepath.Dir(valuesFile)
-		initValuesBytes, rfErr := os.ReadFile(filepath.Join(valuesDir, upgradeFromValues))
+		initValuesBytes, rfErr := os.ReadFile(filepath.Join(valuesDir, upgradeFromValues)) // #nosec G703 -- Upgrade paths are selected by the test runner.
 		require.NoError(t, rfErr)
 		initChart := loadChartFromDir(t, oldChartDir)
 		var initValues map[string]any
@@ -203,7 +203,7 @@ func GetKubeClient(kubeConfig string) (*kubernetes.Clientset, error) {
 }
 
 func deleteCertSecret(t *testing.T, clientset *kubernetes.Clientset, releaseName, namespace string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) // Called from t.Cleanup where t.Context is canceled.
 	defer cancel()
 	secretName := releaseName + "-operator-controller-manager-service-cert"
 	t.Logf("Attempting to delete secret: %s in namespace: %s", secretName, namespace)
@@ -265,7 +265,7 @@ func ChartUninstall(t *testing.T, testKubeConfig string) {
 
 	// Log remaining CRs after helm uninstall to diagnose CRD cleanup issues.
 	// Use context.Background because t.Context() is already cancelled during t.Cleanup.
-	diagCtx, diagCancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:usetesting
+	diagCtx, diagCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer diagCancel()
 	postGVRs, _ := otelServedGVRs(diagCtx, crdClient)
 	for _, gvr := range postGVRs {
@@ -313,7 +313,7 @@ func otelServedGVRs(ctx context.Context, crdClient apiextensionsclient.Interface
 // deleteOperatorCRs deletes all opentelemetry.io CRs across all namespaces
 // and waits for them to be fully removed.
 func deleteOperatorCRs(t *testing.T, crdClient apiextensionsclient.Interface, dynClient dynamic.Interface) {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute) // Called from t.Cleanup where t.Context is canceled.
 	defer cancel()
 
 	gvrs, err := otelServedGVRs(ctx, crdClient)
@@ -345,7 +345,7 @@ func deleteOperatorCRs(t *testing.T, crdClient apiextensionsclient.Interface, dy
 
 	for _, gvr := range gvrs {
 		require.Eventually(t, func() bool {
-			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
+			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer pollCancel()
 			list, listErr := dynClient.Resource(gvr).List(pollCtx, v1.ListOptions{})
 			if listErr != nil {
@@ -358,7 +358,7 @@ func deleteOperatorCRs(t *testing.T, crdClient apiextensionsclient.Interface, dy
 }
 
 func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface, dynClient dynamic.Interface) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute) //nolint:usetesting // called from t.Cleanup where t.Context is canceled
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute) // Called from t.Cleanup where t.Context is canceled.
 	defer cancel()
 
 	gvrs, err := otelServedGVRs(ctx, crdClient)
@@ -393,7 +393,7 @@ func deleteOperatorCRDs(t *testing.T, crdClient apiextensionsclient.Interface, d
 
 	for _, tgt := range deleted {
 		require.Eventually(t, func() bool {
-			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:usetesting
+			pollCtx, pollCancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer pollCancel()
 			crd, getErr := crdAPI.Get(pollCtx, tgt.name, v1.GetOptions{})
 			if k8serrors.IsNotFound(getErr) {
@@ -463,7 +463,7 @@ func loadChartFromDir(t *testing.T, dir string) chart.Charter {
 
 func getDependencyVersion(t *testing.T, dependency string, chartPath string) string {
 	chartFilePath := filepath.Join(chartPath, "Chart.yaml")
-	chartFileContent, err := os.ReadFile(chartFilePath)
+	chartFileContent, err := os.ReadFile(chartFilePath) // #nosec G703 -- Chart paths are selected by the test runner.
 	require.NoError(t, err, "Failed to read %s", chartFilePath)
 
 	var chartData map[string]any

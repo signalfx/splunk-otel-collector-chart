@@ -7,12 +7,12 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: splunk-otel-collector
-    helm.sh/chart: splunk-otel-collector-0.159.0
+    helm.sh/chart: splunk-otel-collector-0.162.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: default
-    app.kubernetes.io/version: "0.159.0"
+    app.kubernetes.io/version: "0.162.0"
     app: splunk-otel-collector
-    chart: splunk-otel-collector-0.159.0
+    chart: splunk-otel-collector-0.162.1
     release: default
 data:
   relay: |
@@ -43,7 +43,7 @@ data:
         source: kubernetes
         sourcetype: kube:events
         splunk_app_name: splunk-otel-collector-chart
-        splunk_app_version: 0.159.0
+        splunk_app_version: 0.162.1
         timeout: 10s
         tls:
           insecure_skip_verify: false
@@ -146,6 +146,16 @@ data:
           k8s.container.status.reason:
             enabled: true
           k8s.node.condition:
+            enabled: true
+          k8s.persistentvolume.status.phase:
+            enabled: true
+          k8s.persistentvolume.storage.capacity:
+            enabled: true
+          k8s.persistentvolumeclaim.status.phase:
+            enabled: true
+          k8s.persistentvolumeclaim.storage.capacity:
+            enabled: true
+          k8s.persistentvolumeclaim.storage.request:
             enabled: true
           k8s.pod.status_reason:
             enabled: true

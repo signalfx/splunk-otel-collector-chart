@@ -1,12 +1,22 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/setup-helm"
     schedule:
       interval: "daily"
+    groups:
+      setup-helm:
+        patterns:
+          - "azure/setup-helm"
+        group-by: "dependency-name"
   - package-ecosystem: "gomod"
     directories:
       - "**/*"
+    schedule:
+      interval: "daily"
+    # The Helm dependency also supplies the CLI version to all Helm 4 workflows.
     groups:
       otelcol:
         patterns:

@@ -1,0 +1,17 @@
+name: Set up Helm 4
+description: Install the Helm CLI version maintained by Dependabot in functional_tests/go.mod.
+
+runs:
+  using: composite
+  steps:
+    - name: Read Helm version
+      id: version
+      shell: bash
+      run: |
+        version=$(bash ci_scripts/helm-version.sh)
+        echo "helm-version=$version" >> "$GITHUB_OUTPUT"
+
+    - name: Install Helm
+      uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+      with:
+        version: ${{ steps.version.outputs.helm-version }}

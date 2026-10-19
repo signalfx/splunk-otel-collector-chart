@@ -25,7 +25,7 @@ resourceSpans:
         - key: k8s.node.name
           value:
             stringValue: kind-control-plane
-        - key: k8s.pod.labels.app
+        - key: k8s.pod.label.app
           value:
             stringValue: httpbin
         - key: host.name

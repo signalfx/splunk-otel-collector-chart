@@ -1,7 +1,7 @@
 resources:
     - scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -17,7 +17,7 @@ resources:
                     url.scheme: https
               name: scrape_duration_seconds
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -33,7 +33,7 @@ resources:
                     url.scheme: https
               name: scrape_samples_post_metric_relabeling
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -49,7 +49,7 @@ resources:
                     url.scheme: https
               name: scrape_samples_scraped
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -65,7 +65,7 @@ resources:
                     url.scheme: https
               name: scrape_series_added
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -81,7 +81,7 @@ resources:
                     url.scheme: https
               name: up
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -98,7 +98,7 @@ resources:
                     url.scheme: https
               name: workqueue_depth
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -115,7 +115,7 @@ resources:
                     url.scheme: https
               name: workqueue_longest_running_processor_seconds
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -134,7 +134,7 @@ resources:
               name: workqueue_retries_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock

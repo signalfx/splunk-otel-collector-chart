@@ -1,0 +1,12 @@
+# AssertMetricNames projects observed metric names into canonical gauge metrics.
+version: 1
+signal: metrics
+resources:
+  - scopes:
+      - metrics/include:
+          - name: test_requests_total
+            type: gauge
+          - name: test_connections_active
+            type: gauge
+          - name: test_uptime_seconds_total
+            type: gauge

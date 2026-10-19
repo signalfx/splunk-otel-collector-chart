@@ -12,11 +12,20 @@ agent:
     - name: SPLUNK_DEBUG_CONFIG_SERVER
       value: "true"
   config:
+    {{- if .IPv6 }}
+    extensions:
+      health_check:
+        endpoint: "[::]:13133"
+    {{- end }}
     service:
       telemetry:
         logs:
           level: debug
     receivers:
+      {{- if .IPv6 }}
+      kubelet_stats:
+        endpoint: "https://[${K8S_NODE_IP}]:10250"
+      {{- end }}
       receiver_creator:
         receivers:
           prometheus/kubernetes-apiserver:
@@ -33,7 +42,7 @@ agent:
                       ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
                       insecure_skip_verify: true
                     static_configs:
-                      - targets: [ "`endpoint`:6443" ]
+                      - targets: [ '`joinHostPort(endpoint, 6443)`' ]
                     metric_relabel_configs:
                       - source_labels: [__name__]
                         action: keep

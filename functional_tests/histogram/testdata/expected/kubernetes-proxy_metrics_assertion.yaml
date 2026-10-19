@@ -1,7 +1,7 @@
 resources:
     - scopes:
         - metrics:
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -17,7 +17,7 @@ resources:
                     url.scheme: http
               name: kubeproxy_sync_proxy_rules_service_changes_pending
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -35,7 +35,7 @@ resources:
               name: kubeproxy_sync_proxy_rules_service_changes_total
               temporality: cumulative
               type: sum
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -51,7 +51,7 @@ resources:
                     url.scheme: http
               name: scrape_duration_seconds
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -67,7 +67,7 @@ resources:
                     url.scheme: http
               name: scrape_samples_post_metric_relabeling
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -83,7 +83,7 @@ resources:
                     url.scheme: http
               name: scrape_samples_scraped
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock
@@ -99,7 +99,7 @@ resources:
                     url.scheme: http
               name: scrape_series_added
               type: gauge
-            - datapoints:
+            - datapoints/include:
                 - attributes:
                     host.name: kind-control-plane
                     k8s.cluster.name: sock

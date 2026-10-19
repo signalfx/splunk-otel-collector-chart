@@ -176,7 +176,7 @@ func updateMatrixFile(filePath string, kindVersions []string, minikubeVersions [
 		return fmt.Errorf("failed to read file: %w", err)
 	}
 
-	var testMatrix map[string]map[string][]string
+	var testMatrix map[string]map[string]any
 	if err = json.Unmarshal(content, &testMatrix); err != nil {
 		return fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
@@ -184,6 +184,14 @@ func updateMatrixFile(filePath string, kindVersions []string, minikubeVersions [
 	for _, value := range testMatrix {
 		if len(kindVersions) > 0 && value[kubeKindVersion] != nil {
 			value[kubeKindVersion] = kindVersions
+			// Keep IPv6 coverage on the newest kind version as the matrix rolls forward.
+			if includes, validIncludes := value["include"].([]any); validIncludes {
+				for _, entry := range includes {
+					if include, validInclude := entry.(map[string]any); validInclude && include["ip-family"] == "ipv6" && include[kubeKindVersion] != nil {
+						include[kubeKindVersion] = kindVersions[0]
+					}
+				}
+			}
 		} else if len(minikubeVersions) > 0 && value[kubeMinikubeVersion] != nil {
 			value[kubeMinikubeVersion] = minikubeVersions
 		}

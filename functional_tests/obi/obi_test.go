@@ -4,6 +4,7 @@
 package obi
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,11 +13,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
@@ -57,12 +60,7 @@ func Test_OBI_Minimal_Traces(t *testing.T) {
 	valuesFile, err := filepath.Abs(filepath.Join(testDir, valuesDir, "obi_values.yaml.tmpl"))
 	require.NoError(t, err)
 
-	hostEp := internal.HostEndpoint(t)
-	internal.ChartInstallOrUpgrade(t, kubeconfig, valuesFile, map[string]any{
-		"OTLPEndpoint": internal.HostPort(hostEp, internal.OTLPGRPCReceiverPort),
-	}, 0, internal.GetDefaultChartOptions())
-
-	// Ensure chart resources are removed after test unless explicitly skipped.
+	// Register cleanup before installation so partially installed charts are removed.
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
@@ -70,6 +68,11 @@ func Test_OBI_Minimal_Traces(t *testing.T) {
 		}
 		internal.ChartUninstall(t, kubeconfig)
 	})
+
+	hostEp := internal.HostEndpoint(t)
+	internal.ChartInstallOrUpgrade(t, kubeconfig, valuesFile, map[string]any{
+		"OTLPEndpoint": internal.HostPort(hostEp, internal.OTLPGRPCReceiverPort),
+	}, 0, internal.GetDefaultChartOptions())
 
 	for _, app := range apps {
 		deployApp(t, kubeconfig, app)
@@ -92,14 +95,19 @@ func deployApp(t *testing.T, kubeconfig string, app App) {
 	deployment := obj.(*appsv1.Deployment)
 
 	deployments := client.AppsV1().Deployments(internal.DefaultNamespace)
-	if _, err = deployments.Create(t.Context(), deployment, metav1.CreateOptions{}); err != nil {
-		// Try update if it already exists
-		_, err = deployments.Update(t.Context(), deployment, metav1.UpdateOptions{})
-		require.NoError(t, err)
+	_, err = deployments.Create(t.Context(), deployment, metav1.CreateOptions{})
+	if k8serrors.IsAlreadyExists(err) {
+		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			existing, getErr := deployments.Get(t.Context(), deployment.Name, metav1.GetOptions{})
+			if getErr != nil {
+				return getErr
+			}
+			deployment.ResourceVersion = existing.ResourceVersion
+			_, updateErr := deployments.Update(t.Context(), deployment, metav1.UpdateOptions{})
+			return updateErr
+		})
 	}
-
-	// Wait for the pod(s) to be Ready for a short stabilization period.
-	internal.CheckPodsReady(t, client, internal.DefaultNamespace, app.LabelSelector(), 5*time.Minute, 15*time.Second)
+	require.NoError(t, err)
 
 	// Ensure the deployment gets cleaned up.
 	t.Cleanup(func() {
@@ -107,8 +115,14 @@ func deployApp(t *testing.T, kubeconfig string, app App) {
 			return
 		}
 		grace := int64(0)
-		_ = deployments.Delete(t.Context(), app.Name, metav1.DeleteOptions{GracePeriodSeconds: &grace})
+		// t.Context is canceled before cleanup runs.
+		ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
+		defer cancel()
+		_ = deployments.Delete(ctx, app.Name, metav1.DeleteOptions{GracePeriodSeconds: &grace})
 	})
+
+	// Wait for the pod(s) to be Ready for a short stabilization period.
+	internal.CheckPodsReady(t, client, internal.DefaultNamespace, app.LabelSelector(), 5*time.Minute, 15*time.Second)
 }
 
 func teardown(t *testing.T, kubeconfig string, apps []App) {

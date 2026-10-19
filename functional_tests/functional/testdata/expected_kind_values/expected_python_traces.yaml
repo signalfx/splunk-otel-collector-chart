@@ -55,15 +55,17 @@ resourceSpans:
         - key: k8s.pod.uid
           value:
             stringValue: 5e8aca4c-0f6f-4403-a0e3-473d05469419
-        - key: k8s.pod.labels.app
+        - key: k8s.pod.label.app
           value:
             stringValue: python-test
         - key: container.image.name
           value:
             stringValue: python_test
-        - key: container.image.tag
+        - key: container.image.tags
           value:
-            stringValue: latest
+            arrayValue:
+              values:
+                - stringValue: latest
         - key: container.id
           value:
             stringValue: 862258faa6700c1ee91aaf58d5cf141a9c4b4ef67fdcd4019ff953032584ea95

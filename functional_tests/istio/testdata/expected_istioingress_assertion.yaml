@@ -1,0 +1,843 @@
+resources:
+  - scopes:
+      - metrics:
+          - monotonic: true
+            name: envoy_cluster_lb_healthy_panic
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_cluster_manager_warming_clusters
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_cluster_membership_healthy
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_cluster_membership_total
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_cluster_upstream_cx_active
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_close_notify
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_connect_attempts_exceeded
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_connect_ms_bucket
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  le: +Inf
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_connect_ms_count
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_connect_ms_sum
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_connect_timeout
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_destroy_local_with_active_rq
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_http1_total
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_http2_total
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_idle_timeout
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_max_requests
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_none_healthy
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_pool_overflow
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_protocol_error
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_cx_total
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_cluster_upstream_rq_active
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_rq_cancelled
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_rq_completed
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_cluster_upstream_rq_pending_active
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_rq_retry
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_rq_retry_limit_exceeded
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_rq_timeout
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: envoy_cluster_upstream_rq_tx_reset
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  cluster_name: xds-grpc
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_server_live
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_server_memory_allocated
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_server_memory_heap_size
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_server_total_connections
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: envoy_server_uptime
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: istio_request_bytes_bucket
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  connection_security_policy: unknown
+                  destination_app: httpbin
+                  destination_principal: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                  destination_service: httpbin.istio-workloads.svc.cluster.local
+                  destination_service_name: httpbin
+                  destination_service_namespace: istio-workloads
+                  destination_version: v1
+                  destination_workload: httpbin
+                  destination_workload_namespace: istio-workloads
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  le: +Inf
+                  os.type/exists: true
+                  reporter: source
+                  request_protocol: http
+                  response_code: "200"
+                  response_flags: '-'
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  source_app: istio-ingressgateway
+                  source_principal: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                  source_workload: istio-ingressgateway
+                  source_workload_namespace: istio-system
+                  url.scheme/exists: true
+          - monotonic: true
+            name: istio_request_bytes_count
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  connection_security_policy: unknown
+                  destination_app: httpbin
+                  destination_principal: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                  destination_service: httpbin.istio-workloads.svc.cluster.local
+                  destination_service_name: httpbin
+                  destination_service_namespace: istio-workloads
+                  destination_version: v1
+                  destination_workload: httpbin
+                  destination_workload_namespace: istio-workloads
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  reporter: source
+                  request_protocol: http
+                  response_code: "200"
+                  response_flags: '-'
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  source_app: istio-ingressgateway
+                  source_principal: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                  source_workload: istio-ingressgateway
+                  source_workload_namespace: istio-system
+                  url.scheme/exists: true
+          - monotonic: true
+            name: istio_request_bytes_sum
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  connection_security_policy: unknown
+                  destination_app: httpbin
+                  destination_principal: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                  destination_service: httpbin.istio-workloads.svc.cluster.local
+                  destination_service_name: httpbin
+                  destination_service_namespace: istio-workloads
+                  destination_version: v1
+                  destination_workload: httpbin
+                  destination_workload_namespace: istio-workloads
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  reporter: source
+                  request_protocol: http
+                  response_code: "200"
+                  response_flags: '-'
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  source_app: istio-ingressgateway
+                  source_principal: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                  source_workload: istio-ingressgateway
+                  source_workload_namespace: istio-system
+                  url.scheme/exists: true
+          - monotonic: true
+            name: istio_request_duration_milliseconds_bucket
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  connection_security_policy: unknown
+                  destination_app: httpbin
+                  destination_principal: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                  destination_service: httpbin.istio-workloads.svc.cluster.local
+                  destination_service_name: httpbin
+                  destination_service_namespace: istio-workloads
+                  destination_version: v1
+                  destination_workload: httpbin
+                  destination_workload_namespace: istio-workloads
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  le: +Inf
+                  os.type/exists: true
+                  reporter: source
+                  request_protocol: http
+                  response_code: "200"
+                  response_flags: '-'
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  source_app: istio-ingressgateway
+                  source_principal: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                  source_workload: istio-ingressgateway
+                  source_workload_namespace: istio-system
+                  url.scheme/exists: true
+          - monotonic: true
+            name: istio_request_duration_milliseconds_count
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  connection_security_policy: unknown
+                  destination_app: httpbin
+                  destination_principal: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                  destination_service: httpbin.istio-workloads.svc.cluster.local
+                  destination_service_name: httpbin
+                  destination_service_namespace: istio-workloads
+                  destination_version: v1
+                  destination_workload: httpbin
+                  destination_workload_namespace: istio-workloads
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  reporter: source
+                  request_protocol: http
+                  response_code: "200"
+                  response_flags: '-'
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  source_app: istio-ingressgateway
+                  source_principal: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                  source_workload: istio-ingressgateway
+                  source_workload_namespace: istio-system
+                  url.scheme/exists: true
+          - monotonic: true
+            name: istio_request_duration_milliseconds_sum
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  connection_security_policy: unknown
+                  destination_app: httpbin
+                  destination_principal: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                  destination_service: httpbin.istio-workloads.svc.cluster.local
+                  destination_service_name: httpbin
+                  destination_service_namespace: istio-workloads
+                  destination_version: v1
+                  destination_workload: httpbin
+                  destination_workload_namespace: istio-workloads
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  reporter: source
+                  request_protocol: http
+                  response_code: "200"
+                  response_flags: '-'
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  source_app: istio-ingressgateway
+                  source_principal: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                  source_workload: istio-ingressgateway
+                  source_workload_namespace: istio-system
+                  url.scheme/exists: true
+          - monotonic: true
+            name: istio_requests_total
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  connection_security_policy: unknown
+                  destination_app: httpbin
+                  destination_principal: spiffe://cluster.local/ns/istio-workloads/sa/httpbin
+                  destination_service: httpbin.istio-workloads.svc.cluster.local
+                  destination_service_name: httpbin
+                  destination_service_namespace: istio-workloads
+                  destination_version: v1
+                  destination_workload: httpbin
+                  destination_workload_namespace: istio-workloads
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  reporter: source
+                  request_protocol: http
+                  response_code: "200"
+                  response_flags: '-'
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  source_app: istio-ingressgateway
+                  source_principal: spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+                  source_workload: istio-ingressgateway
+                  source_workload_namespace: istio-system
+                  url.scheme/exists: true
+          - name: scrape_duration_seconds
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: scrape_samples_post_metric_relabeling
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: scrape_samples_scraped
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: scrape_series_added
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: up
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+        version/regex: .*
+signal: metrics
+version: 1

@@ -8,4 +8,6 @@ paths:
   .github/workflows/functional_test_eks.yaml:
     ignore:
       - 'unexpected key "deployment" for "environment" section'
-      - 'unexpected key "queue" for "concurrency" section'
+  .github/workflows/eks-privileged-tests.yaml:
+    ignore:
+      - 'unexpected key "deployment" for "environment" section'

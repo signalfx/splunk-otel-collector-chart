@@ -8,6 +8,7 @@
 # Include the base utility functions for setting and debugging variables
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$SCRIPT_DIR/base_util.sh"
+export LOCALBIN="${LOCALBIN:-$SCRIPT_DIR/../bin}"
 
 # Function to install a tool
 install() {
@@ -20,9 +21,6 @@ install() {
       ;;
     go)
       install_go "$tool"
-      ;;
-    helm_plugin)
-      install_helm_plugin "$tool"
       ;;
     *)
       echo "Unsupported tool type: $type"
@@ -78,32 +76,16 @@ install_go() {
   fi
 }
 
-# Function to install a helm plugin
-install_helm_plugin() {
-  if ! command -v helm &> /dev/null
-  then
-      echo "Helm could not be found. Please install Helm and try again."
-      return
-  fi
-  local plugin="${1%%=*}"
-  local repo="${1#*=}"
-  local installed_version=$(helm plugin list | grep ${plugin} | awk '{print $2}')
-
-  if [ -z "$installed_version" ]; then
-    echo "Helm plugin ${plugin} is not installed, installing now..."
-    helm plugin install ${repo} || echo "Failed to install plugin ${plugin}. Continuing..."
-  else
-    echo "Helm plugin ${plugin} (version: ${installed_version}) already installed."
-  fi
-}
-
 # install brew-based tools
-for tool in chart-testing go helm kubectl pre-commit skopeo kubeconform; do
+for tool in chart-testing go kubectl pre-commit skopeo kubeconform; do
   install "$tool" brew
 done
 
-# install helm plugin v1.0.3
-install "unittest=https://github.com/helm-unittest/helm-unittest.git --version 6f82a998e0b5461762ca959f87f5dd344af5e4eb" helm_plugin
+# Install the pinned Helm version and use it when installing plugins.
+bash "$SCRIPT_DIR/install-helm.sh"
+export PATH="$(cd "$LOCALBIN" && pwd):$PATH"
+
+bash "$SCRIPT_DIR/install-helm-unittest.sh"
 
 echo "Tool installation process completed!"
 exit 0

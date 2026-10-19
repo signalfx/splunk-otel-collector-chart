@@ -1,0 +1,136 @@
+# AssertMetricNames projects observed metric names into canonical gauge metrics.
+version: 1
+signal: metrics
+resources:
+  - scopes:
+      - metrics/include:
+          - name: container.cpu.time
+            type: gauge
+          - name: container.filesystem.available
+            type: gauge
+          - name: container.filesystem.capacity
+            type: gauge
+          - name: container.filesystem.usage
+            type: gauge
+          - name: container.memory.available
+            type: gauge
+          - name: container.memory.major_page_faults
+            type: gauge
+          - name: container.memory.page_faults
+            type: gauge
+          - name: container.memory.rss
+            type: gauge
+          - name: container.memory.usage
+            type: gauge
+          - name: container.memory.working_set
+            type: gauge
+          - name: k8s.node.network.errors
+            type: gauge
+          - name: k8s.node.network.io
+            type: gauge
+          - name: k8s.pod.cpu.time
+            type: gauge
+          - name: k8s.pod.filesystem.available
+            type: gauge
+          - name: k8s.pod.filesystem.capacity
+            type: gauge
+          - name: k8s.pod.filesystem.usage
+            type: gauge
+          - name: k8s.pod.memory.available
+            type: gauge
+          - name: k8s.pod.memory.major_page_faults
+            type: gauge
+          - name: k8s.pod.memory.page_faults
+            type: gauge
+          - name: k8s.pod.memory.rss
+            type: gauge
+          - name: k8s.pod.memory.usage
+            type: gauge
+          - name: k8s.pod.memory.working_set
+            type: gauge
+          - name: k8s.pod.network.errors
+            type: gauge
+          - name: k8s.pod.network.io
+            type: gauge
+          - name: otelcol_exporter_queue_size
+            type: gauge
+          - name: otelcol_exporter_sent_metric_points
+            type: gauge
+          - name: otelcol_exporter_sent_log_records
+            type: gauge
+          - name: otelcol.k8s.watcher.namespace.added
+            type: gauge
+          - name: otelcol.k8s.watcher.pod.added
+            type: gauge
+          - name: otelcol.k8s.watcher.pod_cache.size
+            type: gauge
+          - name: otelcol.k8s.watcher.pod.updated
+            type: gauge
+          - name: otelcol_processor_memory_limiter_accepted_log_records
+            type: gauge
+          - name: otelcol_process_cpu_seconds
+            type: gauge
+          - name: otelcol_process_memory_rss
+            type: gauge
+          - name: otelcol_process_runtime_heap_alloc_bytes
+            type: gauge
+          - name: otelcol_process_runtime_total_alloc_bytes
+            type: gauge
+          - name: otelcol_process_runtime_total_sys_memory_bytes
+            type: gauge
+          - name: otelcol_process_uptime
+            type: gauge
+          - name: otelcol_processor_memory_limiter_accepted_metric_points
+            type: gauge
+          - name: otelcol_receiver_accepted_metric_points
+            type: gauge
+          - name: otelcol_receiver_refused_metric_points
+            type: gauge
+          - name: otelcol_scraper_errored_metric_points
+            type: gauge
+          - name: otelcol_scraper_scraped_metric_points
+            type: gauge
+          - name: system.cpu.load_average.15m
+            type: gauge
+          - name: system.cpu.load_average.1m
+            type: gauge
+          - name: system.cpu.load_average.5m
+            type: gauge
+          - name: system.cpu.time
+            type: gauge
+          - name: system.disk.io
+            type: gauge
+          - name: system.disk.io_time
+            type: gauge
+          - name: system.disk.merged
+            type: gauge
+          - name: system.disk.operation_time
+            type: gauge
+          - name: system.disk.operations
+            type: gauge
+          - name: system.disk.pending_operations
+            type: gauge
+          - name: system.disk.weighted_io_time
+            type: gauge
+          - name: system.memory.usage
+            type: gauge
+          - name: system.network.connections
+            type: gauge
+          - name: system.network.dropped
+            type: gauge
+          - name: system.network.errors
+            type: gauge
+          - name: system.network.io
+            type: gauge
+          - name: system.network.packets
+            type: gauge
+          - name: system.paging.faults
+            type: gauge
+          - name: system.paging.operations
+            type: gauge
+          - name: system.paging.usage
+            type: gauge
+          - name: system.processes.count
+            type: gauge
+          - name: system.processes.created
+            type: gauge

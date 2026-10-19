@@ -1,0 +1,366 @@
+resources:
+  - scopes:
+      - metrics:
+          - name: pilot_conflict_inbound_listener
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: pilot_eds_no_instances
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_k8s_cfg_events
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  event/exists: true
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  type/exists: true
+                  url.scheme/exists: true
+          - name: pilot_no_ip
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_proxy_convergence_time_bucket
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  le: +Inf
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_proxy_convergence_time_count
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_proxy_convergence_time_sum
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_proxy_queue_time_bucket
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  le: +Inf
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_proxy_queue_time_count
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_proxy_queue_time_sum
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: pilot_services
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_xds_expired_nonce
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  type/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_xds_push_time_bucket
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  le: +Inf
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  type/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_xds_push_time_count
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  type/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_xds_push_time_sum
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  type/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_xds_send_time_bucket
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  le: +Inf
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_xds_send_time_count
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - monotonic: true
+            name: pilot_xds_send_time_sum
+            temporality: cumulative
+            type: sum
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: scrape_duration_seconds
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: scrape_samples_post_metric_relabeling
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: scrape_samples_scraped
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: scrape_series_added
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+          - name: up
+            type: gauge
+            datapoints/include:
+              - attributes:
+                  host.name/exists: true
+                  k8s.cluster.name: dev-operator
+                  k8s.namespace.name: istio-system
+                  k8s.node.name: kind-control-plane
+                  k8s.pod.name/exists: true
+                  k8s.pod.uid/exists: true
+                  os.type/exists: true
+                  service.instance.id/exists: true
+                  service.name/exists: true
+                  url.scheme/exists: true
+        version/regex: .*
+signal: metrics
+version: 1

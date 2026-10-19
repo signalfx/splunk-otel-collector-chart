@@ -106,44 +106,22 @@ receivers:
     watch_observers: [k8s_observer]
     receivers:
       {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
-      {{- if .Values.featureGates.useLightPrometheusReceiver }}
-      lightprometheus:
-      {{- else }}
       prometheus/autodetect:
-      {{- end }}
         {{- if .Values.autodetect.prometheus }}
         # Enable prometheus scraping for pods with standard prometheus annotations
-        {{- if .Values.featureGates.useLightPrometheusReceiver }}
-        # The light receiver concatenates these values into a URL, so only allow a numeric port and an absolute path.
-        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && (! ("prometheus.io/port" in annotations) || annotations["prometheus.io/port"] matches "^[0-9]+$") && (! ("prometheus.io/path" in annotations) || annotations["prometheus.io/path"] matches "^/(?:$|[^/].*)$")
-        {{- else }}
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true"
-        {{- end }}
         {{- else }}
         # Enable prometheus scraping for Istio pods only
-        {{- if .Values.featureGates.useLightPrometheusReceiver }}
-        # The light receiver concatenates these values into a URL, so only allow a numeric port and an absolute path.
-        rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev" in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot" or name matches "istio.*") && (! ("prometheus.io/port" in annotations) || annotations["prometheus.io/port"] matches "^[0-9]+$") && (! ("prometheus.io/path" in annotations) || annotations["prometheus.io/path"] matches "^/(?:$|[^/].*)$")
-        {{- else }}
         rule: type == "pod" && annotations["prometheus.io/scrape"] == "true" && ("istio.io/rev" in labels or "istio.io/rev" in annotations or labels["istio"] == "pilot" or name matches "istio.*")
         {{- end }}
-        {{- end }}
         config:
-          {{- if .Values.featureGates.useLightPrometheusReceiver }}
-          endpoint: 'http://`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090``"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
-          resource_attributes:
-            service.name:
-              enabled: false
-            service.instance.id:
-              enabled: false
-          {{- else }}
           config:
             scrape_configs:
               - job_name: 'autodetect-metrics'
                 metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
                 scrape_interval: 10s
                 static_configs:
-                  - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090`']
+                  - targets: ['`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090)`']
                 {{- if not .Values.autodetect.prometheus }}
                 metric_relabel_configs:
                   - source_labels: [__name__]
@@ -220,7 +198,6 @@ receivers:
                     pilot_xds_send_time|\
                     pilot_xds_write_timeout)(?:_sum|_count|_bucket)?"
             {{- end }}
-          {{- end }}
       {{- end }}
 
       # Receivers for collecting k8s control plane metrics.
@@ -360,7 +337,7 @@ receivers:
             - job_name: "kubedns"
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
-                - targets: ['`endpoint`:`"prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9153`']
+                - targets: ['`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9153)`']
               tls_config:
                 insecure_skip_verify: true
       {{- else }}
@@ -377,7 +354,7 @@ receivers:
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               {{- if eq .Values.distribution "openshift" }}
               static_configs:
-                - targets: ["`endpoint`:9154"]
+                - targets: ['`joinHostPort(endpoint, 9154)`']
               scheme: https
               tls_config:
                 insecure_skip_verify: true
@@ -385,7 +362,7 @@ receivers:
               bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
               {{- else }}
               static_configs:
-                - targets: ["`endpoint`:9153"]
+                - targets: ['`joinHostPort(endpoint, 9153)`']
               {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
@@ -414,7 +391,7 @@ receivers:
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               {{- if and (or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name) (eq .Values.distribution "openshift") }}
               static_configs:
-                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 9979 }}"]
+                - targets: ['`joinHostPort(endpoint, {{ .Values.agent.controlPlaneMetrics.etcd.port | default 9979 }})`']
               scheme: https
               tls_config:
                 insecure_skip_verify: {{ .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
@@ -425,7 +402,7 @@ receivers:
                 {{- end }}
               {{- else if or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name }}
               static_configs:
-                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 2379 }}"]
+                - targets: ['`joinHostPort(endpoint, {{ .Values.agent.controlPlaneMetrics.etcd.port | default 2379 }})`']
               scheme: https
               tls_config:
                 insecure_skip_verify: {{ .Values.agent.controlPlaneMetrics.etcd.skipVerify }}
@@ -436,7 +413,7 @@ receivers:
                 {{- end }}
               {{- else }}
               static_configs:
-                - targets: ["`endpoint`:{{ .Values.agent.controlPlaneMetrics.etcd.port | default 2381 }}"]
+                - targets: ['`joinHostPort(endpoint, {{ .Values.agent.controlPlaneMetrics.etcd.port | default 2381 }})`']
               {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
@@ -462,7 +439,7 @@ receivers:
             - job_name: "kube-controller-manager"
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
-                - targets: ["`endpoint`:10257"]
+                - targets: ['`joinHostPort(endpoint, 10257)`']
               scheme: https
               authorization:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -538,7 +515,7 @@ receivers:
                 - targets: ["`endpoint`"]
               {{- else }}
               static_configs:
-                - targets: ["`endpoint`:10249"]
+                - targets: ['`joinHostPort(endpoint, 10249)`']
               {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
@@ -565,7 +542,7 @@ receivers:
             - job_name: "kubernetes-scheduler"
               scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
               static_configs:
-                - targets: ["`endpoint`:10259"]
+                - targets: ['`joinHostPort(endpoint, 10259)`']
               scheme: https
               tls_config:
                 ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
@@ -831,7 +808,7 @@ processors:
     log_statements:
       - context: log
         statements:
-          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tag"]], ":"))
+          - set(resource.attributes["container_image"], Concat([resource.attributes["container.image.name"], resource.attributes["container.image.tags"][0]], ":")) where IsString(resource.attributes["container.image.name"]) and IsList(resource.attributes["container.image.tags"]) and Len(resource.attributes["container.image.tags"]) > 0
   {{- end }}
   {{- end }}
 
@@ -948,6 +925,15 @@ processors:
     metric_statements:
       - delete_key(resource.attributes, "server.address") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
       - delete_key(resource.attributes, "server.port") where scope.name == "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
+  {{- end }}
+
+  {{- if and .Values.featureGates.useControlPlaneMetricsHistogramData (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
+  transform/limit_histogram_buckets:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - merge_histogram_buckets(32, method="limit_buckets")
   {{- end }}
 
 # If the gateway deployment is enabled, it will use a otlp_grpc exporter to send from the daemonset
@@ -1386,6 +1372,7 @@ service:
         - resource/add_agent_k8s
         - resource_detection
         - resource
+        - transform/limit_histogram_buckets
         {{- if or .Values.autodetect.prometheus .Values.autodetect.istio }}
         - attributes/istio
         - transform/drop_server_attrs
