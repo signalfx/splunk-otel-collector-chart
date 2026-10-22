@@ -148,8 +148,6 @@ exporters:
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
     sending_queue:
       num_consumers: 32
-    # TODO: Performance testing must be done before enabling compression
-    disable_compression: true
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
