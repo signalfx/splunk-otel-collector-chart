@@ -1,8 +1,6 @@
 ---
-# Enables the splunk-otel-db2 subchart.
-#
-# db2.otlp.endpoint is deliberately left unset: the subchart deriving it from this release is
-# the contract under test, so hard-coding it here would assert nothing.
+# db2.otlp.endpoint is deliberately unset: the subchart deriving it from this release is
+# the contract under test.
 splunkObservability:
   realm: test-realm
   accessToken: "dummy-token"
@@ -11,7 +9,7 @@ splunkObservability:
 
 clusterName: db2-functional-test
 
-# Only the agent is needed to receive the subchart's OTLP export and forward it on.
+# Only the agent is needed to receive the subchart's OTLP export.
 clusterReceiver:
   enabled: false
 

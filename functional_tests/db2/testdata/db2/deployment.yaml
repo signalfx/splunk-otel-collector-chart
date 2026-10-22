@@ -36,19 +36,13 @@ spec:
               value: "false"
           ports:
             - containerPort: 50000
-          # A startupProbe rather than one long readinessProbe: it confines the generous
-          # budget to first boot, so a later stall is still reported promptly instead of
-          # being absorbed by a large failureThreshold.
-          #
-          # The probe command matters more than the budget. An earlier revision used a
-          # port check, timed out at 719s, and concluded Db2 was too slow for CI; the
-          # listener simply answers long before the database can be used. With a real
-          # connection Db2 is ready in about 95s. The threshold below is headroom for a
-          # cold image pull from icr.io, and a startupProbe only spends what Db2 needs.
+          # A startupProbe confines the large threshold to first boot, so a later stall is
+          # still reported promptly. The threshold is headroom for a cold image pull; a
+          # startupProbe only spends the time Db2 actually needs.
           startupProbe:
             exec:
               # A real connection, not a port check: the listener answers long before the
-              # database can be used.
+              # database is usable.
               command: ["/bin/bash", "-c", "su - db2inst1 -c 'db2 connect to SAMPLE'"]
             initialDelaySeconds: 60
             periodSeconds: 15

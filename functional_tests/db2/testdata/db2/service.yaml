@@ -1,10 +1,4 @@
-# A Db2 server for the receiver to scrape.
-#
-# The community image needs privileged and a writable /database, and takes several minutes
-# to initialise before it accepts connections — the readiness probe below is what the test
-# waits on rather than a fixed sleep.
-#
-# LICENSE=accept is required by the image; it is the IBM Db2 Community Edition licence.
+# Db2 server for the receiver to scrape.
 apiVersion: v1
 kind: Service
 metadata:

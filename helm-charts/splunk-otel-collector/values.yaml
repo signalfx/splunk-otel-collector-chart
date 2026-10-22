@@ -1630,15 +1630,14 @@ targetallocator:
           component: otel-collector-agent
 
 ################################################################################
-# IBM Db2 receiver. Collects Db2 metrics and active query samples and exports them
-# over OTLP to this release's Collector, running as its own Deployment rather than
-# inside the Collector.
+# IBM Db2 receiver. Collects Db2 metrics and query samples and exports them over OTLP
+# to this release's Collector, running as its own Deployment rather than inside it.
 #
-# With `db2.otlp.endpoint` unset the endpoint is derived from this release, targeting
-# the agent Service. That Service is `internalTrafficPolicy: Local`, so set
-# `db2.otlp.collectorTarget: gateway` when `gateway.enabled` is true.
+# Query samples are OTLP log records, so they need a logs destination enabled on this
+# chart; metrics need nothing extra. Endpoint overrides and that setup are covered in
+# docs/advanced-configuration.md#ibm-db2-monitoring, and the full receiver reference in
+# https://github.com/signalfx/splunk-otel-db2
 #
-# Related documentation: https://github.com/signalfx/splunk-otel-db2
 # Not available in EKS Add-on.
 ################################################################################
 
@@ -1646,6 +1645,9 @@ db2:
   # Keep this key present even when false. Helm ignores a `condition` whose values
   # path does not resolve and installs the subchart anyway.
   enabled: false
+  # The Db2 receiver image is Linux-only.
+  nodeSelector:
+    kubernetes.io/os: linux
 
 ################################################################################
 # Helm Chart Feature Gates.
