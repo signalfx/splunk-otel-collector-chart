@@ -1,7 +1,7 @@
 apiVersion: v2
 name: splunk-otel-collector
-version: 0.163.0
-appVersion: 0.163.0
+version: 0.163.1
+appVersion: 0.163.1
 description: Splunk OpenTelemetry Collector for Kubernetes
 icon: https://github.com/signalfx/splunk-otel-collector-chart/tree/main/splunk.png
 type: application
@@ -28,17 +28,17 @@ dependencies:
     alias: operatorcrds
     condition: operatorcrds.install
   - name: opentelemetry-operator
-    version: 0.126.0
+    version: 0.126.1
     alias: operator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: operator.enabled
   - name: opentelemetry-ebpf-instrumentation
-    version: 0.14.3
+    version: 0.15.2
     alias: obi
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: obi.enabled
   - name: opentelemetry-target-allocator
-    version: 0.161.1
+    version: 0.161.2
     alias: targetallocator
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
     condition: targetallocator.enabled
