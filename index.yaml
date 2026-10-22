@@ -66,6 +66,52 @@ entries:
     version: 0.1.0
   splunk-otel-collector:
   - apiVersion: v2
+    appVersion: 0.163.1
+    created: "2026-10-22T18:40:11.631038848Z"
+    dependencies:
+    - alias: operatorcrds
+      condition: operatorcrds.install
+      name: opentelemetry-operator-crds
+      repository: ""
+      version: 0.0.8
+    - alias: operator
+      condition: operator.enabled
+      name: opentelemetry-operator
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.126.1
+    - alias: obi
+      condition: obi.enabled
+      name: opentelemetry-ebpf-instrumentation
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.15.2
+    - alias: targetallocator
+      condition: targetallocator.enabled
+      name: opentelemetry-target-allocator
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.161.2
+    description: Splunk OpenTelemetry Collector for Kubernetes
+    digest: bd88a3945c819a5905f21e18facc3d1021e9b8b4cab038b1602b02ec2a9829e5
+    icon: https://github.com/signalfx/splunk-otel-collector-chart/tree/main/splunk.png
+    keywords:
+    - splunk
+    - opentelemetry
+    - observability
+    - logs
+    - traces
+    - metrics
+    - apm
+    - instrumentation
+    maintainers:
+    - name: dmitryax
+    - name: atoulme
+    - name: jinja2
+    - name: dloucasfx
+    name: splunk-otel-collector
+    type: application
+    urls:
+    - https://github.com/signalfx/splunk-otel-collector-chart/releases/download/splunk-otel-collector-0.163.1/splunk-otel-collector-0.163.1.tgz
+    version: 0.163.1
+  - apiVersion: v2
     appVersion: 0.163.0
     created: "2026-10-19T22:02:33.032957418Z"
     dependencies:
@@ -6455,4 +6501,4 @@ entries:
     urls:
     - https://github.com/signalfx/splunk-otel-collector-chart/releases/download/splunk-otel-collector-0.20.0/splunk-otel-collector-0.20.0.tgz
     version: 0.20.0
-generated: "2026-10-19T22:02:33.033403697Z"
+generated: "2026-10-22T18:40:11.631389089Z"
