@@ -41,7 +41,7 @@ const (
 // Collector this release creates.
 //
 // db2.otlp.endpoint is left unset on purpose — the subchart deriving it from the parent
-// release name is the behaviour under test.
+// release name is the behavior under test.
 func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 	kubeconfig, ok := os.LookupEnv("KUBECONFIG")
 	require.True(t, ok, "KUBECONFIG must be set")
