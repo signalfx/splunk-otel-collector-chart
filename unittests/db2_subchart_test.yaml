@@ -1,0 +1,114 @@
+suite: IBM Db2 subchart
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+
+tests:
+  # `db2.enabled: false` has to stay present in values.yaml: Helm ignores a `condition`
+  # whose values path does not resolve and installs the subchart anyway. Deleting the key
+  # makes the chart fail to render at its own defaults, which ci_scripts/check-render.sh
+  # catches across every example. This asserts the other half — that the condition is
+  # wired to the key at all, rather than the subchart being installed unconditionally.
+  - it: should render the receiver when enabled
+    template: charts/db2/templates/deployment.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Deployment
+
+  # The receiver image is Linux-only.
+  - it: should schedule the receiver on Linux
+    template: charts/db2/templates/deployment.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector
+          value:
+            kubernetes.io/os: linux
+
+  # The derived endpoint has to name a Service this release actually creates, so the two
+  # charts' naming conventions are asserted together without standing up a cluster.
+  - it: should derive the agent endpoint from the release
+    template: charts/db2/templates/configmap.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "http://test-release-splunk-otel-collector-agent\.test-ns\.svc\.cluster\.local:4317"'
+
+  - it: should target the gateway when asked
+    template: charts/db2/templates/configmap.yaml
+    set:
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "http://test-release-splunk-otel-collector\.test-ns\.svc\.cluster\.local:4317"'
+
+  # Db2 requires ssl_svcename to listen on a different port from svcename, so the
+  # cleartext default cannot be reused once TLS is on. Asserted on secret.yaml because
+  # that is where the shared validation helper is reached first.
+  - it: should refuse TLS without an explicit port
+    template: charts/db2/templates/secret.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "port is required when TLS is enabled"
+
+  - it: should refuse a receiver with no credentials
+    template: charts/db2/templates/secret.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+    asserts:
+      - failedTemplate:
+          errorPattern: "needs credentials"
