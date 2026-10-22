@@ -46,11 +46,15 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 	kubeconfig, ok := os.LookupEnv("KUBECONFIG")
 	require.True(t, ok, "KUBECONFIG must be set")
 
+	client := k8sClient(t, kubeconfig)
+
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		internal.ChartUninstall(t, kubeconfig)
+		// The fixture is created directly rather than by the chart, so uninstalling the
+		// release does not remove it. Left behind by SKIP_TEARDOWN or an interrupted run,
+		// it makes the next run fail on AlreadyExists.
+		deleteDb2Fixture(t, client)
 	}
-
-	client := k8sClient(t, kubeconfig)
 
 	// Db2 first, so a failure reads as "Db2 did not come up" rather than "the wiring
 	// broke". The receiver would retry, but that only lengthens the run.
@@ -107,18 +111,29 @@ func deployDb2(t *testing.T, client *kubernetes.Clientset) {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			return
 		}
-		grace := int64(0)
-		// t.Context is canceled before cleanup runs.
-		ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
-		defer cancel()
-		_ = deployments.Delete(ctx, dep.Name, metav1.DeleteOptions{GracePeriodSeconds: &grace})
-		_ = services.Delete(ctx, svc.Name, metav1.DeleteOptions{})
+		deleteDb2Fixture(t, client)
 	})
 
 	// The startupProbe opens a real connection, so this returns when SAMPLE is usable
 	// rather than when the port is merely listening.
 	internal.CheckPodsReady(t, client, internal.DefaultNamespace, "app=db2",
 		db2ReadyTimeout, 15*time.Second)
+}
+
+// deleteDb2Fixture removes the Service and Deployment created by deployDb2. Shared by the
+// pre-test teardown and the cleanup path so both remove the same objects.
+func deleteDb2Fixture(t *testing.T, client *kubernetes.Clientset) {
+	t.Helper()
+
+	grace := int64(0)
+	// t.Context is canceled before cleanup runs.
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
+	defer cancel()
+
+	_ = client.AppsV1().Deployments(internal.DefaultNamespace).
+		Delete(ctx, "db2", metav1.DeleteOptions{GracePeriodSeconds: &grace})
+	_ = client.CoreV1().Services(internal.DefaultNamespace).
+		Delete(ctx, "db2", metav1.DeleteOptions{})
 }
 
 // decode reads a single-document manifest and asserts its kind, so a mistake in testdata

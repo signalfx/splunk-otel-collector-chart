@@ -1312,14 +1312,26 @@ all, and the records are dropped silently.
 
 What the agent renders, by configuration:
 
-| Configuration | Agent `logs` pipeline |
-| --- | --- |
-| `splunkObservability` only (default) | none — records are dropped |
-| `splunkPlatform.logsEnabled: true` | `otlp` → `splunk_hec/platform_logs` |
-| `splunkObservability.profilingEnabled: true` | `otlp` → `splunk_hec/o11y` |
-| either of the above, plus `gateway.enabled: true` | `otlp` → `otlp_grpc`, gateway exports onward |
+| Configuration | Agent `logs` pipeline | Query samples delivered? |
+| --- | --- | --- |
+| `splunkObservability` only (default) | none | no — no pipeline exists |
+| `splunkPlatform.logsEnabled: true` | `otlp` → `splunk_hec/platform_logs` | yes |
+| `splunkPlatform.logsEnabled` + `gateway.enabled: true` | `otlp` → `otlp_grpc`, gateway exports onward | yes |
+| `splunkObservability.profilingEnabled: true` | `otlp` → `splunk_hec/o11y` | **no** — see below |
 
-So to collect them, enable a logs destination. Sending to Splunk Platform:
+`splunkObservability.profilingEnabled` renders a logs pipeline, but it is not a route for
+these records. The exporter it adds is configured for profiling only:
+
+```yaml
+splunk_hec/o11y:
+  log_data_enabled: false
+  profiling_data_enabled: true
+```
+
+With `log_data_enabled: false` the exporter accepts only profiling records, so Db2 query
+samples reach it and are discarded. Do not rely on this setting to collect them.
+
+So to collect them, enable a Splunk Platform logs destination:
 
 ```yaml
 db2:
@@ -1343,9 +1355,6 @@ splunkPlatform:
   logsEnabled: true
 ```
 
-Note that `splunkObservability.profilingEnabled` is named for AlwaysOn Profiling; it happens
-to enable the shared logs pipeline and the `splunk_hec/o11y` exporter, which is why it
-appears above. If you only want Db2 query samples, prefer the `splunkPlatform` route.
 
 ## Using feature gates
 

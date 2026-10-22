@@ -44,6 +44,10 @@ jobs:
             component: 'chart'
             yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
             dependency_name: 'opentelemetry-target-allocator'
+          - name: 'db2'
+            component: 'chart'
+            yaml_file_path: 'helm-charts/splunk-otel-collector/Chart.yaml'
+            dependency_name: 'splunk-otel-db2'
     env:
       DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
     steps:

@@ -61,7 +61,7 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 		helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || exit 1; \
 	fi ;\
 	helm repo update open-telemetry || exit 1; \
-	if ! (helm repo list | grep -q splunk-otel-db2) ; then \
+	if ! (helm repo list | awk '{print $$1}' | grep -qx splunk-otel-db2) ; then \
 		helm repo add splunk-otel-db2 https://signalfx.github.io/splunk-otel-db2 || exit 1; \
 	fi ;\
 	helm repo update splunk-otel-db2 || exit 1; \
