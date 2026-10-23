@@ -1352,10 +1352,24 @@ otelcol_exporter_sent_log_records{exporter="otlp_http/entities",
 otelcol_receiver_refused_log_records                                             0
 ```
 
-Note this is the pipeline Kubernetes entity events use. The records reach Observability
-Cloud, but whether they are classified as Database Monitoring data has not been verified —
-that likely needs the `X-splunk-instrumentation-library: dbmon` header, which this chart does
-not set.
+This is the pipeline Kubernetes entity events use, and it does not set the library header
+that Database Monitoring identifies its data by. Add it through the gateway config override:
+
+```yaml
+gateway:
+  config:
+    exporters:
+      otlp_http/entities:
+        headers:
+          X-splunk-instrumentation-library: dbmon
+```
+
+The access token keeps coming from the chart's `headers_setter` authenticator, which this
+does not disturb — verified on a live gateway, where delivery continued with the header
+applied and nothing refused.
+
+Whether Database Monitoring *requires* that header to classify the records, or ingests them
+from `/v3/event` regardless, has not been confirmed.
 
 **Agent only** (the default). With a metrics-only Observability Cloud configuration the agent
 renders no `logs` pipeline, so the Collector does not register the OTLP logs service and the
