@@ -1302,36 +1302,12 @@ Pod on the receiver's own Node. The gateway Service is reachable cluster-wide.
 
 ### Receiving query samples and top queries
 
-Metrics need no extra configuration: the agent's OTLP receiver accepts them and the existing
-metrics pipeline forwards them to Splunk Observability Cloud.
+Metrics need no extra configuration — the agent's OTLP receiver accepts them and the
+existing metrics pipeline forwards them to Splunk Observability Cloud.
 
-Query samples and top queries are **OTLP log records**, so they follow this chart's logs
-pipeline — and that pipeline only exists when logs are enabled for some destination. With a
-metrics-only Observability Cloud configuration there is no `logs` pipeline on the agent at
-all, and the records are dropped silently.
-
-What the agent renders, by configuration:
-
-| Configuration | Agent `logs` pipeline | Query samples delivered? |
-| --- | --- | --- |
-| `splunkObservability` only (default) | none | no — no pipeline exists |
-| `splunkPlatform.logsEnabled: true` | `otlp` → `splunk_hec/platform_logs` | yes |
-| `splunkPlatform.logsEnabled` + `gateway.enabled: true` | `otlp` → `otlp_grpc`, gateway exports onward | yes |
-| `splunkObservability.profilingEnabled: true` | `otlp` → `splunk_hec/o11y` | **no** — see below |
-
-`splunkObservability.profilingEnabled` renders a logs pipeline, but it is not a route for
-these records. The exporter it adds is configured for profiling only:
-
-```yaml
-splunk_hec/o11y:
-  log_data_enabled: false
-  profiling_data_enabled: true
-```
-
-With `log_data_enabled: false` the exporter accepts only profiling records, so Db2 query
-samples reach it and are discarded. Do not rely on this setting to collect them.
-
-So to collect them, enable a Splunk Platform logs destination:
+Query samples and top queries are **OTLP log records**, so they need a logs destination
+enabled on this chart. Opt into the events on the receiver, and configure Splunk Platform
+logs:
 
 ```yaml
 db2:
@@ -1355,6 +1331,27 @@ splunkPlatform:
   logsEnabled: true
 ```
 
+With `gateway.enabled: true` the agent forwards to the gateway, which exports onward; no
+further Db2-specific configuration is needed.
+
+See the [receiver's configuration
+reference](https://github.com/signalfx/splunk-otel-db2#query-samples-log-records) for the
+sampling intervals, SQL obfuscation and the full attribute list.
+
+> **Observability Cloud Database Monitoring is not a supported destination for these
+> records today.** This chart has no exporter that sends OTLP log records to Observability
+> Cloud: `splunk_hec/o11y` hardcodes `log_data_enabled: false`, and no values key overrides
+> it. `splunkObservability.profilingEnabled` does render a logs pipeline, but its exporter
+> accepts profiling records only.
+>
+> Without a logs destination the agent renders no `logs` pipeline, so the Collector does not
+> register the OTLP logs service at all and the receiver's exports are rejected. The failure
+> is visible in the receiver's own log, not silent — metrics continue to flow normally:
+>
+> ```
+> ERROR i.o.e.internal.grpc.GrpcExporter - Failed to export logs. Server responded with
+> UNIMPLEMENTED. ... unknown service opentelemetry.proto.collector.logs.v1.LogsService
+> ```
 
 ## Using feature gates
 
