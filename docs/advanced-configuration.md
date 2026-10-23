@@ -1338,20 +1338,38 @@ See the [receiver's configuration
 reference](https://github.com/signalfx/splunk-otel-db2#query-samples-log-records) for the
 sampling intervals, SQL obfuscation and the full attribute list.
 
-> **Observability Cloud Database Monitoring is not a supported destination for these
-> records today.** This chart has no exporter that sends OTLP log records to Observability
-> Cloud: `splunk_hec/o11y` hardcodes `log_data_enabled: false`, and no values key overrides
-> it. `splunkObservability.profilingEnabled` does render a logs pipeline, but its exporter
-> accepts profiling records only.
->
-> Without a logs destination the agent renders no `logs` pipeline, so the Collector does not
-> register the OTLP logs service at all and the receiver's exports are rejected. The failure
-> is visible in the receiver's own log, not silent — metrics continue to flow normally:
->
-> ```
-> ERROR i.o.e.internal.grpc.GrpcExporter - Failed to export logs. Server responded with
-> UNIMPLEMENTED. ... unknown service opentelemetry.proto.collector.logs.v1.LogsService
-> ```
+Where those records end up depends on which Collector they reach, and the two modes differ:
+
+**Gateway** (`gateway.enabled: true`). The gateway's `logs/entities` pipeline receives OTLP
+and exports to Observability Cloud's `/v3/event` via `otlp_http/entities`, so the records are
+delivered without a Splunk Platform destination. Measured on a live gateway with query
+samples enabled:
+
+```
+otelcol_receiver_accepted_log_records{receiver="otlp"}                        1161
+otelcol_exporter_sent_log_records{exporter="otlp_http/entities",
+    server_address="...lab0.signalfx.com", url_path="/v3/event"}              1161
+otelcol_receiver_refused_log_records                                             0
+```
+
+Note this is the pipeline Kubernetes entity events use. The records reach Observability
+Cloud, but whether they are classified as Database Monitoring data has not been verified —
+that likely needs the `X-splunk-instrumentation-library: dbmon` header, which this chart does
+not set.
+
+**Agent only** (the default). With a metrics-only Observability Cloud configuration the agent
+renders no `logs` pipeline, so the Collector does not register the OTLP logs service and the
+receiver's exports are rejected. The failure is visible in the receiver's own log, not silent,
+and metrics keep flowing:
+
+```
+ERROR i.o.e.internal.grpc.GrpcExporter - Failed to export logs. Server responded with
+UNIMPLEMENTED. ... unknown service opentelemetry.proto.collector.logs.v1.LogsService
+```
+
+Enabling a Splunk Platform logs destination, as above, gives the agent a `logs` pipeline.
+`splunkObservability.profilingEnabled` also renders one, but its exporter hardcodes
+`log_data_enabled: false` and takes profiling records only.
 
 ## Using feature gates
 
