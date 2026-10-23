@@ -7,9 +7,12 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -116,6 +119,8 @@ func Test_Functions(t *testing.T) {
 
 		deployCharts(t, testKubeConfig, client, extensionsClient)
 		if !skipTests && kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
+			deleteInstallationHookJob(t, client)
+			internal.ResetMetricsSink(t, globalSinks.k8sclusterReceiverMetricsConsumer)
 			t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 		}
 		deployTestResources(t, client, dynamicClient)
@@ -137,4 +142,26 @@ func Test_Functions(t *testing.T) {
 	} else {
 		runHostedClusterTests(t, kubeTestEnv)
 	}
+}
+
+// deleteInstallationHookJob removes the instrumentation hook Job and waits for
+// its dependent Pods to disappear before the cluster metrics snapshot. Helm's
+// hook-succeeded policy deletes the Job with background propagation, so those
+// Pods can otherwise still appear in the snapshot briefly.
+func deleteInstallationHookJob(t *testing.T, client kubernetes.Interface) {
+	t.Helper()
+
+	jobs := client.BatchV1().Jobs(internal.DefaultNamespace)
+	propagation := metav1.DeletePropagationForeground
+	err := jobs.Delete(t.Context(), "sock-splunk-otel-collector-inst-hook", metav1.DeleteOptions{
+		PropagationPolicy: &propagation,
+	})
+	if k8serrors.IsNotFound(err) {
+		return
+	}
+	require.NoError(t, err)
+	require.Eventually(t, func() bool {
+		_, getErr := jobs.Get(t.Context(), "sock-splunk-otel-collector-inst-hook", metav1.GetOptions{})
+		return k8serrors.IsNotFound(getErr)
+	}, 30*time.Second, time.Second)
 }
