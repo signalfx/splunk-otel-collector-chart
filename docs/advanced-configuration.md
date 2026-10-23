@@ -1260,6 +1260,90 @@ autodetect:
   prometheus: true
 ```
 
+## IBM Db2 monitoring
+
+The [splunk-otel-db2](https://github.com/signalfx/splunk-otel-db2) receiver is available as
+an optional subchart, disabled by default. It runs as its own Deployment and exports over
+OTLP *into* this release's Collector — it is not a Collector receiver, and no Collector
+pipeline is modified by enabling it.
+
+```yaml
+db2:
+  enabled: true
+  receivers:
+    - name: default
+      hostname: db2.example.com
+      database: PROD
+      port: 50001                # your ssl_svcename port
+      credentialsSecret: my-db2-credentials
+```
+
+See the [subchart documentation](https://github.com/signalfx/splunk-otel-db2#configuration)
+for the full set of receiver options. This section covers only the parts that depend on how
+this chart is configured.
+
+Not available in the EKS Add-on.
+
+### Where the receiver sends data
+
+With `db2.otlp.endpoint` unset, the subchart derives the address from the release name and
+targets the agent Service. Four settings in this chart break that derivation, because each
+is a top-level value Helm does not pass down to a subchart:
+
+| If you set | Also set |
+| --- | --- |
+| `gateway.enabled: true` | `db2.otlp.collectorTarget: gateway` |
+| `agent.service.enabled: false`, or run on EKS Fargate | `db2.otlp.collectorTarget: gateway` |
+| `namespaceOverride` | `db2.otlp.collectorNamespace` |
+| `fullnameOverride` / `nameOverride` | `db2.otlp.endpoint` (in full) |
+
+The agent Service is `internalTrafficPolicy: Local`, so it is only reachable from an agent
+Pod on the receiver's own Node. The gateway Service is reachable cluster-wide.
+
+### Receiving query samples and top queries
+
+Metrics need no extra configuration. Query samples and top queries are OTLP log records, so
+they need a Collector pipeline that accepts logs — the gateway has one, and it already
+exports to Observability Cloud. Opt into the events and add the header Database Monitoring
+identifies its data by:
+
+```yaml
+gateway:
+  enabled: true
+  config:
+    exporters:
+      otlp_http/entities:
+        headers:
+          X-splunk-instrumentation-library: dbmon
+
+db2:
+  enabled: true
+  receivers:
+    - name: default
+      hostname: db2.example.com
+      database: PROD
+      port: 50001
+      credentialsSecret: my-db2-credentials
+      events:
+        dbServerQuerySample:
+          enabled: true
+        dbServerTopQuery:
+          enabled: true
+```
+
+The access token still comes from the chart's `headers_setter` authenticator, so adding
+headers here does not affect it.
+
+An agent-only install has no logs pipeline by default, so these exports are rejected with
+`UNIMPLEMENTED` until one exists — either run the gateway as above, or set
+`splunkPlatform.logsEnabled` to send them to Splunk Platform instead.
+`splunkObservability.profilingEnabled` renders a logs pipeline but its exporter takes
+profiling records only, so it is not a route for these.
+
+See the [receiver's configuration
+reference](https://github.com/signalfx/splunk-otel-db2#query-samples-log-records) for
+sampling intervals, SQL obfuscation and the full attribute list.
+
 ## Using feature gates
 
 Enable or disable features of the otel-collector agent, clusterReceiver, and gateway (respectively) using feature

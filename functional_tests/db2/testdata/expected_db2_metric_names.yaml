@@ -1,0 +1,20 @@
+# A small, stable subset of the metrics the receiver emits with no opt-in collection
+# enabled. Asserting the full set would fail this test on unrelated additions in the
+# receiver's own repository.
+version: 1
+signal: metrics
+resources:
+  - scopes:
+      - metrics/include:
+          - name: db2.connection.active
+            type: gauge
+          - name: db2.connection.count
+            type: gauge
+          - name: db2.buffer_pool.logical_reads
+            type: gauge
+          - name: db2.buffer_pool.physical_reads
+            type: gauge
+          - name: db2.lock.wait.count
+            type: gauge
+          - name: db2.deadlock.count
+            type: gauge
