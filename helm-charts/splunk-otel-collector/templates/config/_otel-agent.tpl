@@ -964,8 +964,6 @@ exporters:
     token: "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
     log_data_enabled: false
     profiling_data_enabled: {{ .Values.splunkObservability.profilingEnabled }}
-    # TODO: Performance testing must be done before enabling compression
-    disable_compression: true
   {{- end }}
   {{- if .Values.splunkObservability.secureAppEnabled }}
   otlp_http/secureapp:
