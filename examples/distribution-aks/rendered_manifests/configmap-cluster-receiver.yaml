@@ -100,6 +100,10 @@ data:
             enabled: true
           k8s.pod.status_reason:
             enabled: true
+          k8s.service.endpoint.count:
+            enabled: true
+          k8s.service.load_balancer.ingress.count:
+            enabled: true
         resource_attributes:
           k8s.hpa.scaletargetref.kind:
             enabled: true
@@ -108,6 +112,10 @@ data:
           k8s.kubelet.version:
             enabled: true
           k8s.pod.qos_class:
+            enabled: true
+          k8s.service.publish_not_ready_addresses:
+            enabled: true
+          k8s.service.traffic_distribution:
             enabled: true
       prometheus/k8s_cluster_receiver:
         config:
