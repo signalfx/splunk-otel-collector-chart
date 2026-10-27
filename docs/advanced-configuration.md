@@ -1350,8 +1350,13 @@ pipelines run no such processor, so the receiver's own `host.name` and `server.a
 arrive intact. Key Database Monitoring queries on `server.address`, which always identifies
 the database the metrics came from.
 
-Nothing else needs enabling — in particular no Splunk Platform configuration, which is a
-separate product and not part of this path.
+Database Monitoring is an Observability Cloud feature, so `splunkObservability` must be
+configured. A Platform-only install renders none of this, and asking for it there is refused
+rather than accepted and ignored. No Splunk Platform configuration is involved.
+
+Query events are also kept out of the ordinary logs destination. They arrive over OTLP and
+are not entity-marked, so the logs routing connector would otherwise hand them to the
+default logs route and index the query text alongside normal logs.
 
 See the [receiver's configuration
 reference](https://github.com/signalfx/splunk-otel-db2#query-samples-log-records) for

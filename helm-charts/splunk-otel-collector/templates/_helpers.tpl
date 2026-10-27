@@ -694,9 +694,23 @@ Whether Db2 query events should be routed to Observability Cloud Database Monito
 Read defensively: the db2 block always exists so the subchart condition resolves, but it
 need not carry a dbMonitoring key.
 */}}
-{{- define "splunk-otel-collector.db2DbMonEnabled" -}}
+{{- define "splunk-otel-collector.db2DbMonRequested" -}}
 {{- $db2 := .Values.db2 | default dict -}}
-{{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (dig "enabled" false $db2) (dig "dbMonitoring" "enabled" false $db2) -}}
+{{- if and (dig "enabled" false $db2) (dig "dbMonitoring" "enabled" false $db2) -}}
+true
+{{- else -}}
+false
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether the Db2 Database Monitoring config should render. Deliberately narrower than
+"requested": the destination is Observability Cloud, so there is nothing to render without
+it. Validation keys off the request instead, so asking for this without a destination is an
+error rather than a silent no-op.
+*/}}
+{{- define "splunk-otel-collector.db2DbMonEnabled" -}}
+{{- if and (eq (include "splunk-otel-collector.db2DbMonRequested" .) "true") (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") -}}
 true
 {{- else -}}
 false
@@ -709,7 +723,15 @@ time with something actionable rather than rendering a release that silently dro
 records.
 */}}
 {{- define "splunk-otel-collector.validateDb2DbMonitoring" -}}
-{{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" -}}
+{{- if eq (include "splunk-otel-collector.db2DbMonRequested" .) "true" -}}
+{{- /*
+Checked against the request, not against what renders. Database Monitoring is an
+Observability Cloud feature, so a Platform-only install renders no dbmon exporter and no
+logs/dbmon pipeline at all -- asking for it there used to succeed and quietly do nothing.
+*/ -}}
+{{- if ne (include "splunk-otel-collector.splunkO11yEnabled" .) "true" -}}
+{{- fail "db2.dbMonitoring.enabled requires Splunk Observability Cloud to be configured (splunkObservability.realm and accessToken, or an explicit ingestUrl/apiUrl). Database Monitoring has no Splunk Platform destination, so there is nothing for this setting to route to." -}}
+{{- end -}}
 {{- if not .Values.gateway.enabled -}}
 {{- fail "db2.dbMonitoring.enabled currently requires gateway.enabled: true. The agent's entity pipeline does not carry the routing rule." -}}
 {{- end -}}
@@ -721,12 +743,23 @@ events sent there are rejected outright with UNIMPLEMENTED rather than being dro
 quietly. Refuse the combination instead of installing something that cannot deliver.
 */ -}}
 {{- $otlp := (.Values.db2).otlp | default dict -}}
-{{- $gatewayTarget := or
-      (dig "endpoint" "" $otlp)
+{{- $endpoint := dig "endpoint" "" $otlp -}}
+{{- if $endpoint -}}
+{{- /*
+An explicit endpoint is the operator's own address and may legitimately be a collector
+outside this release, so it is not second-guessed -- except for the one case that is
+certainly wrong: aiming it at this release's agent Service.
+*/ -}}
+{{- $agentService := printf "%s-agent" (include "splunk-otel-collector.fullname" .) -}}
+{{- if contains $agentService $endpoint -}}
+{{- fail (printf "db2.dbMonitoring.enabled requires the Db2 receiver to export to the gateway, but db2.otlp.endpoint points at the agent Service (%s). The agent has no OTLP logs pipeline, so query-sample events sent to it are rejected with UNIMPLEMENTED. Point it at the gateway Service, or unset it and set db2.otlp.collectorTarget: gateway to have it derived." $agentService) -}}
+{{- end -}}
+{{- else -}}
+{{- if not (or
       (eq (dig "collectorTarget" "agent" $otlp) "gateway")
-      (dig "gateway" "enabled" false (.Values.global | default dict)) -}}
-{{- if not $gatewayTarget -}}
+      (dig "gateway" "enabled" false (.Values.global | default dict))) -}}
 {{- fail "db2.dbMonitoring.enabled requires the Db2 receiver to export to the gateway, but db2.otlp.collectorTarget is \"agent\". Set db2.otlp.collectorTarget: gateway. The agent has no OTLP logs pipeline in Observability-only mode, so query-sample events sent to it are rejected with UNIMPLEMENTED." -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

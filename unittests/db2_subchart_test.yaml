@@ -160,3 +160,86 @@ tests:
       - matchRegex:
           path: data.relay
           pattern: "otlp_http/dbmon"
+
+  # Database Monitoring is an Observability Cloud feature. On a Platform-only install no
+  # dbmon exporter or pipeline renders at all, so asking for it used to succeed and quietly
+  # do nothing.
+  - it: should refuse database monitoring without an Observability destination
+    set:
+      # The suite's basic.yaml sets a realm; clear it to get a Platform-only install.
+      splunkObservability.realm: ""
+      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
+      splunkPlatform.token: token
+      splunkPlatform.index: main
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires Splunk Observability Cloud to be configured"
+
+  # An explicit endpoint is the operator's own address and is not second-guessed, except
+  # when it names this release's agent Service -- which cannot receive OTLP logs.
+  - it: should refuse an explicit endpoint pointing at the agent service
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: http://test-release-splunk-otel-collector-agent.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "points at the agent Service"
+
+  # Db2 events arrive over OTLP and are not entity-marked, so routing/logs hands them to the
+  # default logs route. They carry query text and must not be indexed outside DB Monitoring.
+  - it: should keep db2 query events out of the ordinary logs destination
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
+      splunkPlatform.token: token
+      splunkPlatform.index: main
+      splunkPlatform.logsEnabled: true
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'logs:\s*\n\s*exporters:\s*\n\s*- splunk_hec/platform_logs\s*\n\s*processors:\s*\n\s*- memory_limiter\s*\n\s*- filter/exclude_dbmon'

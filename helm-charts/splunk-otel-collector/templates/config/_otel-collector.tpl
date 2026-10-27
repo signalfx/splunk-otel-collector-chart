@@ -404,6 +404,13 @@ service:
         {{- end }}
       processors:
         - memory_limiter
+        {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
+        # Db2 query events reach this pipeline too: they arrive over OTLP and are not
+        # entity-marked, so routing/logs hands them to this default route. They carry query
+        # text and belong only in Database Monitoring, so drop them before the ordinary logs
+        # destination indexes them.
+        - filter/exclude_dbmon
+        {{- end }}
         - k8s_attributes
         - filter/logs
         - batch
