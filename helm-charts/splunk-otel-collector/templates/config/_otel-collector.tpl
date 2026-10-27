@@ -52,6 +52,21 @@ receivers:
 
 # By default k8s_attributes, memory_limiter and batch processors enabled.
 processors:
+  {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
+  # Scope-keyed split for Db2 query events. Filters rather than the logs routing connector,
+  # so this works whether or not a logs destination is configured: that connector needs a
+  # pipeline feeding it, which only exists when logs are enabled.
+  filter/dbmon_only:
+    error_mode: ignore
+    logs:
+      log_record:
+        - 'instrumentation_scope.name != "github.com/signalfx/splunk-otel-db2"'
+  filter/exclude_dbmon:
+    error_mode: ignore
+    logs:
+      log_record:
+        - 'instrumentation_scope.name == "github.com/signalfx/splunk-otel-db2"'
+  {{- end }}
   {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
@@ -125,6 +140,17 @@ exporters:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     auth:
       authenticator: headers_setter
+  {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
+  # Db2 query events. Separate from otlp_http/entities on purpose: that exporter is shared
+  # with Kubernetes entity events, and putting the Database Monitoring library header there
+  # would mark those as Database Monitoring data too.
+  otlp_http/dbmon:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    auth:
+      authenticator: headers_setter
+    headers:
+      "X-Splunk-Instrumentation-Library": dbmon
+  {{- end }}
   {{- if .Values.splunkObservability.secureAppEnabled }}
   otlp_http/secureapp:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
@@ -319,8 +345,31 @@ service:
         {{- else }}
         - otlp
         {{- end }}
-      processors: [memory_limiter, batch]
+      processors:
+        - memory_limiter
+        {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
+        # Db2 query events have their own exporter; keep them out of entity ingestion.
+        - filter/exclude_dbmon
+        {{- end }}
+        - batch
       exporters: [otlp_http/entities]
+    {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
+    # Db2 query events
+    logs/dbmon:
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        - filter/dbmon_only
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resource_detection/k8s_cluster_name
+        {{- end }}
+        {{- if .Values.clusterName }}
+        - resource/add_cluster_name
+        {{- end }}
+        - batch
+      exporters: [otlp_http/dbmon]
+    {{- end }}
     {{- if .Values.splunkObservability.secureAppEnabled }}
     # secureapp events
     logs/secureapp:

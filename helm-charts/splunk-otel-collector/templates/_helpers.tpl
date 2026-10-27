@@ -688,3 +688,30 @@ Create the target allocator endpoint to match subchart's naming logic
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Whether Db2 query events should be routed to Observability Cloud Database Monitoring.
+Read defensively: the db2 block always exists so the subchart condition resolves, but it
+need not carry a dbMonitoring key.
+*/}}
+{{- define "splunk-otel-collector.db2DbMonEnabled" -}}
+{{- $db2 := .Values.db2 | default dict -}}
+{{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (dig "enabled" false $db2) (dig "dbMonitoring" "enabled" false $db2) -}}
+true
+{{- else -}}
+false
+{{- end -}}
+{{- end -}}
+
+{{/*
+The Db2 Database Monitoring pipeline lives in the gateway config, so refuse at template
+time with something actionable rather than rendering a release that silently drops these
+records.
+*/}}
+{{- define "splunk-otel-collector.validateDb2DbMonitoring" -}}
+{{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" -}}
+{{- if not .Values.gateway.enabled -}}
+{{- fail "db2.dbMonitoring.enabled currently requires gateway.enabled: true. The agent's entity pipeline does not carry the routing rule." -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -92,6 +94,61 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 	// cycles.
 	internal.AssertMetricNames(t, metricsSink,
 		filepath.Join(testDir, "expected_db2_metric_names.yaml"), 5*time.Minute, 5*time.Second)
+
+	assertDb2ResourceAttributes(t, metricsSink)
+}
+
+// assertDb2ResourceAttributes checks the attribution that survives the trip through the
+// Collector. The receiver can scrape several remote databases, so a metric is only useful if
+// it still names the database it came from once it reaches the sink.
+//
+// server.address is asserted strictly. host.name is only reported, because the agent's
+// metrics pipeline runs resource_detection with override: true and may replace it with the
+// Collector node's hostname — the point here is to make whatever happens visible rather than
+// to encode today's behaviour.
+func assertDb2ResourceAttributes(t *testing.T, sink *consumertest.MetricsSink) {
+	t.Helper()
+
+	const wantHost = "db2.default.svc.cluster.local"
+
+	var checked int
+	for _, batch := range sink.AllMetrics() {
+		for i := 0; i < batch.ResourceMetrics().Len(); i++ {
+			rm := batch.ResourceMetrics().At(i)
+			if !hasDb2Metric(rm) {
+				continue
+			}
+			attrs := rm.Resource().Attributes()
+
+			serverAddress, ok := attrs.Get("server.address")
+			require.True(t, ok, "a Db2 resource reached the sink without server.address")
+			require.Equal(t, wantHost, serverAddress.Str(),
+				"server.address must still name the database the metrics came from")
+
+			if hostName, ok := attrs.Get("host.name"); ok {
+				t.Logf("host.name as received: %q (receiver set %q)", hostName.Str(), wantHost)
+			} else {
+				t.Log("host.name was not present on the Db2 resource")
+			}
+			checked++
+		}
+	}
+	require.NotZero(t, checked, "no Db2 resource metrics reached the sink to inspect")
+	t.Logf("checked resource attributes on %d Db2 resource batches", checked)
+}
+
+// hasDb2Metric reports whether a resource carries metrics from the Db2 receiver, so other
+// resources arriving at the shared sink are not asserted against.
+func hasDb2Metric(rm pmetric.ResourceMetrics) bool {
+	for i := 0; i < rm.ScopeMetrics().Len(); i++ {
+		sm := rm.ScopeMetrics().At(i)
+		for j := 0; j < sm.Metrics().Len(); j++ {
+			if strings.HasPrefix(sm.Metrics().At(j).Name(), "db2.") {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func deployDb2(t *testing.T, client *kubernetes.Clientset) {

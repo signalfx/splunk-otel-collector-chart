@@ -1648,6 +1648,12 @@ db2:
   # The Db2 receiver image is Linux-only.
   nodeSelector:
     kubernetes.io/os: linux
+  # Route the receiver's query samples and top queries to Observability Cloud Database
+  # Monitoring. Off by default. When on, this chart adds a dedicated exporter and a routing
+  # rule keyed on the receiver's instrumentation scope, so these records carry the Database
+  # Monitoring library header without touching the shared entity-events exporter.
+  dbMonitoring:
+    enabled: false
 
 ################################################################################
 # Helm Chart Feature Gates.

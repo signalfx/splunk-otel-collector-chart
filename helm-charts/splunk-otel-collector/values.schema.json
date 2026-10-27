@@ -1871,6 +1871,15 @@
       "properties": {
         "enabled": {
           "type": "boolean"
+        },
+        "dbMonitoring": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          }
         }
       }
     },

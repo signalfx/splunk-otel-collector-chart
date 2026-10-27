@@ -1302,22 +1302,20 @@ Pod on the receiver's own Node. The gateway Service is reachable cluster-wide.
 
 ### Receiving query samples and top queries
 
-Metrics need no extra configuration. Query samples and top queries are OTLP log records, so
-they need a Collector pipeline that accepts logs — the gateway has one, and it already
-exports to Observability Cloud. Opt into the events and add the header Database Monitoring
-identifies its data by:
+Metrics need no extra configuration. Query samples and top queries are OTLP **log records**,
+so they need routing to Database Monitoring. Set `db2.dbMonitoring.enabled` and the chart
+adds a dedicated exporter plus a routing rule keyed on the receiver's instrumentation scope:
 
 ```yaml
 gateway:
   enabled: true
-  config:
-    exporters:
-      otlp_http/entities:
-        headers:
-          X-splunk-instrumentation-library: dbmon
 
 db2:
   enabled: true
+  dbMonitoring:
+    enabled: true
+  otlp:
+    collectorTarget: gateway
   receivers:
     - name: default
       hostname: db2.example.com
@@ -1331,14 +1329,17 @@ db2:
           enabled: true
 ```
 
-The access token still comes from the chart's `headers_setter` authenticator, so adding
-headers here does not affect it.
+This renders `otlp_http/dbmon`, which carries
+`X-Splunk-Instrumentation-Library: dbmon` to the Observability Cloud `/v3/event` endpoint,
+and a `logs/dbmon` pipeline that filters on the receiver's scope,
+`github.com/signalfx/splunk-otel-db2`. The shared
+`otlp_http/entities` exporter is deliberately left alone, so Kubernetes entity events are not
+marked as Database Monitoring data.
 
-An agent-only install has no logs pipeline by default, so these exports are rejected with
-`UNIMPLEMENTED` until one exists — either run the gateway as above, or set
-`splunkPlatform.logsEnabled` to send them to Splunk Platform instead.
-`splunkObservability.profilingEnabled` renders a logs pipeline but its exporter takes
-profiling records only, so it is not a route for these.
+It requires `gateway.enabled: true`, which the chart enforces at template time with an
+actionable error rather than rendering a release that drops these records. Nothing else needs
+enabling — in particular no Splunk Platform configuration, which is a separate product and
+not part of this path.
 
 See the [receiver's configuration
 reference](https://github.com/signalfx/splunk-otel-db2#query-samples-log-records) for
