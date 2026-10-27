@@ -713,5 +713,20 @@ records.
 {{- if not .Values.gateway.enabled -}}
 {{- fail "db2.dbMonitoring.enabled currently requires gateway.enabled: true. The agent's entity pipeline does not carry the routing rule." -}}
 {{- end -}}
+{{- /*
+The routing rule lives in the gateway config, but the subchart defaults to exporting to
+the agent, and in Observability-only mode the agent has no pipeline receiving OTLP logs
+(logs/entities reads from nop). OTLP registers a service per signal, so query-sample
+events sent there are rejected outright with UNIMPLEMENTED rather than being dropped
+quietly. Refuse the combination instead of installing something that cannot deliver.
+*/ -}}
+{{- $otlp := (.Values.db2).otlp | default dict -}}
+{{- $gatewayTarget := or
+      (dig "endpoint" "" $otlp)
+      (eq (dig "collectorTarget" "agent" $otlp) "gateway")
+      (dig "gateway" "enabled" false (.Values.global | default dict)) -}}
+{{- if not $gatewayTarget -}}
+{{- fail "db2.dbMonitoring.enabled requires the Db2 receiver to export to the gateway, but db2.otlp.collectorTarget is \"agent\". Set db2.otlp.collectorTarget: gateway. The agent has no OTLP logs pipeline in Observability-only mode, so query-sample events sent to it are rejected with UNIMPLEMENTED." -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}

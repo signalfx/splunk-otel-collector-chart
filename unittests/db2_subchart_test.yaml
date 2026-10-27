@@ -112,3 +112,51 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "needs credentials"
+
+  # The routing rule is in the gateway config, but the subchart exports to the agent by
+  # default, and the agent has no pipeline receiving OTLP logs in Observability-only mode.
+  # That combination rendered cleanly while query-sample events were rejected at the agent
+  # with UNIMPLEMENTED, so it has to fail at template time instead.
+  - it: should refuse database monitoring while the receiver still targets the agent
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires the Db2 receiver to export to the gateway"
+
+  - it: should accept database monitoring when the receiver targets the gateway
+    template: templates/configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: "otlp_http/dbmon"

@@ -146,8 +146,9 @@ func assertDb2Dimensions(t *testing.T, sink *consumertest.MetricsSink) {
 	}
 
 	require.NotZero(t, checked, "no Db2 data points reached the sink to inspect")
-	// "host" as well as "host.name": SignalFx's default translation renames host.name, so
-	// the attribute the receiver set can arrive under either key.
+	// "host" is logged next to "host.name" only as a precaution against a rename somewhere
+	// in the SignalFx path. Nothing in the exporter or translator was found to do that, so
+	// the expectation is that it stays empty.
 	for _, key := range []string{"server.address", "host.name", "host", "db.namespace", "server.port"} {
 		t.Logf("dimension %s as received: %v", key, keysOf(seen[key]))
 	}

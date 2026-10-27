@@ -1336,10 +1336,22 @@ and a `logs/dbmon` pipeline that filters on the receiver's scope,
 `otlp_http/entities` exporter is deliberately left alone, so Kubernetes entity events are not
 marked as Database Monitoring data.
 
-It requires `gateway.enabled: true`, which the chart enforces at template time with an
-actionable error rather than rendering a release that drops these records. Nothing else needs
-enabling — in particular no Splunk Platform configuration, which is a separate product and
-not part of this path.
+Both `gateway.enabled: true` and `db2.otlp.collectorTarget: gateway` are required, and the
+chart enforces each at template time with an actionable error rather than rendering a release
+that cannot deliver these records. The second is easy to miss: the receiver exports to the
+agent by default, and in Observability-only mode the agent has no pipeline receiving OTLP
+logs. OTLP registers one service per signal, so query samples sent there are rejected with
+`UNIMPLEMENTED` instead of being dropped quietly.
+
+Sending straight to the gateway also preserves host attribution. The agent's metrics pipeline
+runs `resource_detection` with `override: true`, which replaces `host.name` with the
+Collector node's hostname — wrong for a receiver that scrapes remote databases. The gateway
+pipelines run no such processor, so the receiver's own `host.name` and `server.address`
+arrive intact. Key Database Monitoring queries on `server.address`, which always identifies
+the database the metrics came from.
+
+Nothing else needs enabling — in particular no Splunk Platform configuration, which is a
+separate product and not part of this path.
 
 See the [receiver's configuration
 reference](https://github.com/signalfx/splunk-otel-db2#query-samples-log-records) for
