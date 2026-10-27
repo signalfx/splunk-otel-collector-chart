@@ -17,6 +17,12 @@ clusterReceiver:
 gateway:
   enabled: true
   replicaCount: 1
+  # The chart default is 4 CPU / 8Gi, which cannot be scheduled on a single-node kind
+  # cluster alongside Db2. Matches the sizing the other gateway suites use.
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
 
 db2:
   enabled: true
