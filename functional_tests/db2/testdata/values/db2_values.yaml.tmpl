@@ -52,3 +52,7 @@ db2:
       events:
         dbServerQuerySample:
           enabled: true
+        # Top queries read the package cache, which is populated even on an otherwise idle
+        # instance, so at least one Db2 log record is produced without synthetic load.
+        dbServerTopQuery:
+          enabled: true

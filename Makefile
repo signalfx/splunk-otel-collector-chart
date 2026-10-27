@@ -114,8 +114,11 @@ unittest: ## Run unittests on the Helm chart
 
 # Has to exceed the sum of a suite's own waits plus its cleanup, since go test counts
 # cleanup against the same deadline: a suite that hits its inner timeouts should fail on
-# its own assertion rather than panic here and skip teardown.
-TEST_TIMEOUT ?= 60m
+# its own assertion rather than panic here and skip teardown. The db2 suite is the
+# longest: 15m Helm + 15m Db2 + 5m + 5m readiness + 5m metrics + 4m events, then up to
+# 15m of teardown. The workflow sets no timeout-minutes, so the job's own ceiling is
+# GitHub's 360m default.
+TEST_TIMEOUT ?= 75m
 
 # Example Usage:
 #   make functionaltest

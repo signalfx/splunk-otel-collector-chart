@@ -755,13 +755,23 @@ matching rejected unrelated names that merely contain the Service name, such as
 "<fullname>-agent-proxy", and let a differently-cased spelling of the agent host through.
 */ -}}
 {{- $gatewayService := include "splunk-otel-collector.fullname" . -}}
+{{- $namespace := include "splunk-otel-collector.namespace" . -}}
 {{- $host := $endpoint -}}
 {{- if contains "://" $host -}}{{- $host = splitList "://" $host | last -}}{{- end -}}
 {{- $host = splitList "/" $host | first -}}
 {{- $host = splitList ":" $host | first -}}
-{{- $label := splitList "." (lower $host) | first -}}
-{{- if ne $label (lower $gatewayService) -}}
-{{- fail (printf "db2.dbMonitoring.enabled requires the Db2 receiver to export to this release's gateway Service (%s), but db2.otlp.endpoint resolves to host %q. The Database Monitoring routing rule is part of this release's gateway config, so records sent anywhere else never reach it -- and the agent in particular has no OTLP logs pipeline, which rejects them with UNIMPLEMENTED. Unset db2.otlp.endpoint and set db2.otlp.collectorTarget: gateway to have the address derived." $gatewayService $host) -}}
+{{- $labels := splitList "." (lower $host) -}}
+{{- $ok := eq (first $labels) (lower $gatewayService) -}}
+{{- /*
+A qualified name also has to name this release's namespace: the Service name alone is
+shared by every install of this chart, so "<fullname>.other-namespace.svc.cluster.local"
+is a different release's gateway and carries none of this release's routing.
+*/ -}}
+{{- if and $ok (gt (len $labels) 1) -}}
+{{- $ok = eq (index $labels 1) (lower $namespace) -}}
+{{- end -}}
+{{- if not $ok -}}
+{{- fail (printf "db2.dbMonitoring.enabled requires the Db2 receiver to export to this release's gateway Service (%s in namespace %s), but db2.otlp.endpoint resolves to host %q. The Database Monitoring routing rule is part of this release's gateway config, so records sent anywhere else never reach it -- and the agent in particular has no OTLP logs pipeline, which rejects them with UNIMPLEMENTED. Unset db2.otlp.endpoint and set db2.otlp.collectorTarget: gateway to have the address derived." $gatewayService $namespace $host) -}}
 {{- end -}}
 {{- else -}}
 {{- if not (or

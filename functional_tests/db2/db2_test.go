@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -17,6 +18,7 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"gopkg.in/yaml.v3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -110,6 +112,7 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 		filepath.Join(testDir, "expected_db2_metric_names.yaml"), 5*time.Minute, 5*time.Second)
 
 	assertDb2Dimensions(t, metricsSink)
+	assertDbMonEventsRouted(t, metricsSink)
 }
 
 // assertDb2Dimensions checks the attribution that survives the trip through the Collector.
@@ -203,6 +206,11 @@ func keysOf(m map[string]struct{}) []string {
 
 // assertDbMonRouting checks the gateway config the Collector loaded carries the Database
 // Monitoring split, and that the shared entity exporter was not co-opted to do it.
+//
+// The config is unmarshalled rather than string-matched. Slicing the raw text to isolate
+// the entities exporter silently captured the rest of the file -- the exporter keys are
+// sorted, so otlp_http/entities has no otlp sibling after it -- which made the assertion
+// fail on config that was perfectly correct.
 func assertDbMonRouting(t *testing.T, client *kubernetes.Clientset) {
 	t.Helper()
 
@@ -219,28 +227,118 @@ func assertDbMonRouting(t *testing.T, client *kubernetes.Clientset) {
 	}
 	require.NotEmpty(t, relay, "no gateway ConfigMap was created")
 
-	for _, want := range []string{
-		"otlp_http/dbmon",
-		"filter/dbmon_only",
-		"filter/exclude_dbmon",
-		"logs/dbmon",
-		"X-Splunk-Instrumentation-Library: dbmon",
-	} {
-		require.Contains(t, relay, want,
-			"db2.dbMonitoring.enabled did not render %q into the gateway config", want)
+	var cfg struct {
+		Exporters  map[string]map[string]any `yaml:"exporters"`
+		Processors map[string]any            `yaml:"processors"`
+		Service    struct {
+			Pipelines map[string]struct {
+				Receivers  []string `yaml:"receivers"`
+				Processors []string `yaml:"processors"`
+				Exporters  []string `yaml:"exporters"`
+			} `yaml:"pipelines"`
+		} `yaml:"service"`
 	}
+	require.NoError(t, yaml.Unmarshal([]byte(relay), &cfg),
+		"the gateway relay config is not parseable YAML")
 
-	// The whole point of the dedicated exporter: entity events must not be labeled as
-	// Database Monitoring data. Asserted on the entities exporter block specifically,
-	// since the header is expected to appear elsewhere in the file.
-	idx := strings.Index(relay, "otlp_http/entities:")
-	require.NotEqual(t, -1, idx, "no otlp_http/entities exporter in the gateway config")
-	block := relay[idx:]
-	if end := strings.Index(block, "\n    otlp"); end != -1 {
-		block = block[:end]
+	require.Contains(t, cfg.Exporters, "otlp_http/dbmon")
+	require.Contains(t, cfg.Processors, "filter/dbmon_only")
+	require.Contains(t, cfg.Processors, "filter/exclude_dbmon")
+
+	dbmon, ok := cfg.Service.Pipelines["logs/dbmon"]
+	require.True(t, ok, "db2.dbMonitoring.enabled rendered no logs/dbmon pipeline")
+	require.Contains(t, dbmon.Processors, "filter/dbmon_only")
+	require.Contains(t, dbmon.Exporters, "otlp_http/dbmon")
+
+	headers, _ := cfg.Exporters["otlp_http/dbmon"]["headers"].(map[string]any)
+	require.Equal(t, "dbmon", headers["X-Splunk-Instrumentation-Library"],
+		"the dbmon exporter must carry the Database Monitoring library header")
+
+	// The point of the dedicated exporter: entity events must not be labeled as Database
+	// Monitoring data, and must not be routed through the dbmon pipeline.
+	entities, ok := cfg.Exporters["otlp_http/entities"]
+	require.True(t, ok, "no otlp_http/entities exporter in the gateway config")
+	entityHeaders, _ := entities["headers"].(map[string]any)
+	require.NotContains(t, entityHeaders, "X-Splunk-Instrumentation-Library",
+		"the shared entity exporter must not carry the Database Monitoring header")
+
+	// Every other logs pipeline has to exclude the Db2 scope, or query text leaves
+	// Database Monitoring.
+	for name, p := range cfg.Service.Pipelines {
+		if !strings.HasPrefix(name, "logs") || name == "logs/dbmon" {
+			continue
+		}
+		if len(p.Exporters) == 0 || !slices.Contains(p.Receivers, "routing/logs") &&
+			!slices.Contains(p.Receivers, "otlp") {
+			continue
+		}
+		require.Contains(t, p.Processors, "filter/exclude_dbmon",
+			"pipeline %q exports log records without excluding the Db2 scope", name)
 	}
-	require.NotContains(t, block, "dbmon",
-		"the shared entity exporter must not carry Database Monitoring config")
+}
+
+// assertDbMonEventsRouted proves a Db2 query event actually traveled the logs/dbmon
+// pipeline, rather than only that the pipeline was rendered.
+//
+// Read from the Collector's own telemetry, which the gateway's metrics/collector pipeline
+// exports to the same sink. Counts sent and failed together on purpose: the sink is a
+// SignalFx receiver with no /v3/event, so the send itself cannot succeed here. What the
+// counter proves is that records passed filter/dbmon_only and reached the dbmon exporter
+// -- if the scope filter were wrong they would never be handed to it at all.
+func assertDbMonEventsRouted(t *testing.T, sink *consumertest.MetricsSink) {
+	t.Helper()
+
+	const exporter = "otlp_http/dbmon"
+	var last float64
+
+	require.Eventually(t, func() bool {
+		last = 0
+		for _, batch := range sink.AllMetrics() {
+			for i := 0; i < batch.ResourceMetrics().Len(); i++ {
+				rm := batch.ResourceMetrics().At(i)
+				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+					sm := rm.ScopeMetrics().At(j)
+					for k := 0; k < sm.Metrics().Len(); k++ {
+						m := sm.Metrics().At(k)
+						if !strings.HasPrefix(m.Name(), "otelcol_exporter_") ||
+							!strings.HasSuffix(m.Name(), "_log_records") {
+							continue
+						}
+						for _, attrs := range dataPointAttributes(m) {
+							if v, ok := attrs.Get("exporter"); ok && v.AsString() == exporter {
+								last += dataPointValue(m)
+							}
+						}
+					}
+				}
+			}
+		}
+		return last > 0
+	}, 4*time.Minute, 10*time.Second,
+		"no log record reached %s: query events are not being routed through logs/dbmon", exporter)
+
+	t.Logf("log records handed to %s: %v", exporter, last)
+}
+
+// dataPointValue returns the first numeric data point of a metric, whichever shape it has.
+func dataPointValue(m pmetric.Metric) float64 {
+	num := func(dp pmetric.NumberDataPoint) float64 {
+		if dp.ValueType() == pmetric.NumberDataPointValueTypeInt {
+			return float64(dp.IntValue())
+		}
+		return dp.DoubleValue()
+	}
+	switch m.Type() {
+	case pmetric.MetricTypeGauge:
+		if m.Gauge().DataPoints().Len() > 0 {
+			return num(m.Gauge().DataPoints().At(0))
+		}
+	case pmetric.MetricTypeSum:
+		if m.Sum().DataPoints().Len() > 0 {
+			return num(m.Sum().DataPoints().At(0))
+		}
+	}
+	return 0
 }
 
 func deployDb2(t *testing.T, client *kubernetes.Clientset) {
