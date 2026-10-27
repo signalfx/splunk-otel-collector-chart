@@ -278,6 +278,7 @@ jobs:
                 .headRefName == "update-TargetAllocator"
                 or .headRefName == "update-operator"
                 or .headRefName == "update-java"
+                or .headRefName == "update-python"
                 or .headRefName == "update-nodejs"
                 or .headRefName == "update-dotnet"
                 # OBI updates are not release-blocking yet.
