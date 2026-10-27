@@ -8,12 +8,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -95,60 +97,95 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 	internal.AssertMetricNames(t, metricsSink,
 		filepath.Join(testDir, "expected_db2_metric_names.yaml"), 5*time.Minute, 5*time.Second)
 
-	assertDb2ResourceAttributes(t, metricsSink)
+	assertDb2Dimensions(t, metricsSink)
 }
 
-// assertDb2ResourceAttributes checks the attribution that survives the trip through the
-// Collector. The receiver can scrape several remote databases, so a metric is only useful if
-// it still names the database it came from once it reaches the sink.
+// assertDb2Dimensions checks the attribution that survives the trip through the Collector.
+// The receiver can scrape several remote databases, so a metric is only useful if it still
+// names the database it came from once it reaches the sink.
 //
-// server.address is asserted strictly. host.name is only reported, because the agent's
-// metrics pipeline runs resource_detection with override: true and may replace it with the
-// Collector node's hostname — the point here is to make whatever happens visible rather than
-// to encode today's behaviour.
-func assertDb2ResourceAttributes(t *testing.T, sink *consumertest.MetricsSink) {
+// The dimensions are read from the data points, not the resource: the chart exports through
+// the signalfx exporter, and SignalFx carries dimensions per data point rather than as an
+// OTLP resource. Reading the resource found it empty.
+//
+// server.address is asserted strictly. host.name is only reported, because the agent metrics
+// pipeline runs resource_detection with override: true and may replace it with the Collector
+// node hostname — the point is to make whatever happens visible rather than to encode
+// today's behavior.
+func assertDb2Dimensions(t *testing.T, sink *consumertest.MetricsSink) {
 	t.Helper()
 
 	const wantHost = "db2.default.svc.cluster.local"
 
+	seen := map[string]map[string]struct{}{}
 	var checked int
+
 	for _, batch := range sink.AllMetrics() {
 		for i := 0; i < batch.ResourceMetrics().Len(); i++ {
 			rm := batch.ResourceMetrics().At(i)
-			if !hasDb2Metric(rm) {
-				continue
+			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+				sm := rm.ScopeMetrics().At(j)
+				for k := 0; k < sm.Metrics().Len(); k++ {
+					m := sm.Metrics().At(k)
+					if !strings.HasPrefix(m.Name(), "db2.") {
+						continue
+					}
+					for _, attrs := range dataPointAttributes(m) {
+						attrs.Range(func(key string, v pcommon.Value) bool {
+							if seen[key] == nil {
+								seen[key] = map[string]struct{}{}
+							}
+							seen[key][v.AsString()] = struct{}{}
+							return true
+						})
+						checked++
+					}
+				}
 			}
-			attrs := rm.Resource().Attributes()
-
-			serverAddress, ok := attrs.Get("server.address")
-			require.True(t, ok, "a Db2 resource reached the sink without server.address")
-			require.Equal(t, wantHost, serverAddress.Str(),
-				"server.address must still name the database the metrics came from")
-
-			if hostName, ok := attrs.Get("host.name"); ok {
-				t.Logf("host.name as received: %q (receiver set %q)", hostName.Str(), wantHost)
-			} else {
-				t.Log("host.name was not present on the Db2 resource")
-			}
-			checked++
 		}
 	}
-	require.NotZero(t, checked, "no Db2 resource metrics reached the sink to inspect")
-	t.Logf("checked resource attributes on %d Db2 resource batches", checked)
+
+	require.NotZero(t, checked, "no Db2 data points reached the sink to inspect")
+	// "host" as well as "host.name": SignalFx's default translation renames host.name, so
+	// the attribute the receiver set can arrive under either key.
+	for _, key := range []string{"server.address", "host.name", "host", "db.namespace", "server.port"} {
+		t.Logf("dimension %s as received: %v", key, keysOf(seen[key]))
+	}
+
+	require.Contains(t, seen, "server.address",
+		"Db2 data points reached the sink without a server.address dimension")
+	require.Contains(t, seen["server.address"], wantHost,
+		"server.address must still name the database the metrics came from")
 }
 
-// hasDb2Metric reports whether a resource carries metrics from the Db2 receiver, so other
-// resources arriving at the shared sink are not asserted against.
-func hasDb2Metric(rm pmetric.ResourceMetrics) bool {
-	for i := 0; i < rm.ScopeMetrics().Len(); i++ {
-		sm := rm.ScopeMetrics().At(i)
-		for j := 0; j < sm.Metrics().Len(); j++ {
-			if strings.HasPrefix(sm.Metrics().At(j).Name(), "db2.") {
-				return true
-			}
+// dataPointAttributes returns the attribute maps of a metric's data points, whichever shape
+// the metric has.
+func dataPointAttributes(m pmetric.Metric) []pcommon.Map {
+	var out []pcommon.Map
+	switch m.Type() {
+	case pmetric.MetricTypeGauge:
+		for i := 0; i < m.Gauge().DataPoints().Len(); i++ {
+			out = append(out, m.Gauge().DataPoints().At(i).Attributes())
+		}
+	case pmetric.MetricTypeSum:
+		for i := 0; i < m.Sum().DataPoints().Len(); i++ {
+			out = append(out, m.Sum().DataPoints().At(i).Attributes())
+		}
+	case pmetric.MetricTypeHistogram:
+		for i := 0; i < m.Histogram().DataPoints().Len(); i++ {
+			out = append(out, m.Histogram().DataPoints().At(i).Attributes())
 		}
 	}
-	return false
+	return out
+}
+
+func keysOf(m map[string]struct{}) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
 }
 
 func deployDb2(t *testing.T, client *kubernetes.Clientset) {
