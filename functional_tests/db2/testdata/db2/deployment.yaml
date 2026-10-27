@@ -47,7 +47,9 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 15
             timeoutSeconds: 15
-            failureThreshold: 80
+            # 60s + 48*15s = 13m, which has to stay inside db2ReadyTimeout so the Go wait
+            # reports a stalled fixture rather than the suite deadline firing first.
+            failureThreshold: 48
           readinessProbe:
             exec:
               command: ["/bin/bash", "-c", "su - db2inst1 -c 'db2 connect to SAMPLE'"]

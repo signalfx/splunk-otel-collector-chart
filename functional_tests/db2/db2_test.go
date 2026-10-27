@@ -37,7 +37,12 @@ const (
 
 	// Matches the startupProbe budget in testdata/db2/deployment.yaml, plus slack for a
 	// cold image pull. A ceiling, not an expectation.
-	db2ReadyTimeout = 25 * time.Minute
+	//
+	// Sized so this wait, the Helm action timeout, the pod and metric waits and the
+	// teardown all fit inside TEST_TIMEOUT: go test counts cleanup against the same
+	// deadline, so an over-generous wait here turns a clean assertion failure into a panic
+	// that skips teardown and leaks the fixture.
+	db2ReadyTimeout = 15 * time.Minute
 )
 
 // Test_Db2_Metrics_Through_Collector covers the contract between the two charts: a real
@@ -90,7 +95,14 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 	internal.CheckPodsReady(t, client, internal.DefaultNamespace,
 		"app.kubernetes.io/name=db2", 5*time.Minute, 10*time.Second)
 
+	// The gateway carries the Database Monitoring config. A Collector rejects an invalid
+	// OTTL condition or exporter block at startup, so reaching Ready is the assertion that
+	// the rendered dbmon wiring is actually loadable - not just well-formed YAML.
+	internal.CheckPodsReady(t, client, internal.DefaultNamespace,
+		"app=splunk-otel-collector,component=otel-collector", 5*time.Minute, 10*time.Second)
+
 	assertDerivedEndpoint(t, client)
+	assertDbMonRouting(t, client)
 
 	// The receiver scrapes on an interval and the Collector batches, so allow several
 	// cycles.
@@ -187,6 +199,48 @@ func keysOf(m map[string]struct{}) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// assertDbMonRouting checks the gateway config the Collector loaded carries the Database
+// Monitoring split, and that the shared entity exporter was not co-opted to do it.
+func assertDbMonRouting(t *testing.T, client *kubernetes.Clientset) {
+	t.Helper()
+
+	cms, err := client.CoreV1().ConfigMaps(internal.DefaultNamespace).
+		List(t.Context(), metav1.ListOptions{})
+	require.NoError(t, err)
+
+	var relay string
+	for _, cm := range cms.Items {
+		if strings.HasSuffix(cm.Name, "-otel-collector") {
+			relay = cm.Data["relay"]
+			break
+		}
+	}
+	require.NotEmpty(t, relay, "no gateway ConfigMap was created")
+
+	for _, want := range []string{
+		"otlp_http/dbmon",
+		"filter/dbmon_only",
+		"filter/exclude_dbmon",
+		"logs/dbmon",
+		"X-Splunk-Instrumentation-Library: dbmon",
+	} {
+		require.Contains(t, relay, want,
+			"db2.dbMonitoring.enabled did not render %q into the gateway config", want)
+	}
+
+	// The whole point of the dedicated exporter: entity events must not be labeled as
+	// Database Monitoring data. Asserted on the entities exporter block specifically,
+	// since the header is expected to appear elsewhere in the file.
+	idx := strings.Index(relay, "otlp_http/entities:")
+	require.NotEqual(t, -1, idx, "no otlp_http/entities exporter in the gateway config")
+	block := relay[idx:]
+	if end := strings.Index(block, "\n    otlp"); end != -1 {
+		block = block[:end]
+	}
+	require.NotContains(t, block, "dbmon",
+		"the shared entity exporter must not carry Database Monitoring config")
 }
 
 func deployDb2(t *testing.T, client *kubernetes.Clientset) {

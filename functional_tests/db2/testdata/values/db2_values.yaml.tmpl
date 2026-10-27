@@ -9,12 +9,28 @@ splunkObservability:
 
 clusterName: db2-functional-test
 
-# Only the agent is needed to receive the subchart's OTLP export.
 clusterReceiver:
   enabled: false
 
+# Database Monitoring routing lives in the gateway config, so the gateway has to run and
+# the receiver has to export to it.
+gateway:
+  enabled: true
+  replicaCount: 1
+
 db2:
   enabled: true
+  # Exercises the Database Monitoring wiring at runtime: a dedicated exporter, two
+  # scope-keyed filters and the logs/dbmon pipeline. Chart unit tests cover what renders;
+  # this covers the Collector accepting it and the metrics path surviving alongside it, as
+  # a malformed OTTL condition or exporter block only fails once the Collector parses it.
+  #
+  # The sink is a SignalFx receiver and does not implement /v3/event, so the dbmon
+  # exporter's own sends fail here. That is expected and not what this asserts.
+  dbMonitoring:
+    enabled: true
+  otlp:
+    collectorTarget: gateway
   receivers:
     - name: default
       hostname: db2.default.svc.cluster.local
@@ -25,3 +41,8 @@ db2:
       password: db2inst1-pwd
       tls:
         insecure: true
+      # Produces the log records the dbmon filters act on; without an event enabled the
+      # pipeline would render but never see traffic.
+      events:
+        dbServerQuerySample:
+          enabled: true

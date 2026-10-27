@@ -730,7 +730,7 @@ Observability Cloud feature, so a Platform-only install renders no dbmon exporte
 logs/dbmon pipeline at all -- asking for it there used to succeed and quietly do nothing.
 */ -}}
 {{- if ne (include "splunk-otel-collector.splunkO11yEnabled" .) "true" -}}
-{{- fail "db2.dbMonitoring.enabled requires Splunk Observability Cloud to be configured (splunkObservability.realm and accessToken, or an explicit ingestUrl/apiUrl). Database Monitoring has no Splunk Platform destination, so there is nothing for this setting to route to." -}}
+{{- fail "db2.dbMonitoring.enabled requires Splunk Observability Cloud to be configured: set splunkObservability.realm and splunkObservability.accessToken. Database Monitoring has no Splunk Platform destination, so there is nothing for this setting to route to." -}}
 {{- end -}}
 {{- if not .Values.gateway.enabled -}}
 {{- fail "db2.dbMonitoring.enabled currently requires gateway.enabled: true. The agent's entity pipeline does not carry the routing rule." -}}
@@ -746,13 +746,22 @@ quietly. Refuse the combination instead of installing something that cannot deli
 {{- $endpoint := dig "endpoint" "" $otlp -}}
 {{- if $endpoint -}}
 {{- /*
-An explicit endpoint is the operator's own address and may legitimately be a collector
-outside this release, so it is not second-guessed -- except for the one case that is
-certainly wrong: aiming it at this release's agent Service.
+The logs/dbmon pipeline that carries these records lives in *this* release's gateway
+config, so the endpoint has to resolve to this release's gateway Service -- any other
+address, inside or outside the cluster, means the records never meet the routing rule.
+
+Matched on the parsed and lower-cased first DNS label rather than by substring: substring
+matching rejected unrelated names that merely contain the Service name, such as
+"<fullname>-agent-proxy", and let a differently-cased spelling of the agent host through.
 */ -}}
-{{- $agentService := printf "%s-agent" (include "splunk-otel-collector.fullname" .) -}}
-{{- if contains $agentService $endpoint -}}
-{{- fail (printf "db2.dbMonitoring.enabled requires the Db2 receiver to export to the gateway, but db2.otlp.endpoint points at the agent Service (%s). The agent has no OTLP logs pipeline, so query-sample events sent to it are rejected with UNIMPLEMENTED. Point it at the gateway Service, or unset it and set db2.otlp.collectorTarget: gateway to have it derived." $agentService) -}}
+{{- $gatewayService := include "splunk-otel-collector.fullname" . -}}
+{{- $host := $endpoint -}}
+{{- if contains "://" $host -}}{{- $host = splitList "://" $host | last -}}{{- end -}}
+{{- $host = splitList "/" $host | first -}}
+{{- $host = splitList ":" $host | first -}}
+{{- $label := splitList "." (lower $host) | first -}}
+{{- if ne $label (lower $gatewayService) -}}
+{{- fail (printf "db2.dbMonitoring.enabled requires the Db2 receiver to export to this release's gateway Service (%s), but db2.otlp.endpoint resolves to host %q. The Database Monitoring routing rule is part of this release's gateway config, so records sent anywhere else never reach it -- and the agent in particular has no OTLP logs pipeline, which rejects them with UNIMPLEMENTED. Unset db2.otlp.endpoint and set db2.otlp.collectorTarget: gateway to have the address derived." $gatewayService $host) -}}
 {{- end -}}
 {{- else -}}
 {{- if not (or

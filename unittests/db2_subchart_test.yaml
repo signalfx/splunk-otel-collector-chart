@@ -189,9 +189,10 @@ tests:
       - failedTemplate:
           errorPattern: "requires Splunk Observability Cloud to be configured"
 
-  # An explicit endpoint is the operator's own address and is not second-guessed, except
-  # when it names this release's agent Service -- which cannot receive OTLP logs.
-  - it: should refuse an explicit endpoint pointing at the agent service
+  # The routing rule is in this release's gateway config, so any other address -- the
+  # agent, or a collector outside the release -- never meets it. Matched on the parsed
+  # host, so a name merely containing the Service name is not mistaken for it.
+  - it: should refuse an explicit endpoint that is not this release's gateway
     set:
       splunkObservability.realm: us0
       splunkObservability.accessToken: token
@@ -211,7 +212,7 @@ tests:
             credentialsSecret: my-db2-credentials
     asserts:
       - failedTemplate:
-          errorPattern: "points at the agent Service"
+          errorPattern: "export to this release's gateway Service"
 
   # Db2 events arrive over OTLP and are not entity-marked, so routing/logs hands them to the
   # default logs route. They carry query text and must not be indexed outside DB Monitoring.
@@ -243,3 +244,26 @@ tests:
       - matchRegex:
           path: data.relay
           pattern: 'logs:\s*\n\s*exporters:\s*\n\s*- splunk_hec/platform_logs\s*\n\s*processors:\s*\n\s*- memory_limiter\s*\n\s*- filter/exclude_dbmon'
+
+  # A name that merely contains the gateway Service name is a different service. Substring
+  # matching rejected this, and let a differently-cased agent hostname through.
+  - it: should accept the gateway endpoint regardless of case and not match by substring
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: http://TEST-RELEASE-Splunk-Otel-Collector.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - notFailedTemplate: {}

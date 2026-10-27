@@ -112,13 +112,18 @@ unittest: ## Run unittests on the Helm chart
 	fi
 	cd helm-charts/splunk-otel-collector && helm unittest --strict -f "../../unittests/*.yaml" . || exit 1
 
+# Has to exceed the sum of a suite's own waits plus its cleanup, since go test counts
+# cleanup against the same deadline: a suite that hits its inner timeouts should fail on
+# its own assertion rather than panic here and skip teardown.
+TEST_TIMEOUT ?= 60m
+
 # Example Usage:
 #   make functionaltest
 #   make functionaltest SKIP_SETUP=true SKIP_TEARDOWN=true SKIP_TESTS=true TEARDOWN_BEFORE_SETUP=true SUITE="functional" UPDATE_EXPECTED_RESULTS=true KUBE_TEST_ENV="kind" KUBECONFIG="/path/to/kubeconfig"
 .PHONY: functionaltest
 functionaltest: ## Run functional tests for this Helm chart with optional tags and environment variables
 	@echo "Running functional tests for this helm chart..."
-	cd functional_tests && go test -v -timeout 45m ./$(SUITE)/... || exit 1
+	cd functional_tests && go test -v -timeout $(TEST_TIMEOUT) ./$(SUITE)/... || exit 1
 
 ##@ Changelog
 # Tasks related to changelog management
