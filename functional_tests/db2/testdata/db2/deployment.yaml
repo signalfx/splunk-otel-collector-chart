@@ -36,6 +36,30 @@ spec:
               value: "false"
           ports:
             - containerPort: 50000
+          # An idle Db2 produces no query events: the sampler reads currently-running
+          # activities and finds none, and the package cache may hold nothing the receiver
+          # considers a top query. The assertion on logs/dbmon then passes or fails on
+          # chance -- it passed on one Kubernetes version and failed on two others.
+          #
+          # This gives the instance a steady trickle of statements instead. It runs in this
+          # container so it uses the local instance directly, and backgrounds itself so
+          # postStart returns immediately rather than blocking startup. Failures while Db2
+          # is still booting are expected and ignored; the loop simply retries.
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    nohup bash -c 'while true; do
+                      su - db2inst1 -c "db2 connect to SAMPLE && db2 \"select count(*) from syscat.tables\" && db2 \"select * from syscat.columns fetch first 200 rows only\"" >/dev/null 2>&1
+                      sleep 5
+                    done' >/dev/null 2>&1 &
+                    # Kubernetes terminates the container if a postStart hook fails, so this
+                    # never reports one. The loop is best effort; the assertions report its
+                    # absence far more usefully than a restarting Db2 would.
+                    exit 0
           # A startupProbe confines the large threshold to first boot, so a later stall is
           # still reported promptly. The threshold is headroom for a cold image pull; a
           # startupProbe only spends the time Db2 actually needs.

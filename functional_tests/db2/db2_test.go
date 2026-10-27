@@ -314,7 +314,7 @@ func assertDbMonEventsRouted(t *testing.T, sink *consumertest.MetricsSink) {
 			}
 		}
 		return last > 0
-	}, 4*time.Minute, 10*time.Second,
+	}, 5*time.Minute, 10*time.Second,
 		"no log record reached %s: query events are not being routed through logs/dbmon", exporter)
 
 	t.Logf("log records handed to %s: %v", exporter, last)
