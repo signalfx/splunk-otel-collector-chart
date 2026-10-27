@@ -1401,7 +1401,7 @@ instrumentation:
       #   - name: NODEJS_ENV_VAR
       #     value: nodejs_value
     python:
-      image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
+      image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.13.2
       secureAppImage: quay.io/signalfx/splunk-otel-instrumentation-python:v2-secureapp
       env:
         - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
