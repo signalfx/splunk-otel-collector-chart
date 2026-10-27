@@ -289,7 +289,7 @@ get_current_tag() {
 #              It supports registries hosted at quay.io, ghcr.io, and Docker Hub. The function assumes
 #              semantic versioning for tags. It prioritizes the most detailed semantic version
 #              if multiple tags share the same image digest.
-#              QUAY_TAG_REGEX optionally restricts Quay tags, searching additional pages as needed.
+#              TAG_REGEX optionally restricts Quay tags, searching additional pages as needed.
 # Usage: get_latest_tag "quay.io/owner/repo"
 get_latest_tag() {
     local repo_value="$1"
@@ -299,7 +299,7 @@ get_latest_tag() {
     if [[ $repo_value =~ ^quay\.io/(.+)/(.+) ]]; then
         local owner="${BASH_REMATCH[1]}"
         local repo_name="${BASH_REMATCH[2]}"
-        local tag_regex="${QUAY_TAG_REGEX:-}"
+        local tag_regex="${TAG_REGEX:-}"
         local page_size=1
         if [[ -n "$tag_regex" ]]; then
             page_size=100
@@ -312,6 +312,7 @@ get_latest_tag() {
         local tag_name
         if [[ -n "$tag_regex" ]]; then
             local page=1 response
+            # Scan pages for the first tag matching the regex, stopping when found or no pages remain.
             while true; do
                 response=$(curl -fsSL "$latest_api&page=$page") || return 1
                 tag_name=$(jq -r --arg regex "$tag_regex" \

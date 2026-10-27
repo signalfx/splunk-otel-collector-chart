@@ -13,8 +13,8 @@
 #   --debug: (Optional) Activates debug mode for verbose output, aiding in troubleshooting.
 #
 # Environment Variables:
-#   QUAY_TAG_REGEX: Optional regular expression to select versioned tags from Quay,
-#                   for example '^v2\.[0-9]+\.[0-9]+$' to exclude rolling and SecureApp tags.
+#   TAG_REGEX: Optional regular expression to select versioned tags from Quay,
+#              for example '^v2\.[0-9]+\.[0-9]+$' to exclude rolling and SecureApp tags.
 #
 # Usage Examples:
 #   - Using a direct path to update a tag where '.images.splunk.repository' and '.images.splunk.tag' are present:

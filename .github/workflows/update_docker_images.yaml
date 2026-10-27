@@ -37,7 +37,7 @@ jobs:
             yaml_value_path: '.instrumentation.spec.python.image'
             filter: 'v2.'
             # Standard and SecureApp images share a repository; use versioned standard tags only.
-            quay_tag_regex: '^v2\.[0-9]+\.[0-9]+$'
+            tag_regex: '^v2\.[0-9]+\.[0-9]+$'
           - name: 'nodejs'
             component: 'operator'
             yaml_file_path: 'helm-charts/splunk-otel-collector/values.yaml'
@@ -62,7 +62,7 @@ jobs:
           #  yaml_value_path: 'select(.kind == \\\"Pod\\\").spec.containers[] | select(.name == \\\"splunk\\\")'
     env:
       DEBUG_MODE: ${{ github.event.inputs.DEBUG_MODE }}
-      QUAY_TAG_REGEX: ${{ matrix.quay_tag_regex }}
+      TAG_REGEX: ${{ matrix.tag_regex }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
