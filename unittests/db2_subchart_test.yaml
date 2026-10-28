@@ -361,7 +361,7 @@ tests:
             credentialsSecret: my-db2-credentials
     asserts:
       - failedTemplate:
-          errorPattern: "needs db2.otlp.collectorNamespace: elsewhere"
+          errorPattern: "would derive the gateway in namespace"
 
   # The functional test redirects this exporter to its own sink, so the derived form is
   # only covered here.
@@ -389,3 +389,101 @@ tests:
       - matchRegex:
           path: data.relay
           pattern: 'logs_endpoint: https://ingest\.us0\.observability\.splunkcloud\.com/v3/event'
+
+  # Loose parsing accepted addresses the exporter cannot use: no scheme, no port, a
+  # foreign scheme, or a stray second port segment.
+  - it: should refuse an endpoint that is not a complete http url
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: ftp://test-release-splunk-otel-collector.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "must use the http or https scheme"
+
+  # Removing the port leaves the gateway with no OTLP gRPC listener at all.
+  - it: should refuse database monitoring when the gateway otlp port is removed
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      gateway.ports.otlp: null
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "gateway.ports.otlp is not configured"
+
+  # The subchart always derives 4317, so a re-pointed gateway needs an explicit endpoint
+  # rather than a silently wrong one.
+  - it: should refuse deriving the address when the gateway otlp port is customised
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      gateway.ports.otlp.containerPort: 5317
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "the subchart always derives 4317"
+
+  # The short name does not resolve across namespaces.
+  - it: should refuse the bare service name when the gateway is in another namespace
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      namespaceOverride: elsewhere
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorNamespace: elsewhere
+          endpoint: http://test-release-splunk-otel-collector:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "Accepted forms are"
