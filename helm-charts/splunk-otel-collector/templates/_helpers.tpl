@@ -759,25 +759,49 @@ matching rejected unrelated names that merely contain the Service name, such as
 {{- $host := $endpoint -}}
 {{- if contains "://" $host -}}{{- $host = splitList "://" $host | last -}}{{- end -}}
 {{- $host = splitList "/" $host | first -}}
-{{- $host = splitList ":" $host | first -}}
-{{- $labels := splitList "." (lower $host) -}}
-{{- $ok := eq (first $labels) (lower $gatewayService) -}}
+{{- $hostPort := splitList ":" $host -}}
+{{- $host = first $hostPort -}}
+{{- $port := "" -}}
+{{- if gt (len $hostPort) 1 -}}{{- $port = index $hostPort 1 -}}{{- end -}}
 {{- /*
-A qualified name also has to name this release's namespace: the Service name alone is
-shared by every install of this chart, so "<fullname>.other-namespace.svc.cluster.local"
-is a different release's gateway and carries none of this release's routing.
+Compared against the whole set of names that actually resolve to this Service, rather than
+label by label. Checking only the first two labels accepted anything suffixed onto them,
+so "<fullname>.<namespace>.evil.example" passed as though it were in-cluster.
 */ -}}
-{{- if and $ok (gt (len $labels) 1) -}}
-{{- $ok = eq (index $labels 1) (lower $namespace) -}}
+{{- $accepted := list
+      (lower $gatewayService)
+      (printf "%s.%s" (lower $gatewayService) (lower $namespace))
+      (printf "%s.%s.svc" (lower $gatewayService) (lower $namespace))
+      (printf "%s.%s.svc.cluster.local" (lower $gatewayService) (lower $namespace)) -}}
+{{- if not (has (lower $host) $accepted) -}}
+{{- fail (printf "db2.dbMonitoring.enabled requires the Db2 receiver to export to this release's gateway Service, but db2.otlp.endpoint resolves to host %q. Accepted forms are: %s. The Database Monitoring routing rule is part of this release's gateway config, so records sent anywhere else never reach it -- and the agent in particular has no OTLP logs pipeline, which rejects them with UNIMPLEMENTED. Unset db2.otlp.endpoint and set db2.otlp.collectorTarget: gateway to have the address derived." $host (join ", " $accepted)) -}}
 {{- end -}}
-{{- if not $ok -}}
-{{- fail (printf "db2.dbMonitoring.enabled requires the Db2 receiver to export to this release's gateway Service (%s in namespace %s), but db2.otlp.endpoint resolves to host %q. The Database Monitoring routing rule is part of this release's gateway config, so records sent anywhere else never reach it -- and the agent in particular has no OTLP logs pipeline, which rejects them with UNIMPLEMENTED. Unset db2.otlp.endpoint and set db2.otlp.collectorTarget: gateway to have the address derived." $gatewayService $namespace $host) -}}
+{{- /*
+The receiver exports OTLP over gRPC, so the HTTP port would refuse it. Checked here
+because the host being right makes the wrong port easy to miss.
+*/ -}}
+{{- $grpcPort := "4317" -}}
+{{- if and $port (ne $port $grpcPort) -}}
+{{- fail (printf "db2.dbMonitoring.enabled requires db2.otlp.endpoint to use the gateway's OTLP gRPC port %s, but it specifies %s. The Db2 receiver exports OTLP over gRPC; the HTTP port will not accept it." $grpcPort $port) -}}
 {{- end -}}
 {{- else -}}
 {{- if not (or
       (eq (dig "collectorTarget" "agent" $otlp) "gateway")
       (dig "gateway" "enabled" false (.Values.global | default dict))) -}}
 {{- fail "db2.dbMonitoring.enabled requires the Db2 receiver to export to the gateway, but db2.otlp.collectorTarget is \"agent\". Set db2.otlp.collectorTarget: gateway. The agent has no OTLP logs pipeline in Observability-only mode, so query-sample events sent to it are rejected with UNIMPLEMENTED." -}}
+{{- end -}}
+{{- /*
+The subchart rebuilds the gateway address from the release and chart names. Helm passes a
+parent's own values down only through `global`, so nameOverride and fullnameOverride are
+invisible to it and it derives a Service name that was never created -- an export into a
+name that does not resolve, with nothing in the rendered output to show it. Namespace it
+can be told about, so that one asks for the matching key rather than an endpoint.
+*/ -}}
+{{- if or .Values.nameOverride .Values.fullnameOverride -}}
+{{- fail (printf "db2.dbMonitoring.enabled cannot derive the gateway address while nameOverride or fullnameOverride is set: the subchart rebuilds it from the release and chart names and cannot see either. Set db2.otlp.endpoint: http://%s.%s.svc.cluster.local:4317 explicitly." (include "splunk-otel-collector.fullname" .) (include "splunk-otel-collector.namespace" .)) -}}
+{{- end -}}
+{{- if and .Values.namespaceOverride (ne (dig "collectorNamespace" "" $otlp) .Values.namespaceOverride) -}}
+{{- fail (printf "db2.dbMonitoring.enabled with namespaceOverride needs db2.otlp.collectorNamespace: %s. The subchart defaults to its own release namespace, so it would otherwise derive the gateway in the wrong namespace." .Values.namespaceOverride) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

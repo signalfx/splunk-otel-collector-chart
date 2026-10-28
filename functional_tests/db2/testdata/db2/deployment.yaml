@@ -37,9 +37,10 @@ spec:
           ports:
             - containerPort: 50000
           # An idle Db2 produces no query events: the sampler reads currently-running
-          # activities and finds none, and the package cache may hold nothing the receiver
-          # considers a top query. The assertion on logs/dbmon then passes or fails on
-          # chance -- it passed on one Kubernetes version and failed on two others.
+          # activities and finds none, and top queries are computed from deltas, so a first
+          # reading of the package cache only establishes a baseline however many rows it
+          # holds. The assertion on logs/dbmon then passes or fails on chance -- it passed
+          # on one Kubernetes version and failed on two others.
           #
           # This gives the instance a steady trickle of statements instead. It runs in this
           # container so it uses the local instance directly, and backgrounds itself so

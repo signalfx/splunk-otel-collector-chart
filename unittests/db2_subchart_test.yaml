@@ -267,3 +267,125 @@ tests:
             credentialsSecret: my-db2-credentials
     asserts:
       - notFailedTemplate: {}
+
+  # Checking only the first two labels accepted anything suffixed onto them, so an
+  # in-cluster-looking name could point anywhere.
+  - it: should refuse an endpoint with extra labels after the namespace
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: http://test-release-splunk-otel-collector.test-ns.evil.example:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "Accepted forms are"
+
+  # The receiver exports OTLP over gRPC, so the gateway's HTTP port would refuse it.
+  - it: should refuse the gateway host on the OTLP HTTP port
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: http://test-release-splunk-otel-collector.test-ns.svc.cluster.local:4318
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "OTLP gRPC port 4317"
+
+  # Helm passes parent values down only through global, so the subchart cannot see these
+  # and would derive a Service name that was never created.
+  - it: should refuse deriving the gateway address under fullnameOverride
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      fullnameOverride: custom-gw
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot derive the gateway address while nameOverride or fullnameOverride is set"
+
+  - it: should require collectorNamespace alongside namespaceOverride
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      namespaceOverride: elsewhere
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "needs db2.otlp.collectorNamespace: elsewhere"
+
+  # The functional test redirects this exporter to its own sink, so the derived form is
+  # only covered here.
+  - it: should derive the dbmon logs endpoint from the Observability ingest URL
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'logs_endpoint: https://ingest\.us0\.observability\.splunkcloud\.com/v3/event'

@@ -45,6 +45,10 @@ const (
 	// deadline, so an over-generous wait here turns a clean assertion failure into a panic
 	// that skips teardown and leaks the fixture.
 	db2ReadyTimeout = 15 * time.Minute
+
+	// Dedicated so it collides with neither the OTLP sinks (4317/4318) nor the secureapp
+	// logs sink (4320).
+	dbMonSinkPort = 4321
 )
 
 // Test_Db2_Metrics_Through_Collector covers the contract between the two charts: a real
@@ -73,6 +77,12 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 
 	metricsSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
 
+	// Database Monitoring events get their own OTLP/HTTP sink on /v3/event. The metrics
+	// sink is a SignalFx receiver and cannot serve that path, so without a second sink the
+	// only observable outcome would be a failed export -- which shows routing happened but
+	// not that anything deliverable came out of it.
+	dbmonSink := internal.SetupOTLPLogsSinkOnPort(t, dbMonSinkPort, "/v3/event")
+
 	valuesFile, err := filepath.Abs(filepath.Join(testDir, valuesDir, "db2_values.yaml.tmpl"))
 	require.NoError(t, err)
 
@@ -90,6 +100,7 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 	internal.ChartInstallOrUpgrade(t, kubeconfig, valuesFile, map[string]any{
 		"IngestURL": "http://" + internal.HostPort(hostEp, internal.SignalFxReceiverPort),
 		"ApiURL":    "http://" + internal.HostPort(hostEp, internal.SignalFxAPIPort),
+		"DbMonURL":  "http://" + internal.HostPort(hostEp, dbMonSinkPort),
 	}, 0, internal.GetDefaultChartOptions())
 
 	// A crash here would mean the chart produced an unusable Deployment or a config the
@@ -112,7 +123,7 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 		filepath.Join(testDir, "expected_db2_metric_names.yaml"), 5*time.Minute, 5*time.Second)
 
 	assertDb2Dimensions(t, metricsSink)
-	assertDbMonEventsRouted(t, metricsSink)
+	assertDbMonEventsDelivered(t, dbmonSink)
 }
 
 // assertDb2Dimensions checks the attribution that survives the trip through the Collector.
@@ -277,68 +288,42 @@ func assertDbMonRouting(t *testing.T, client *kubernetes.Clientset) {
 	}
 }
 
-// assertDbMonEventsRouted proves a Db2 query event actually traveled the logs/dbmon
-// pipeline, rather than only that the pipeline was rendered.
-//
-// Read from the Collector's own telemetry, which the gateway's metrics/collector pipeline
-// exports to the same sink. Counts sent and failed together on purpose: the sink is a
-// SignalFx receiver with no /v3/event, so the send itself cannot succeed here. What the
-// counter proves is that records passed filter/dbmon_only and reached the dbmon exporter
-// -- if the scope filter were wrong they would never be handed to it at all.
-func assertDbMonEventsRouted(t *testing.T, sink *consumertest.MetricsSink) {
+// assertDbMonEventsDelivered waits for a Db2 query event to arrive at the Database
+// Monitoring sink. That covers the whole path at once: the receiver emitted an event,
+// filter/dbmon_only passed it, and otlp_http/dbmon delivered it to /v3/event in a form the
+// receiving end accepts. A wrong endpoint, URL path or payload fails here, where counting
+// failed exports could not tell those apart from success.
+func assertDbMonEventsDelivered(t *testing.T, sink *consumertest.LogsSink) {
 	t.Helper()
 
-	const exporter = "otlp_http/dbmon"
-	var last float64
+	const wantScope = "github.com/signalfx/splunk-otel-db2"
+	var scopes []string
 
 	require.Eventually(t, func() bool {
-		last = 0
-		for _, batch := range sink.AllMetrics() {
-			for i := 0; i < batch.ResourceMetrics().Len(); i++ {
-				rm := batch.ResourceMetrics().At(i)
-				for j := 0; j < rm.ScopeMetrics().Len(); j++ {
-					sm := rm.ScopeMetrics().At(j)
-					for k := 0; k < sm.Metrics().Len(); k++ {
-						m := sm.Metrics().At(k)
-						if !strings.HasPrefix(m.Name(), "otelcol_exporter_") ||
-							!strings.HasSuffix(m.Name(), "_log_records") {
-							continue
-						}
-						for _, attrs := range dataPointAttributes(m) {
-							if v, ok := attrs.Get("exporter"); ok && v.AsString() == exporter {
-								last += dataPointValue(m)
-							}
-						}
+		scopes = nil
+		for _, batch := range sink.AllLogs() {
+			for i := 0; i < batch.ResourceLogs().Len(); i++ {
+				rl := batch.ResourceLogs().At(i)
+				for j := 0; j < rl.ScopeLogs().Len(); j++ {
+					sl := rl.ScopeLogs().At(j)
+					if sl.LogRecords().Len() == 0 {
+						continue
 					}
+					scopes = append(scopes, sl.Scope().Name())
 				}
 			}
 		}
-		return last > 0
+		return slices.Contains(scopes, wantScope)
 	}, 5*time.Minute, 10*time.Second,
-		"no log record reached %s: query events are not being routed through logs/dbmon", exporter)
+		"no log record from scope %q reached the Database Monitoring sink; scopes seen: %v",
+		wantScope, scopes)
 
-	t.Logf("log records handed to %s: %v", exporter, last)
-}
-
-// dataPointValue returns the first numeric data point of a metric, whichever shape it has.
-func dataPointValue(m pmetric.Metric) float64 {
-	num := func(dp pmetric.NumberDataPoint) float64 {
-		if dp.ValueType() == pmetric.NumberDataPointValueTypeInt {
-			return float64(dp.IntValue())
-		}
-		return dp.DoubleValue()
+	// Only the Db2 receiver may be routed here. filter/dbmon_only is what keeps unrelated
+	// records out of Database Monitoring, so anything else arriving is a routing fault.
+	for _, got := range scopes {
+		require.Equal(t, wantScope, got,
+			"a record from scope %q reached the Database Monitoring sink", got)
 	}
-	switch m.Type() {
-	case pmetric.MetricTypeGauge:
-		if m.Gauge().DataPoints().Len() > 0 {
-			return num(m.Gauge().DataPoints().At(0))
-		}
-	case pmetric.MetricTypeSum:
-		if m.Sum().DataPoints().Len() > 0 {
-			return num(m.Sum().DataPoints().At(0))
-		}
-	}
-	return 0
 }
 
 func deployDb2(t *testing.T, client *kubernetes.Clientset) {

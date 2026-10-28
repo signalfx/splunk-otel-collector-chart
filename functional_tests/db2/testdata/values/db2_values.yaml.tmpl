@@ -23,6 +23,14 @@ gateway:
     limits:
       cpu: 200m
       memory: 256Mi
+  # Database Monitoring events need a sink that serves /v3/event. The ingest URL above is a
+  # SignalFx receiver, which does not, so only this exporter is redirected -- everything
+  # else still goes through the chart's derived endpoints. The derived form of this value
+  # is asserted in unittests/db2_subchart_test.yaml.
+  config:
+    exporters:
+      otlp_http/dbmon:
+        logs_endpoint: {{ .DbMonURL }}/v3/event
 
 db2:
   enabled: true
@@ -52,7 +60,9 @@ db2:
       events:
         dbServerQuerySample:
           enabled: true
-        # Top queries read the package cache, which is populated even on an otherwise idle
-        # instance, so at least one Db2 log record is produced without synthetic load.
+        # Both are on so either can satisfy the delivery assertion. Neither is guaranteed on
+        # its own: sampling reads currently-running activities, and top queries are computed
+        # from deltas, so a first reading of the package cache only establishes a baseline.
+        # The statement loop in testdata/db2/deployment.yaml is what makes an event certain.
         dbServerTopQuery:
           enabled: true
