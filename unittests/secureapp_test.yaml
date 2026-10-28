@@ -23,6 +23,16 @@ templates:
 
 tests:
 
+  - it: "profiling HEC exporter uses the default compression setting in agent config"
+    set:
+      splunkObservability:
+        profilingEnabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "disable_compression:"
+
   # --------------------------------------------------------------------------
   # S=0: secureApp disabled — no routing connector, no split, no secureapp
   # --------------------------------------------------------------------------

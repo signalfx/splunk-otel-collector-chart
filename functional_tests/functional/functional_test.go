@@ -7,9 +7,11 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -116,6 +118,8 @@ func Test_Functions(t *testing.T) {
 
 		deployCharts(t, testKubeConfig, client, extensionsClient)
 		if !skipTests && kubeTestEnv == kindTestKubeEnv && os.Getenv("UPGRADE_FROM_VALUES") == "" {
+			waitForInstallationHookPodsToDisappear(t, client)
+			internal.ResetMetricsSink(t, globalSinks.k8sclusterReceiverMetricsConsumer)
 			t.Run("kubernetes cluster metrics", testK8sClusterReceiverMetrics)
 		}
 		deployTestResources(t, client, dynamicClient)
@@ -137,4 +141,24 @@ func Test_Functions(t *testing.T) {
 	} else {
 		runHostedClusterTests(t, kubeTestEnv)
 	}
+}
+
+// waitForInstallationHookPodsToDisappear waits for the instrumentation hook
+// Pods to disappear before the cluster metrics snapshot. Helm's hook-succeeded
+// policy deletes the Job, but its Pods can otherwise still appear in the
+// snapshot briefly.
+func waitForInstallationHookPodsToDisappear(t *testing.T, client kubernetes.Interface) {
+	t.Helper()
+
+	pods := client.CoreV1().Pods(internal.DefaultNamespace)
+	require.Eventually(t, func() bool {
+		hookPods, err := pods.List(t.Context(), metav1.ListOptions{
+			LabelSelector: "app=splunk-otel-collector-inst-hook",
+		})
+		if err != nil {
+			t.Logf("failed to list instrumentation hook Pods: %v", err)
+			return false
+		}
+		return len(hookPods.Items) == 0
+	}, 30*time.Second, time.Second, "instrumentation hook Pods did not disappear")
 }

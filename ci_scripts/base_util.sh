@@ -289,6 +289,7 @@ get_current_tag() {
 #              It supports registries hosted at quay.io, ghcr.io, and Docker Hub. The function assumes
 #              semantic versioning for tags. It prioritizes the most detailed semantic version
 #              if multiple tags share the same image digest.
+#              TAG_REGEX optionally restricts Quay tags, searching additional pages as needed.
 # Usage: get_latest_tag "quay.io/owner/repo"
 get_latest_tag() {
     local repo_value="$1"
@@ -298,12 +299,33 @@ get_latest_tag() {
     if [[ $repo_value =~ ^quay\.io/(.+)/(.+) ]]; then
         local owner="${BASH_REMATCH[1]}"
         local repo_name="${BASH_REMATCH[2]}"
-        local latest_api="https://quay.io/api/v1/repository/$owner/$repo_name/tag/?limit=1&onlyActiveTags=true"
+        local tag_regex="${TAG_REGEX:-}"
+        local page_size=1
+        if [[ -n "$tag_regex" ]]; then
+            page_size=100
+        fi
+        local latest_api="https://quay.io/api/v1/repository/$owner/$repo_name/tag/?limit=$page_size&onlyActiveTags=true"
         if [ -n "$filter" ]; then
             # quay.io requires filter_tag_name in "<op>:<value>" form; a bare value is rejected.
             latest_api+="&filter_tag_name=like:$filter"
         fi
-        local tag_name=$(curl -sL "$latest_api" | jq -r '.tags[0].name // empty')
+        local tag_name
+        if [[ -n "$tag_regex" ]]; then
+            local page=1 response
+            # Scan pages for the first tag matching the regex, stopping when found or no pages remain.
+            while true; do
+                response=$(curl -fsSL "$latest_api&page=$page") || return 1
+                tag_name=$(jq -r --arg regex "$tag_regex" \
+                    'first(.tags[].name | select(test($regex))) // empty' \
+                    <<< "$response") || return 1
+                if [[ -n "$tag_name" ]] || ! jq -e '.has_additional == true' <<< "$response" > /dev/null; then
+                    break
+                fi
+                page=$((page + 1))
+            done
+        else
+            tag_name=$(curl -sL "$latest_api" | jq -r '.tags[0].name // empty') || return 1
+        fi
         if [ -z "$tag_name" ]; then
             echo "Error: No tag found or failed to fetch tag from quay.io" >&2
             return 1
