@@ -6,10 +6,10 @@ metadata:
   namespace: default
   name: default-targetallocator-ta
   labels:
-    helm.sh/chart: targetallocator-0.161.2
+    helm.sh/chart: targetallocator-0.162.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-target-allocator
-    app.kubernetes.io/version: "0.161.0"
+    app.kubernetes.io/version: "0.162.0"
     app.kubernetes.io/name: targetallocator
     app.kubernetes.io/instance: default
 spec:
@@ -21,12 +21,12 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 75d110ae2d6aa64c93d3abae0478d343c8959e049c7564f272a75345c74ec196
+        checksum/config: 5c44d6331b0cbd1258ef7a540d76c9263aef99900422db8b0c3b8fadc8e28eb8
       labels:
-        helm.sh/chart: targetallocator-0.161.2
+        helm.sh/chart: targetallocator-0.162.0
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/part-of: opentelemetry-target-allocator
-        app.kubernetes.io/version: "0.161.0"
+        app.kubernetes.io/version: "0.162.0"
         app.kubernetes.io/name: targetallocator
         app.kubernetes.io/instance: default
     spec:
@@ -36,7 +36,7 @@ spec:
         kubernetes.io/os: linux
       containers:
         - name: targetallocator
-          image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:0.161.0
+          image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:0.162.0
           ports:
             - containerPort: 8080
               name: http-port
