@@ -696,10 +696,30 @@ need not carry a dbMonitoring key.
 */}}
 {{- define "splunk-otel-collector.db2DbMonRequested" -}}
 {{- $db2 := .Values.db2 | default dict -}}
-{{- if and (dig "enabled" false $db2) (dig "dbMonitoring" "enabled" false $db2) -}}
-true
-{{- else -}}
+{{- if not (dig "enabled" false $db2) -}}
 false
+{{- else -}}
+{{- $dbmon := dig "dbMonitoring" dict $db2 -}}
+{{- if hasKey $dbmon "enabled" -}}
+{{- /* Explicitly set either way, so take it as given. */ -}}
+{{- ternary "true" "false" $dbmon.enabled -}}
+{{- else -}}
+{{- /*
+Otherwise follow the receivers, because there is no configuration in which these events are
+wanted and this routing is not: without it the records reached the entity-events exporter on
+a gateway install, and were rejected with UNIMPLEMENTED on an agent one. Keyed on the
+presence of the key rather than its value, so dbMonitoring.enabled: false still forces it
+off for anyone routing these records themselves.
+*/ -}}
+{{- $wanted := false -}}
+{{- range dig "receivers" list $db2 -}}
+{{- $events := dig "events" dict (. | default dict) -}}
+{{- if or (dig "dbServerQuerySample" "enabled" false $events) (dig "dbServerTopQuery" "enabled" false $events) -}}
+{{- $wanted = true -}}
+{{- end -}}
+{{- end -}}
+{{- ternary "true" "false" $wanted -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -725,15 +745,24 @@ records.
 {{- define "splunk-otel-collector.validateDb2DbMonitoring" -}}
 {{- if eq (include "splunk-otel-collector.db2DbMonRequested" .) "true" -}}
 {{- /*
+Names whatever turned Database Monitoring on, so each error points at the setting the
+operator actually wrote. Blaming db2.dbMonitoring.enabled reads as nonsense to someone who
+only enabled an event and never set that key.
+*/ -}}
+{{- $why := "db2.dbMonitoring.enabled" -}}
+{{- if not (hasKey (dig "dbMonitoring" dict (.Values.db2 | default dict)) "enabled") -}}
+{{- $why = "Db2 Database Monitoring, turned on by events.dbServerQuerySample or events.dbServerTopQuery on a db2 receiver (set db2.dbMonitoring.enabled: false to opt out)," -}}
+{{- end -}}
+{{- /*
 Checked against the request, not against what renders. Database Monitoring is an
 Observability Cloud feature, so a Platform-only install renders no dbmon exporter and no
 logs/dbmon pipeline at all -- asking for it there used to succeed and quietly do nothing.
 */ -}}
 {{- if ne (include "splunk-otel-collector.splunkO11yEnabled" .) "true" -}}
-{{- fail "db2.dbMonitoring.enabled requires Splunk Observability Cloud to be configured: set splunkObservability.realm and splunkObservability.accessToken. Database Monitoring has no Splunk Platform destination, so there is nothing for this setting to route to." -}}
+{{- fail (printf "%s requires Splunk Observability Cloud to be configured: set splunkObservability.realm and splunkObservability.accessToken. Database Monitoring has no Splunk Platform destination, so there is nothing for this setting to route to." $why) -}}
 {{- end -}}
 {{- if not .Values.gateway.enabled -}}
-{{- fail "db2.dbMonitoring.enabled currently requires gateway.enabled: true. The agent's entity pipeline does not carry the routing rule." -}}
+{{- fail (printf "%s currently requires gateway.enabled: true. The agent's entity pipeline does not carry the routing rule." $why) -}}
 {{- end -}}
 {{- /*
 The routing rule lives in the gateway config, but the subchart defaults to exporting to
@@ -755,7 +784,7 @@ port is gone, since then the gateway has nowhere to receive these events.
 */ -}}
 {{- $otlpPort := dig "otlp" dict (.Values.gateway.ports | default dict) -}}
 {{- if not $otlpPort -}}
-{{- fail "db2.dbMonitoring.enabled requires the gateway's OTLP gRPC port, but gateway.ports.otlp is not configured. The Db2 receiver exports OTLP over gRPC, so without that port the gateway cannot receive these events." -}}
+{{- fail (printf "%s requires the gateway's OTLP gRPC port, but gateway.ports.otlp is not configured. The Db2 receiver exports OTLP over gRPC, so without that port the gateway cannot receive these events." $why) -}}
 {{- end -}}
 {{- $gatewayPort := toString (dig "containerPort" 4317 $otlpPort) -}}
 {{- if $endpoint -}}
@@ -796,7 +825,7 @@ namespaceOverride can break. Offer it only then; otherwise require a qualified n
 {{- $accepted = prepend $accepted $gatewayService -}}
 {{- end -}}
 {{- if not (has $host $accepted) -}}
-{{- fail (printf "db2.dbMonitoring.enabled requires the Db2 receiver to export to this release's gateway Service, but db2.otlp.endpoint resolves to host %q. Accepted forms are: %s. The Database Monitoring routing rule is part of this release's gateway config, so records sent anywhere else never reach it -- and the agent in particular has no OTLP logs pipeline, which rejects them with UNIMPLEMENTED." $host (join ", " $accepted)) -}}
+{{- fail (printf "%s requires the Db2 receiver to export to this release's gateway Service, but db2.otlp.endpoint resolves to host %q. Accepted forms are: %s. The Database Monitoring routing rule is part of this release's gateway config, so records sent anywhere else never reach it -- and the agent in particular has no OTLP logs pipeline, which rejects them with UNIMPLEMENTED." $why $host (join ", " $accepted)) -}}
 {{- end -}}
 {{- if ne $port $gatewayPort -}}
 {{- fail (printf "db2.otlp.endpoint must use the gateway's OTLP gRPC port %s, but specifies %s. The Db2 receiver exports OTLP over gRPC; the HTTP port will not accept it." $gatewayPort $port) -}}
@@ -805,7 +834,7 @@ namespaceOverride can break. Offer it only then; otherwise require a qualified n
 {{- if not (or
       (eq (dig "collectorTarget" "agent" $otlp) "gateway")
       (dig "gateway" "enabled" false (.Values.global | default dict))) -}}
-{{- fail "db2.dbMonitoring.enabled requires the Db2 receiver to export to the gateway, but db2.otlp.collectorTarget is \"agent\". Set db2.otlp.collectorTarget: gateway. The agent has no OTLP logs pipeline in Observability-only mode, so query-sample events sent to it are rejected with UNIMPLEMENTED." -}}
+{{- fail (printf "%s requires the Db2 receiver to export to the gateway, but db2.otlp.collectorTarget is \"agent\". Set db2.otlp.collectorTarget: gateway. The agent has no OTLP logs pipeline in Observability-only mode, so query-sample events sent to it are rejected with UNIMPLEMENTED." $why) -}}
 {{- end -}}
 {{- /*
 The subchart rebuilds the gateway address from the release and chart names. Helm passes a
@@ -814,7 +843,7 @@ invisible to it and it derives a Service name that was never created -- an expor
 name that does not resolve, with nothing in the rendered output to show it.
 */ -}}
 {{- if or .Values.nameOverride .Values.fullnameOverride -}}
-{{- fail (printf "db2.dbMonitoring.enabled cannot derive the gateway address while nameOverride or fullnameOverride is set: the subchart rebuilds it from the release and chart names and cannot see either. Set db2.otlp.endpoint: http://%s.%s.svc.cluster.local:%s explicitly." $gatewayService $gatewayNs $gatewayPort) -}}
+{{- fail (printf "%s cannot derive the gateway address while nameOverride or fullnameOverride is set: the subchart rebuilds it from the release and chart names and cannot see either. Set db2.otlp.endpoint: http://%s.%s.svc.cluster.local:%s explicitly." $why $gatewayService $gatewayNs $gatewayPort) -}}
 {{- end -}}
 {{- /*
 Checked unconditionally rather than only under namespaceOverride: the subchart falls back
@@ -824,11 +853,11 @@ actually runs derives an address for a Service that is not there.
 {{- /* The subchart ships collectorNamespace: "", so dig returns that rather than a default. */ -}}
 {{- $derivedNs := lower (dig "collectorNamespace" "" $otlp | default $db2Ns) -}}
 {{- if ne $derivedNs $gatewayNs -}}
-{{- fail (printf "db2.dbMonitoring.enabled would derive the gateway in namespace %q, but it runs in %q. Set db2.otlp.collectorNamespace: %s." $derivedNs $gatewayNs $gatewayNs) -}}
+{{- fail (printf "%s would derive the gateway in namespace %q, but it runs in %q. Set db2.otlp.collectorNamespace: %s." $why $derivedNs $gatewayNs $gatewayNs) -}}
 {{- end -}}
 {{- /* The subchart always derives port 4317, so a re-pointed gateway needs an endpoint. */ -}}
 {{- if ne $gatewayPort "4317" -}}
-{{- fail (printf "db2.dbMonitoring.enabled cannot derive the gateway address while gateway.ports.otlp.containerPort is %s: the subchart always derives 4317. Set db2.otlp.endpoint: http://%s.%s.svc.cluster.local:%s explicitly." $gatewayPort $gatewayService $gatewayNs $gatewayPort) -}}
+{{- fail (printf "%s cannot derive the gateway address while gateway.ports.otlp.containerPort is %s: the subchart always derives 4317. Set db2.otlp.endpoint: http://%s.%s.svc.cluster.local:%s explicitly." $why $gatewayPort $gatewayService $gatewayNs $gatewayPort) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

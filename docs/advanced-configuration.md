@@ -1303,8 +1303,8 @@ Pod on the receiver's own Node. The gateway Service is reachable cluster-wide.
 ### Receiving query samples and top queries
 
 Metrics need no extra configuration. Query samples and top queries are OTLP **log records**,
-so they need routing to Database Monitoring. Set `db2.dbMonitoring.enabled` and the chart
-adds a dedicated exporter plus a routing rule keyed on the receiver's instrumentation scope:
+so they need routing to Database Monitoring. Enabling either event is enough: the chart then
+adds a dedicated exporter plus a routing rule keyed on the receiver's instrumentation scope.
 
 ```yaml
 gateway:
@@ -1312,8 +1312,6 @@ gateway:
 
 db2:
   enabled: true
-  dbMonitoring:
-    enabled: true
   otlp:
     collectorTarget: gateway
   receivers:
@@ -1336,12 +1334,19 @@ and a `logs/dbmon` pipeline that filters on the receiver's scope,
 `otlp_http/entities` exporter is deliberately left alone, so Kubernetes entity events are not
 marked as Database Monitoring data.
 
+There is no separate switch to remember, because there is no configuration in which these
+events are wanted and this routing is not: without it the records reach the entity-events
+exporter instead, or are rejected outright by an agent. `db2.dbMonitoring.enabled` exists
+only to override that — `false` suppresses the routing if you ship these records yourself,
+`true` renders it before any event is enabled.
+
 Both `gateway.enabled: true` and `db2.otlp.collectorTarget: gateway` are required, and the
 chart enforces each at template time with an actionable error rather than rendering a release
 that cannot deliver these records. The second is easy to miss: the receiver exports to the
 agent by default, and in Observability-only mode the agent has no pipeline receiving OTLP
 logs. OTLP registers one service per signal, so query samples sent there are rejected with
-`UNIMPLEMENTED` instead of being dropped quietly.
+`UNIMPLEMENTED` instead of being dropped quietly. Because enabling an event is what turns
+the routing on, that is also when these requirements start to apply.
 
 Sending straight to the gateway also preserves host attribution. The agent's metrics pipeline
 runs `resource_detection` with `override: true`, which replaces `host.name` with the

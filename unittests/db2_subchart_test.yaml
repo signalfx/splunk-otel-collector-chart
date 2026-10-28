@@ -487,3 +487,133 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "Accepted forms are"
+
+  # Database Monitoring follows the receivers, because there is no configuration in which
+  # these events are wanted and the routing is not.
+  - it: should enable database monitoring from a receiver's query sample event
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerQuerySample:
+                enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: "otlp_http/dbmon"
+
+  - it: should enable database monitoring from a receiver's top query event
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerTopQuery:
+                enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: "otlp_http/dbmon"
+
+  - it: should leave database monitoring off when no event is enabled
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - notMatchRegex:
+          path: data.relay
+          pattern: "dbmon"
+
+  # The key is read for presence, not truth, so an explicit false still wins over the
+  # events -- for anyone shipping these records themselves.
+  - it: should let an explicit false suppress the derived routing
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: false
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerQuerySample:
+                enabled: true
+    asserts:
+      - notMatchRegex:
+          path: data.relay
+          pattern: "dbmon"
+
+  # An operator who only enabled an event never wrote db2.dbMonitoring.enabled, so naming
+  # that key in the error would send them looking for something they did not set.
+  - it: should name the event settings when derived routing fails validation
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerQuerySample:
+                enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "turned on by events.dbServerQuerySample or events.dbServerTopQuery"

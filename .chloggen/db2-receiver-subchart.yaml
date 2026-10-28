@@ -13,3 +13,11 @@ subtext: |
   Collects IBM Db2 metrics and active query samples and exports them over OTLP to this
   release's Collector, running as its own Deployment rather than inside the Collector.
   See https://github.com/signalfx/splunk-otel-db2 for configuration.
+
+  Query samples and top queries are OTLP log records rather than metrics, so they need
+  routing to Database Monitoring. That follows the receivers: enabling
+  `events.dbServerQuerySample` or `events.dbServerTopQuery` on any db2 receiver renders a
+  dedicated exporter and a pipeline filtered on the receiver's instrumentation scope,
+  leaving the shared entity-events exporter untouched. It requires `gateway.enabled` and a
+  receiver exporting to the gateway, both reported at template time. Set
+  `db2.dbMonitoring.enabled` explicitly to override the default either way.

@@ -34,15 +34,11 @@ gateway:
 
 db2:
   enabled: true
-  # Exercises the Database Monitoring wiring at runtime: a dedicated exporter, two
-  # scope-keyed filters and the logs/dbmon pipeline. Chart unit tests cover what renders;
-  # this covers the Collector accepting it and the metrics path surviving alongside it, as
-  # a malformed OTTL condition or exporter block only fails once the Collector parses it.
-  #
-  # The sink is a SignalFx receiver and does not implement /v3/event, so the dbmon
-  # exporter's own sends fail here. That is expected and not what this asserts.
-  dbMonitoring:
-    enabled: true
+  # dbMonitoring is deliberately not set: enabling the events below is what turns the
+  # routing on, and leaving it out exercises that derivation. This covers the Database
+  # Monitoring wiring at runtime -- a dedicated exporter, two scope-keyed filters and the
+  # logs/dbmon pipeline -- where a malformed OTTL condition or exporter block only fails
+  # once the Collector parses it, which rendering alone cannot catch.
   otlp:
     collectorTarget: gateway
   receivers:
