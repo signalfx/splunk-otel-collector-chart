@@ -338,7 +338,7 @@ tests:
             credentialsSecret: my-db2-credentials
     asserts:
       - failedTemplate:
-          errorPattern: "cannot derive the gateway address while nameOverride or fullnameOverride is set"
+          errorPattern: "cannot derive the Collector address while nameOverride or fullnameOverride is set"
 
   - it: should require collectorNamespace alongside namespaceOverride
     set:
@@ -361,7 +361,7 @@ tests:
             credentialsSecret: my-db2-credentials
     asserts:
       - failedTemplate:
-          errorPattern: "would derive the gateway in namespace"
+          errorPattern: "would derive the Collector in namespace"
 
   # The functional test redirects this exporter to its own sink, so the derived form is
   # only covered here.
@@ -438,9 +438,9 @@ tests:
       - failedTemplate:
           errorPattern: "gateway.ports.otlp is not configured"
 
-  # The subchart always derives 4317, so a re-pointed gateway needs an explicit endpoint
-  # rather than a silently wrong one.
-  - it: should refuse deriving the address when the gateway otlp port is customised
+  # The Collector's OTLP receiver binds 4317 whatever containerPort says, so moving the
+  # port leaves the Service advertising a number nothing listens on.
+  - it: should refuse a customised gateway otlp container port
     set:
       splunkObservability.realm: us0
       splunkObservability.accessToken: token
@@ -461,7 +461,7 @@ tests:
             credentialsSecret: my-db2-credentials
     asserts:
       - failedTemplate:
-          errorPattern: "the subchart always derives 4317"
+          errorPattern: "requires gateway.ports.otlp.containerPort to stay 4317"
 
   # The short name does not resolve across namespaces.
   - it: should refuse the bare service name when the gateway is in another namespace
@@ -617,3 +617,123 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "turned on by events.dbServerQuerySample or events.dbServerTopQuery"
+
+  # The subchart schema accepts null for events and for each event object, and dig returns
+  # that null rather than its default, which aborted the render on valid values.
+  - it: should tolerate null event blocks
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerQuerySample: null
+              dbServerTopQuery:
+                enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: "otlp_http/dbmon"
+
+  # Present in values is not the same as published: the Service only carries a port whose
+  # enabled_for names a signal that is itself on.
+  - it: should refuse an otlp port that the gateway service will not publish
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      gateway.ports.otlp.enabled_for: [logs]
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "none of those signals is enabled"
+
+  # The receiver checks scheme against its own TLS setting at startup.
+  - it: should refuse https while the exporter is insecure
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: https://test-release-splunk-otel-collector.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "while db2.otlp.tls.insecure is true"
+
+  - it: should refuse an upper case scheme
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: HTTP://test-release-splunk-otel-collector.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "http or https scheme in lower case"
+
+  # Applies to plain metrics too: the derived address is wrong under these overrides
+  # whichever target is used, and the export goes into a name that does not resolve.
+  - it: should refuse a derived address under fullnameOverride without database monitoring
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      fullnameOverride: custom-gw
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "db2.enabled cannot derive the Collector address"

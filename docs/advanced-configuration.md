@@ -1359,6 +1359,13 @@ Database Monitoring is an Observability Cloud feature, so `splunkObservability` 
 configured. A Platform-only install renders none of this, and asking for it there is refused
 rather than accepted and ignored. No Splunk Platform configuration is involved.
 
+The gateway's `otlp` port has to stay as shipped. `gateway.ports.otlp.containerPort` must
+remain `4317`, because the Collector's OTLP receiver binds `0.0.0.0:4317` whatever that value
+says — moving it leaves the Service advertising a port nothing listens on. Its `enabled_for`
+also has to name a signal that is enabled, or the Service omits the port altogether. Both are
+checked at template time. If you set `db2.otlp.endpoint` yourself, its scheme must match
+`db2.otlp.tls.insecure`: `http` while that is `true`, `https` once it is `false`.
+
 Query events are also kept out of the ordinary logs destination. They arrive over OTLP and
 are not entity-marked, so the logs routing connector would otherwise hand them to the
 default logs route and index the query text alongside normal logs.

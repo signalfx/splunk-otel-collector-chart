@@ -711,10 +711,17 @@ a gateway install, and were rejected with UNIMPLEMENTED on an agent one. Keyed o
 presence of the key rather than its value, so dbMonitoring.enabled: false still forces it
 off for anyone routing these records themselves.
 */ -}}
+{{- /*
+Every level is normalised with `default dict`. The subchart's schema accepts null for
+`events` and for each event object, and `dig` returns that null rather than its default
+when the key is present, so reading through it aborted the render on valid values.
+*/ -}}
 {{- $wanted := false -}}
 {{- range dig "receivers" list $db2 -}}
-{{- $events := dig "events" dict (. | default dict) -}}
-{{- if or (dig "dbServerQuerySample" "enabled" false $events) (dig "dbServerTopQuery" "enabled" false $events) -}}
+{{- $events := dig "events" dict (. | default dict) | default dict -}}
+{{- $sample := dig "dbServerQuerySample" dict $events | default dict -}}
+{{- $top := dig "dbServerTopQuery" dict $events | default dict -}}
+{{- if or (dig "enabled" false $sample) (dig "enabled" false $top) -}}
 {{- $wanted = true -}}
 {{- end -}}
 {{- end -}}
@@ -778,15 +785,36 @@ quietly. Refuse the combination instead of installing something that cannot deli
 {{- /* A subchart always installs into the release namespace; only the parent can move. */ -}}
 {{- $db2Ns := lower .Release.Namespace -}}
 {{- /*
-The gateway's OTLP gRPC listener can be re-pointed or removed outright, and the receiver
-speaks only gRPC. Read the configured port rather than assuming 4317, and refuse when the
-port is gone, since then the gateway has nowhere to receive these events.
+The receiver speaks OTLP over gRPC, so the gateway's otlp port has to exist, be exposed,
+and be the one the Collector actually listens on.
 */ -}}
-{{- $otlpPort := dig "otlp" dict (.Values.gateway.ports | default dict) -}}
+{{- $otlpPort := dig "otlp" dict (.Values.gateway.ports | default dict) | default dict -}}
 {{- if not $otlpPort -}}
 {{- fail (printf "%s requires the gateway's OTLP gRPC port, but gateway.ports.otlp is not configured. The Db2 receiver exports OTLP over gRPC, so without that port the gateway cannot receive these events." $why) -}}
 {{- end -}}
+{{- /*
+Present in values is not the same as reachable. The gateway Service only publishes a port
+whose enabled_for names a signal that is itself enabled, so a port restricted to, say,
+logs disappears on an Observability-only install and the export has nowhere to land.
+*/ -}}
+{{- $enabledFor := dig "enabled_for" list $otlpPort | default list -}}
+{{- $exposed := or
+      (and (has "metrics" $enabledFor) (eq (include "splunk-otel-collector.metricsEnabled" .) "true"))
+      (and (has "traces" $enabledFor) (eq (include "splunk-otel-collector.tracesEnabled" .) "true"))
+      (and (has "logs" $enabledFor) (eq (include "splunk-otel-collector.logsEnabled" .) "true"))
+      (and (has "profiling" $enabledFor) (eq (include "splunk-otel-collector.profilingEnabled" .) "true")) -}}
+{{- if not $exposed -}}
+{{- fail (printf "%s requires the gateway to publish its OTLP gRPC port, but gateway.ports.otlp.enabled_for is %v and none of those signals is enabled, so the Service omits the port entirely. Add a signal that is enabled, or leave enabled_for at its default." $why $enabledFor) -}}
+{{- end -}}
+{{- /*
+The Collector's OTLP receiver binds 0.0.0.0:4317 whatever containerPort says, so moving
+the port leaves the Service and container advertising one number while nothing listens on
+it. Refused rather than worked around, since no endpoint value can reach it.
+*/ -}}
 {{- $gatewayPort := toString (dig "containerPort" 4317 $otlpPort) -}}
+{{- if ne $gatewayPort "4317" -}}
+{{- fail (printf "%s requires gateway.ports.otlp.containerPort to stay 4317, but it is %s. The Collector's OTLP receiver binds 0.0.0.0:4317 regardless of this value, so the Service would advertise %s with nothing listening on it." $why $gatewayPort $gatewayPort) -}}
+{{- end -}}
 {{- if $endpoint -}}
 {{- /*
 Parsed as a whole URL. Accepting the pieces loosely let through addresses the exporter
@@ -794,11 +822,11 @@ cannot use at all: no scheme, no port, "ftp://", or a stray second port segment.
 */ -}}
 {{- $schemeSplit := splitList "://" $endpoint -}}
 {{- if ne (len $schemeSplit) 2 -}}
-{{- fail (printf "db2.otlp.endpoint must be a complete URL of the form http://host:port, got %q." $endpoint) -}}
+{{- fail (printf "%s requires db2.otlp.endpoint to be a complete URL of the form http://host:port, got %q." $why $endpoint) -}}
 {{- end -}}
-{{- $scheme := lower (first $schemeSplit) -}}
+{{- $scheme := first $schemeSplit -}}
 {{- if not (has $scheme (list "http" "https")) -}}
-{{- fail (printf "db2.otlp.endpoint must use the http or https scheme, got %q in %q." $scheme $endpoint) -}}
+{{- fail (printf "db2.otlp.endpoint must use the http or https scheme in lower case, got %q in %q." $scheme $endpoint) -}}
 {{- end -}}
 {{- $authority := index $schemeSplit 1 -}}
 {{- if contains "/" $authority -}}
@@ -812,6 +840,17 @@ cannot use at all: no scheme, no port, "ftp://", or a stray second port segment.
 {{- $port := index $hostPort 1 -}}
 {{- if not (regexMatch "^[0-9]+$" $port) -}}
 {{- fail (printf "db2.otlp.endpoint has a non-numeric port %q in %q." $port $endpoint) -}}
+{{- end -}}
+{{- /*
+The scheme has to agree with the exporter's own TLS setting, which the receiver checks at
+startup: https with insecure: true, or http with insecure: false, fails there instead.
+*/ -}}
+{{- $insecure := dig "insecure" true (dig "tls" dict $otlp | default dict) -}}
+{{- if and $insecure (ne $scheme "http") -}}
+{{- fail (printf "db2.otlp.endpoint uses %q while db2.otlp.tls.insecure is true. Use http, or set db2.otlp.tls.insecure: false." $scheme) -}}
+{{- end -}}
+{{- if and (not $insecure) (ne $scheme "https") -}}
+{{- fail (printf "db2.otlp.endpoint uses %q while db2.otlp.tls.insecure is false. Use https, or set db2.otlp.tls.insecure: true." $scheme) -}}
 {{- end -}}
 {{- /*
 The short name only resolves from the Db2 pod when both sit in one namespace, which
@@ -836,28 +875,38 @@ namespaceOverride can break. Offer it only then; otherwise require a qualified n
       (dig "gateway" "enabled" false (.Values.global | default dict))) -}}
 {{- fail (printf "%s requires the Db2 receiver to export to the gateway, but db2.otlp.collectorTarget is \"agent\". Set db2.otlp.collectorTarget: gateway. The agent has no OTLP logs pipeline in Observability-only mode, so query-sample events sent to it are rejected with UNIMPLEMENTED." $why) -}}
 {{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether the subchart's derived collector address can be correct at all. Separate from the
+Database Monitoring checks because it applies to plain metrics too: the derivation is wrong
+under these overrides whichever target is used, and the result is an export into a name
+that does not resolve, with nothing in the rendered output to show it.
+*/}}
+{{- define "splunk-otel-collector.validateDb2Derivation" -}}
+{{- $db2 := .Values.db2 | default dict -}}
+{{- if dig "enabled" false $db2 -}}
+{{- $otlp := dig "otlp" dict $db2 | default dict -}}
+{{- if not (dig "endpoint" "" $otlp) -}}
+{{- $collectorNs := lower (include "splunk-otel-collector.namespace" .) -}}
+{{- $db2Ns := lower .Release.Namespace -}}
 {{- /*
-The subchart rebuilds the gateway address from the release and chart names. Helm passes a
-parent's own values down only through `global`, so nameOverride and fullnameOverride are
-invisible to it and it derives a Service name that was never created -- an export into a
-name that does not resolve, with nothing in the rendered output to show it.
+Helm passes a parent's own values down only through `global`, so the subchart cannot see
+nameOverride or fullnameOverride and rebuilds the Service name from the release and chart
+names instead.
 */ -}}
 {{- if or .Values.nameOverride .Values.fullnameOverride -}}
-{{- fail (printf "%s cannot derive the gateway address while nameOverride or fullnameOverride is set: the subchart rebuilds it from the release and chart names and cannot see either. Set db2.otlp.endpoint: http://%s.%s.svc.cluster.local:%s explicitly." $why $gatewayService $gatewayNs $gatewayPort) -}}
+{{- fail (printf "db2.enabled cannot derive the Collector address while nameOverride or fullnameOverride is set: the subchart rebuilds it from the release and chart names and cannot see either, so it would export into a Service name this release never creates. Set db2.otlp.endpoint explicitly -- this release's gateway is %s.%s.svc.cluster.local:4317." (lower (include "splunk-otel-collector.fullname" .)) $collectorNs) -}}
 {{- end -}}
 {{- /*
-Checked unconditionally rather than only under namespaceOverride: the subchart falls back
-to its own release namespace, so any collectorNamespace disagreeing with where the gateway
-actually runs derives an address for a Service that is not there.
+The subchart falls back to its own release namespace, so any collectorNamespace that
+disagrees with where the Collector runs derives an address for a Service that is not there.
 */ -}}
-{{- /* The subchart ships collectorNamespace: "", so dig returns that rather than a default. */ -}}
 {{- $derivedNs := lower (dig "collectorNamespace" "" $otlp | default $db2Ns) -}}
-{{- if ne $derivedNs $gatewayNs -}}
-{{- fail (printf "%s would derive the gateway in namespace %q, but it runs in %q. Set db2.otlp.collectorNamespace: %s." $why $derivedNs $gatewayNs $gatewayNs) -}}
-{{- end -}}
-{{- /* The subchart always derives port 4317, so a re-pointed gateway needs an endpoint. */ -}}
-{{- if ne $gatewayPort "4317" -}}
-{{- fail (printf "%s cannot derive the gateway address while gateway.ports.otlp.containerPort is %s: the subchart always derives 4317. Set db2.otlp.endpoint: http://%s.%s.svc.cluster.local:%s explicitly." $why $gatewayPort $gatewayService $gatewayNs $gatewayPort) -}}
+{{- if ne $derivedNs $collectorNs -}}
+{{- fail (printf "db2 would derive the Collector in namespace %q, but it runs in %q. Set db2.otlp.collectorNamespace: %s." $derivedNs $collectorNs $collectorNs) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
