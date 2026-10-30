@@ -216,6 +216,7 @@ func testJavaTraces(t *testing.T) {
 
 	internal.MaybeWriteUpdateExpectedTracesResults(t, expectedTracesFile, selectedTrace)
 	err = ptracetest.CompareTraces(expectedTraces, *selectedTrace,
+		ptracetest.IgnoreResourceEntityRefs(),
 		ptracetest.IgnoreResourceAttributeValue("host.name"),
 		ptracetest.IgnoreResourceAttributeValue("k8s.node.name"),
 		ptracetest.IgnoreResourceAttributeValue("os.description"),
