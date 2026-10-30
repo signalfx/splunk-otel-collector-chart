@@ -115,10 +115,10 @@ data:
         - name: OTEL_EXPERIMENTAL_RESOURCE_DETECTORS
           value: ""
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: splunk.zc.method=splunk-otel-instrumentation-python:v2.7.0
+          value: splunk.zc.method=splunk-otel-instrumentation-python:v2.13.3
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: http://default-splunk-otel-collector-agent.default.svc.cluster.local:4318
-        image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.7.0
+        image: quay.io/signalfx/splunk-otel-instrumentation-python:v2.13.3
 ---
 # Source: splunk-otel-collector/templates/operator/instrumentation-hook-job.yaml
 apiVersion: rbac.authorization.k8s.io/v1
