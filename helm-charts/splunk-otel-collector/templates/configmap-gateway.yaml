@@ -1,3 +1,5 @@
+{{- include "splunk-otel-collector.validateDb2DbMonitoring" . -}}
+{{- include "splunk-otel-collector.validateDb2Derivation" . -}}
 {{ if .Values.gateway.enabled }}
 {{- $configMapName := printf "%s-otel-collector" (include "splunk-otel-collector.fullname" .) }}
 {{- $remoteManagementConfigManaged := eq (include "splunk-otel-collector.opampBridge.gatewayManaged" .) "true" }}

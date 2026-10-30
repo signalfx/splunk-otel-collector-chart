@@ -1,0 +1,14 @@
+# Db2 server for the receiver to scrape.
+apiVersion: v1
+kind: Service
+metadata:
+  name: db2
+  labels:
+    app: db2
+spec:
+  selector:
+    app: db2
+  ports:
+    - name: db2
+      port: 50000
+      targetPort: 50000

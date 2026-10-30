@@ -1,0 +1,739 @@
+suite: IBM Db2 subchart
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+
+tests:
+  # `db2.enabled: false` has to stay present in values.yaml: Helm ignores a `condition`
+  # whose values path does not resolve and installs the subchart anyway. Deleting the key
+  # makes the chart fail to render at its own defaults, which ci_scripts/check-render.sh
+  # catches across every example. This asserts the other half — that the condition is
+  # wired to the key at all, rather than the subchart being installed unconditionally.
+  - it: should render the receiver when enabled
+    template: charts/db2/templates/deployment.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Deployment
+
+  # The receiver image is Linux-only.
+  - it: should schedule the receiver on Linux
+    template: charts/db2/templates/deployment.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector
+          value:
+            kubernetes.io/os: linux
+
+  # The derived endpoint has to name a Service this release actually creates, so the two
+  # charts' naming conventions are asserted together without standing up a cluster.
+  - it: should derive the agent endpoint from the release
+    template: charts/db2/templates/configmap.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "http://test-release-splunk-otel-collector-agent\.test-ns\.svc\.cluster\.local:4317"'
+
+  - it: should target the gateway when asked
+    template: charts/db2/templates/configmap.yaml
+    set:
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'endpoint: "http://test-release-splunk-otel-collector\.test-ns\.svc\.cluster\.local:4317"'
+
+  # Db2 requires ssl_svcename to listen on a different port from svcename, so the
+  # cleartext default cannot be reused once TLS is on. Asserted on secret.yaml because
+  # that is where the shared validation helper is reached first.
+  - it: should refuse TLS without an explicit port
+    template: charts/db2/templates/secret.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "port is required when TLS is enabled"
+
+  - it: should refuse a receiver with no credentials
+    template: charts/db2/templates/secret.yaml
+    set:
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+    asserts:
+      - failedTemplate:
+          errorPattern: "needs credentials"
+
+  # The routing rule is in the gateway config, but the subchart exports to the agent by
+  # default, and the agent has no pipeline receiving OTLP logs in Observability-only mode.
+  # That combination rendered cleanly while query-sample events were rejected at the agent
+  # with UNIMPLEMENTED, so it has to fail at template time instead.
+  - it: should refuse database monitoring while the receiver still targets the agent
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires the Db2 receiver to export to the gateway"
+
+  - it: should accept database monitoring when the receiver targets the gateway
+    template: templates/configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: "otlp_http/dbmon"
+
+  # Database Monitoring is an Observability Cloud feature. On a Platform-only install no
+  # dbmon exporter or pipeline renders at all, so asking for it used to succeed and quietly
+  # do nothing.
+  - it: should refuse database monitoring without an Observability destination
+    set:
+      # The suite's basic.yaml sets a realm; clear it to get a Platform-only install.
+      splunkObservability.realm: ""
+      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
+      splunkPlatform.token: token
+      splunkPlatform.index: main
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires Splunk Observability Cloud to be configured"
+
+  # The routing rule is in this release's gateway config, so any other address -- the
+  # agent, or a collector outside the release -- never meets it. Matched on the parsed
+  # host, so a name merely containing the Service name is not mistaken for it.
+  - it: should refuse an explicit endpoint that is not this release's gateway
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: http://test-release-splunk-otel-collector-agent.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "export to this release's gateway Service"
+
+  # Db2 events arrive over OTLP and are not entity-marked, so routing/logs hands them to the
+  # default logs route. They carry query text and must not be indexed outside DB Monitoring.
+  - it: should keep db2 query events out of the ordinary logs destination
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
+      splunkPlatform.token: token
+      splunkPlatform.index: main
+      splunkPlatform.logsEnabled: true
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'logs:\s*\n\s*exporters:\s*\n\s*- splunk_hec/platform_logs\s*\n\s*processors:\s*\n\s*- memory_limiter\s*\n\s*- filter/exclude_dbmon'
+
+  # A name that merely contains the gateway Service name is a different service. Substring
+  # matching rejected this, and let a differently-cased agent hostname through.
+  - it: should accept the gateway endpoint regardless of case and not match by substring
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: http://TEST-RELEASE-Splunk-Otel-Collector.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - notFailedTemplate: {}
+
+  # Checking only the first two labels accepted anything suffixed onto them, so an
+  # in-cluster-looking name could point anywhere.
+  - it: should refuse an endpoint with extra labels after the namespace
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: http://test-release-splunk-otel-collector.test-ns.evil.example:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "Accepted forms are"
+
+  # The receiver exports OTLP over gRPC, so the gateway's HTTP port would refuse it.
+  - it: should refuse the gateway host on the OTLP HTTP port
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: http://test-release-splunk-otel-collector.test-ns.svc.cluster.local:4318
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "OTLP gRPC port 4317"
+
+  # Helm passes parent values down only through global, so the subchart cannot see these
+  # and would derive a Service name that was never created.
+  - it: should refuse deriving the gateway address under fullnameOverride
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      fullnameOverride: custom-gw
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot derive the Collector address while nameOverride or fullnameOverride is set"
+
+  - it: should require collectorNamespace alongside namespaceOverride
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      namespaceOverride: elsewhere
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "would derive the Collector in namespace"
+
+  # The functional test redirects this exporter to its own sink, so the derived form is
+  # only covered here.
+  - it: should derive the dbmon logs endpoint from the Observability ingest URL
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'logs_endpoint: https://ingest\.us0\.observability\.splunkcloud\.com/v3/event'
+
+  # Loose parsing accepted addresses the exporter cannot use: no scheme, no port, a
+  # foreign scheme, or a stray second port segment.
+  - it: should refuse an endpoint that is not a complete http url
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: ftp://test-release-splunk-otel-collector.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "must use the http or https scheme"
+
+  # Removing the port leaves the gateway with no OTLP gRPC listener at all.
+  - it: should refuse database monitoring when the gateway otlp port is removed
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      gateway.ports.otlp: null
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "gateway.ports.otlp is not configured"
+
+  # The Collector's OTLP receiver binds 4317 whatever containerPort says, so moving the
+  # port leaves the Service advertising a number nothing listens on.
+  - it: should refuse a customised gateway otlp container port
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      gateway.ports.otlp.containerPort: 5317
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires gateway.ports.otlp.containerPort to stay 4317"
+
+  # The short name does not resolve across namespaces.
+  - it: should refuse the bare service name when the gateway is in another namespace
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      namespaceOverride: elsewhere
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorNamespace: elsewhere
+          endpoint: http://test-release-splunk-otel-collector:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "Accepted forms are"
+
+  # Database Monitoring follows the receivers, because there is no configuration in which
+  # these events are wanted and the routing is not.
+  - it: should enable database monitoring from a receiver's query sample event
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerQuerySample:
+                enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: "otlp_http/dbmon"
+
+  - it: should enable database monitoring from a receiver's top query event
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerTopQuery:
+                enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: "otlp_http/dbmon"
+
+  - it: should leave database monitoring off when no event is enabled
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - notMatchRegex:
+          path: data.relay
+          pattern: "dbmon"
+
+  # The key is read for presence, not truth, so an explicit false still wins over the
+  # events -- for anyone shipping these records themselves.
+  - it: should let an explicit false suppress the derived routing
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: false
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerQuerySample:
+                enabled: true
+    asserts:
+      - notMatchRegex:
+          path: data.relay
+          pattern: "dbmon"
+
+  # An operator who only enabled an event never wrote db2.dbMonitoring.enabled, so naming
+  # that key in the error would send them looking for something they did not set.
+  - it: should name the event settings when derived routing fails validation
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerQuerySample:
+                enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "turned on by events.dbServerQuerySample or events.dbServerTopQuery"
+
+  # The subchart schema accepts null for events and for each event object, and dig returns
+  # that null rather than its default, which aborted the render on valid values.
+  - it: should tolerate null event blocks
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+            events:
+              dbServerQuerySample: null
+              dbServerTopQuery:
+                enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: "otlp_http/dbmon"
+
+  # Present in values is not the same as published: the Service only carries a port whose
+  # enabled_for names a signal that is itself on.
+  - it: should refuse an otlp port that the gateway service will not publish
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      gateway.ports.otlp.enabled_for: [logs]
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "none of those signals is enabled"
+
+  # The receiver checks scheme against its own TLS setting at startup.
+  - it: should refuse https while the exporter is insecure
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: https://test-release-splunk-otel-collector.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "while db2.otlp.tls.insecure is true"
+
+  - it: should refuse an upper case scheme
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      db2:
+        enabled: true
+        dbMonitoring:
+          enabled: true
+        otlp:
+          endpoint: HTTP://test-release-splunk-otel-collector.test-ns.svc.cluster.local:4317
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "http or https scheme in lower case"
+
+  # Applies to plain metrics too: the derived address is wrong under these overrides
+  # whichever target is used, and the export goes into a name that does not resolve.
+  - it: should refuse a derived address under fullnameOverride without database monitoring
+    set:
+      splunkObservability.realm: us0
+      splunkObservability.accessToken: token
+      clusterName: test
+      gateway.enabled: true
+      fullnameOverride: custom-gw
+      db2:
+        enabled: true
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "db2.enabled cannot derive the Collector address"

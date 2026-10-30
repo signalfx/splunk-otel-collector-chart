@@ -1260,6 +1260,120 @@ autodetect:
   prometheus: true
 ```
 
+## IBM Db2 monitoring
+
+The [splunk-otel-db2](https://github.com/signalfx/splunk-otel-db2) receiver is available as
+an optional subchart, disabled by default. It runs as its own Deployment and exports over
+OTLP *into* this release's Collector — it is not a Collector receiver, and no Collector
+pipeline is modified by enabling it.
+
+```yaml
+db2:
+  enabled: true
+  receivers:
+    - name: default
+      hostname: db2.example.com
+      database: PROD
+      port: 50001                # your ssl_svcename port
+      credentialsSecret: my-db2-credentials
+```
+
+See the [subchart documentation](https://github.com/signalfx/splunk-otel-db2#configuration)
+for the full set of receiver options. This section covers only the parts that depend on how
+this chart is configured.
+
+Not available in the EKS Add-on.
+
+### Where the receiver sends data
+
+With `db2.otlp.endpoint` unset, the subchart derives the address from the release name and
+targets the agent Service. Four settings in this chart break that derivation, because each
+is a top-level value Helm does not pass down to a subchart:
+
+| If you set | Also set |
+| --- | --- |
+| `gateway.enabled: true` | `db2.otlp.collectorTarget: gateway` |
+| `agent.service.enabled: false`, or run on EKS Fargate | `db2.otlp.collectorTarget: gateway` |
+| `namespaceOverride` | `db2.otlp.collectorNamespace` |
+| `fullnameOverride` / `nameOverride` | `db2.otlp.endpoint` (in full) |
+
+The agent Service is `internalTrafficPolicy: Local`, so it is only reachable from an agent
+Pod on the receiver's own Node. The gateway Service is reachable cluster-wide.
+
+### Receiving query samples and top queries
+
+Metrics need no extra configuration. Query samples and top queries are OTLP **log records**,
+so they need routing to Database Monitoring. Enabling either event is enough: the chart then
+adds a dedicated exporter plus a routing rule keyed on the receiver's instrumentation scope.
+
+```yaml
+gateway:
+  enabled: true
+
+db2:
+  enabled: true
+  otlp:
+    collectorTarget: gateway
+  receivers:
+    - name: default
+      hostname: db2.example.com
+      database: PROD
+      port: 50001
+      credentialsSecret: my-db2-credentials
+      events:
+        dbServerQuerySample:
+          enabled: true
+        dbServerTopQuery:
+          enabled: true
+```
+
+This renders `otlp_http/dbmon`, which carries
+`X-Splunk-Instrumentation-Library: dbmon` to the Observability Cloud `/v3/event` endpoint,
+and a `logs/dbmon` pipeline that filters on the receiver's scope,
+`github.com/signalfx/splunk-otel-db2`. The shared
+`otlp_http/entities` exporter is deliberately left alone, so Kubernetes entity events are not
+marked as Database Monitoring data.
+
+There is no separate switch to remember, because there is no configuration in which these
+events are wanted and this routing is not: without it the records reach the entity-events
+exporter instead, or are rejected outright by an agent. `db2.dbMonitoring.enabled` exists
+only to override that — `false` suppresses the routing if you ship these records yourself,
+`true` renders it before any event is enabled.
+
+Both `gateway.enabled: true` and `db2.otlp.collectorTarget: gateway` are required, and the
+chart enforces each at template time with an actionable error rather than rendering a release
+that cannot deliver these records. The second is easy to miss: the receiver exports to the
+agent by default, and in Observability-only mode the agent has no pipeline receiving OTLP
+logs. OTLP registers one service per signal, so query samples sent there are rejected with
+`UNIMPLEMENTED` instead of being dropped quietly. Because enabling an event is what turns
+the routing on, that is also when these requirements start to apply.
+
+Sending straight to the gateway also preserves host attribution. The agent's metrics pipeline
+runs `resource_detection` with `override: true`, which replaces `host.name` with the
+Collector node's hostname — wrong for a receiver that scrapes remote databases. The gateway
+pipelines run no such processor, so the receiver's own `host.name` and `server.address`
+arrive intact. Key Database Monitoring queries on `server.address`, which always identifies
+the database the metrics came from.
+
+Database Monitoring is an Observability Cloud feature, so `splunkObservability` must be
+configured. A Platform-only install renders none of this, and asking for it there is refused
+rather than accepted and ignored. No Splunk Platform configuration is involved.
+
+The gateway's `otlp` port has to stay as shipped. `gateway.ports.otlp.containerPort` must
+remain `4317`, because the Collector's OTLP receiver binds `0.0.0.0:4317` whatever that value
+says — moving it leaves the Service advertising a port nothing listens on. Its `enabled_for`
+also has to name a signal that is enabled, or the Service omits the port altogether. Both are
+checked at template time. If you set `db2.otlp.endpoint` yourself, its scheme must match
+`db2.otlp.tls.insecure`: `http` while that is `true`, `https` once it is `false`.
+
+Query events are also kept out of the ordinary logs destination. They arrive over OTLP and
+are not entity-marked, so the logs routing connector would otherwise hand them to the
+default logs route and index the query text alongside normal logs.
+
+See the [receiver's configuration
+reference](https://github.com/signalfx/splunk-otel-db2#query-samples-log-records) for
+sampling intervals, SQL obfuscation and the full attribute list.
+
 ## Using feature gates
 
 Enable or disable features of the otel-collector agent, clusterReceiver, and gateway (respectively) using feature
