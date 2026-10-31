@@ -4,6 +4,28 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.164.0] - 2026-10-31
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.164.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.164.0).
+
+### 💡 Enhancements 💡
+
+- `chart`: Use the HEC exporter default compression setting for profiling data in agent and collector configurations. ([#2686](https://github.com/signalfx/splunk-otel-collector-chart/pull/2686))
+- `chart`: Bump TargetAllocator to 0.162.0 in helm-charts/splunk-otel-collector/Chart.yaml ([#2693](https://github.com/signalfx/splunk-otel-collector-chart/pull/2693))
+- `clusterReceiver`: Enable k8s.service metrics and resource attributes in the Kubernetes cluster receiver configuration. ([#2587](https://github.com/signalfx/splunk-otel-collector-chart/pull/2587))
+  The following service metrics are now enabled by default in the k8s_cluster receiver when sending to
+  Splunk Observability:
+    - k8s.service.endpoint.count
+    - k8s.service.load_balancer.ingress.count
+  The following resource attributes are also enabled to provide additional context for these metrics:
+    - k8s.service.publish_not_ready_addresses
+    - k8s.service.traffic_distribution
+  
+- `operator`: Bump java-csa to v2.33.1 in helm-charts/splunk-otel-collector/values.yaml ([#2689](https://github.com/signalfx/splunk-otel-collector-chart/pull/2689),[#2694](https://github.com/signalfx/splunk-otel-collector-chart/pull/#2694))
+- `operator`: Bump java to v2.33.1 in helm-charts/splunk-otel-collector/values.yaml ([#2688](https://github.com/signalfx/splunk-otel-collector-chart/pull/2688))
+- `operator`: Bump operator to 0.126.2 in helm-charts/splunk-otel-collector/Chart.yaml ([#2687](https://github.com/signalfx/splunk-otel-collector-chart/pull/2687))
+- `operator`: Bump python to v2.13.3 in helm-charts/splunk-otel-collector/values.yaml ([#2695](https://github.com/signalfx/splunk-otel-collector-chart/pull/2695))
+
 ## [0.163.1] - 2026-10-22
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.163.1](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.163.1).
