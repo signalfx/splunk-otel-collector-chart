@@ -1291,9 +1291,28 @@ db2:
           enabled: true
 ```
 
-`db2.otlp.endpoint` is left unset so the subchart derives the Collector address from this
-release. Set it only when the Collector runs outside this release. One entry per database;
-`db2.receivers` replaces the default list wholesale rather than merging into it.
+One entry per database; `db2.receivers` replaces the default list wholesale rather than
+merging into it.
+
+### Pointing the receiver at the Collector
+
+`db2.otlp.endpoint` is left unset above so the subchart derives the address from the release
+name, and it exports to the agent. Override that when any of the following apply:
+
+```yaml
+db2:
+  otlp:
+    # Send to the gateway instead of the agent.
+    collectorTarget: gateway
+    # Required with namespaceOverride, which moves the Collector Services.
+    collectorNamespace: my-namespace
+    # Required with nameOverride or fullnameOverride: Helm passes a parent's values to a
+    # subchart only through `global`, so the derivation cannot see either.
+    endpoint: http://my-collector.my-namespace.svc.cluster.local:4317
+```
+
+The chart fails at template time if the derived address cannot be right, rather than
+exporting into a Service name that does not resolve.
 
 See the [receiver's configuration
 reference](https://github.com/signalfx/splunk-otel-db2#configuration) for collection
