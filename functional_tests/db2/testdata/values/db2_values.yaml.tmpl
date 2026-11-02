@@ -1,19 +1,16 @@
 ---
-# db2.otlp.endpoint is deliberately unset: the subchart deriving it from this release is
-# the contract under test.
 splunkObservability:
   realm: test-realm
   accessToken: "dummy-token"
   ingestUrl: {{ .IngestURL }}
   apiUrl: {{ .ApiURL }}
+  dbMonitoringEnabled: true
 
 clusterName: db2-functional-test
 
 clusterReceiver:
   enabled: false
 
-# Database Monitoring routing lives in the gateway config, so the gateway has to run and
-# the receiver has to export to it.
 gateway:
   enabled: true
   replicaCount: 1
@@ -23,10 +20,8 @@ gateway:
     limits:
       cpu: 200m
       memory: 256Mi
-  # Database Monitoring events need a sink that serves /v3/event. The ingest URL above is a
-  # SignalFx receiver, which does not, so only this exporter is redirected -- everything
-  # else still goes through the chart's derived endpoints. The derived form of this value
-  # is asserted in unittests/db2_subchart_test.yaml.
+  # The ingest URL is a SignalFx receiver and does not serve /v3/event, so this one
+  # exporter is redirected at its own sink.
   config:
     exporters:
       otlp_http/dbmon:
@@ -34,11 +29,6 @@ gateway:
 
 db2:
   enabled: true
-  # dbMonitoring is deliberately not set: enabling the events below is what turns the
-  # routing on, and leaving it out exercises that derivation. This covers the Database
-  # Monitoring wiring at runtime -- a dedicated exporter, two scope-keyed filters and the
-  # logs/dbmon pipeline -- where a malformed OTTL condition or exporter block only fails
-  # once the Collector parses it, which rendering alone cannot catch.
   otlp:
     collectorTarget: gateway
   receivers:

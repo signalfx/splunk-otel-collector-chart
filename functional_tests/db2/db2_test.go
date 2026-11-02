@@ -40,10 +40,8 @@ const (
 	// Matches the startupProbe budget in testdata/db2/deployment.yaml, plus slack for a
 	// cold image pull. A ceiling, not an expectation.
 	//
-	// Sized so this wait, the Helm action timeout, the pod and metric waits and the
-	// teardown all fit inside TEST_TIMEOUT: go test counts cleanup against the same
-	// deadline, so an over-generous wait here turns a clean assertion failure into a panic
-	// that skips teardown and leaks the fixture.
+	// This plus the Helm, readiness and metric waits and the teardown must fit inside
+	// TEST_TIMEOUT, which go test also charges cleanup against.
 	db2ReadyTimeout = 15 * time.Minute
 
 	// Dedicated so it collides with neither the OTLP sinks (4317/4318) nor the secureapp
@@ -77,10 +75,8 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 
 	metricsSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
 
-	// Database Monitoring events get their own OTLP/HTTP sink on /v3/event. The metrics
-	// sink is a SignalFx receiver and cannot serve that path, so without a second sink the
-	// only observable outcome would be a failed export -- which shows routing happened but
-	// not that anything deliverable came out of it.
+	// Database Monitoring events need a sink that serves /v3/event; the metrics sink is a
+	// SignalFx receiver and cannot.
 	dbmonSink := internal.SetupOTLPLogsSinkOnPort(t, dbMonSinkPort, "/v3/event")
 
 	valuesFile, err := filepath.Abs(filepath.Join(testDir, valuesDir, "db2_values.yaml.tmpl"))
@@ -108,9 +104,8 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 	internal.CheckPodsReady(t, client, internal.DefaultNamespace,
 		"app.kubernetes.io/name=db2", 5*time.Minute, 10*time.Second)
 
-	// The gateway carries the Database Monitoring config. A Collector rejects an invalid
-	// OTTL condition or exporter block at startup, so reaching Ready is the assertion that
-	// the rendered dbmon wiring is actually loadable - not just well-formed YAML.
+	// A Collector rejects an invalid routing condition or exporter at startup, so the
+	// gateway reaching Ready is what shows the rendered wiring is loadable.
 	internal.CheckPodsReady(t, client, internal.DefaultNamespace,
 		"app=splunk-otel-collector,component=otel-collector", 5*time.Minute, 10*time.Second)
 
@@ -126,18 +121,15 @@ func Test_Db2_Metrics_Through_Collector(t *testing.T) {
 	assertDbMonEventsDelivered(t, dbmonSink)
 }
 
-// assertDb2Dimensions checks the attribution that survives the trip through the Collector.
-// The receiver can scrape several remote databases, so a metric is only useful if it still
-// names the database it came from once it reaches the sink.
+// assertDb2Dimensions checks the attribution that survives the trip to the sink. The
+// receiver can scrape several remote databases, so a metric is only useful if it still
+// names the one it came from.
 //
-// The dimensions are read from the data points, not the resource: the chart exports through
-// the signalfx exporter, and SignalFx carries dimensions per data point rather than as an
-// OTLP resource. Reading the resource found it empty.
+// Dimensions come from the data points rather than the resource: the chart exports through
+// the signalfx exporter, which carries them per data point.
 //
-// server.address is asserted strictly. host.name is only reported, because the agent metrics
-// pipeline runs resource_detection with override: true and may replace it with the Collector
-// node hostname — the point is to make whatever happens visible rather than to encode
-// today's behavior.
+// server.address is asserted; host.name is only logged, because the agent metrics pipeline
+// runs resource_detection with override: true and may replace it.
 func assertDb2Dimensions(t *testing.T, sink *consumertest.MetricsSink) {
 	t.Helper()
 
@@ -172,9 +164,8 @@ func assertDb2Dimensions(t *testing.T, sink *consumertest.MetricsSink) {
 	}
 
 	require.NotZero(t, checked, "no Db2 data points reached the sink to inspect")
-	// "host" is logged next to "host.name" only as a precaution against a rename somewhere
-	// in the SignalFx path. Nothing in the exporter or translator was found to do that, so
-	// the expectation is that it stays empty.
+	// "host" is logged alongside "host.name" in case anything in the SignalFx path renames
+	// it.
 	for _, key := range []string{"server.address", "host.name", "host", "db.namespace", "server.port"} {
 		t.Logf("dimension %s as received: %v", key, keysOf(seen[key]))
 	}
@@ -215,13 +206,8 @@ func keysOf(m map[string]struct{}) []string {
 	return out
 }
 
-// assertDbMonRouting checks the gateway config the Collector loaded carries the Database
-// Monitoring split, and that the shared entity exporter was not co-opted to do it.
-//
-// The config is unmarshalled rather than string-matched. Slicing the raw text to isolate
-// the entities exporter silently captured the rest of the file -- the exporter keys are
-// sorted, so otlp_http/entities has no otlp sibling after it -- which made the assertion
-// fail on config that was perfectly correct.
+// assertDbMonRouting checks the gateway config the Collector loaded routes query events to
+// their own exporter, and keeps them off the shared entity exporter.
 func assertDbMonRouting(t *testing.T, client *kubernetes.Clientset) {
 	t.Helper()
 
@@ -240,59 +226,63 @@ func assertDbMonRouting(t *testing.T, client *kubernetes.Clientset) {
 
 	var cfg struct {
 		Exporters  map[string]map[string]any `yaml:"exporters"`
-		Processors map[string]any            `yaml:"processors"`
-		Service    struct {
+		Connectors struct {
+			RoutingLogs struct {
+				Table []struct {
+					Condition string   `yaml:"condition"`
+					Pipelines []string `yaml:"pipelines"`
+				} `yaml:"table"`
+			} `yaml:"routing/logs"`
+		} `yaml:"connectors"`
+		Service struct {
 			Pipelines map[string]struct {
-				Receivers  []string `yaml:"receivers"`
-				Processors []string `yaml:"processors"`
-				Exporters  []string `yaml:"exporters"`
+				Receivers []string `yaml:"receivers"`
+				Exporters []string `yaml:"exporters"`
 			} `yaml:"pipelines"`
 		} `yaml:"service"`
 	}
 	require.NoError(t, yaml.Unmarshal([]byte(relay), &cfg),
 		"the gateway relay config is not parseable YAML")
 
-	require.Contains(t, cfg.Exporters, "otlp_http/dbmon")
-	require.Contains(t, cfg.Processors, "filter/dbmon_only")
-	require.Contains(t, cfg.Processors, "filter/exclude_dbmon")
-
 	dbmon, ok := cfg.Service.Pipelines["logs/dbmon"]
-	require.True(t, ok, "db2.dbMonitoring.enabled rendered no logs/dbmon pipeline")
-	require.Contains(t, dbmon.Processors, "filter/dbmon_only")
+	require.True(t, ok, "dbMonitoringEnabled rendered no logs/dbmon pipeline")
+	require.Contains(t, dbmon.Receivers, "routing/logs")
 	require.Contains(t, dbmon.Exporters, "otlp_http/dbmon")
 
 	headers, _ := cfg.Exporters["otlp_http/dbmon"]["headers"].(map[string]any)
 	require.Equal(t, "dbmon", headers["X-Splunk-Instrumentation-Library"],
 		"the dbmon exporter must carry the Database Monitoring library header")
 
-	// The point of the dedicated exporter: entity events must not be labeled as Database
-	// Monitoring data, and must not be routed through the dbmon pipeline.
 	entities, ok := cfg.Exporters["otlp_http/entities"]
 	require.True(t, ok, "no otlp_http/entities exporter in the gateway config")
 	entityHeaders, _ := entities["headers"].(map[string]any)
 	require.NotContains(t, entityHeaders, "X-Splunk-Instrumentation-Library",
 		"the shared entity exporter must not carry the Database Monitoring header")
 
-	// Every other logs pipeline has to exclude the Db2 scope, or query text leaves
-	// Database Monitoring.
-	for name, p := range cfg.Service.Pipelines {
-		if !strings.HasPrefix(name, "logs") || name == "logs/dbmon" {
-			continue
+	// Query events are not entity-marked, so an entity route ahead of the Database
+	// Monitoring one would leave them to the default route and the ordinary logs
+	// destination.
+	table := cfg.Connectors.RoutingLogs.Table
+	dbmonAt, entitiesAt := -1, -1
+	for i, r := range table {
+		if slices.Contains(r.Pipelines, "logs/dbmon") && dbmonAt < 0 {
+			dbmonAt = i
 		}
-		if len(p.Exporters) == 0 || !slices.Contains(p.Receivers, "routing/logs") &&
-			!slices.Contains(p.Receivers, "otlp") {
-			continue
+		if slices.Contains(r.Pipelines, "logs/entities") && entitiesAt < 0 {
+			entitiesAt = i
 		}
-		require.Contains(t, p.Processors, "filter/exclude_dbmon",
-			"pipeline %q exports log records without excluding the Db2 scope", name)
+	}
+	require.GreaterOrEqual(t, dbmonAt, 0, "routing/logs has no route to logs/dbmon")
+	if entitiesAt >= 0 {
+		require.Less(t, dbmonAt, entitiesAt,
+			"the Database Monitoring route must come before the entity route")
 	}
 }
 
 // assertDbMonEventsDelivered waits for a Db2 query event to arrive at the Database
-// Monitoring sink. That covers the whole path at once: the receiver emitted an event,
-// filter/dbmon_only passed it, and otlp_http/dbmon delivered it to /v3/event in a form the
-// receiving end accepts. A wrong endpoint, URL path or payload fails here, where counting
-// failed exports could not tell those apart from success.
+// Monitoring sink, which covers the whole path: the receiver emitted it, routing/logs sent
+// it to logs/dbmon, and otlp_http/dbmon delivered it to /v3/event in a form the receiving
+// end accepts.
 func assertDbMonEventsDelivered(t *testing.T, sink *consumertest.LogsSink) {
 	t.Helper()
 
@@ -318,8 +308,7 @@ func assertDbMonEventsDelivered(t *testing.T, sink *consumertest.LogsSink) {
 		"no log record from scope %q reached the Database Monitoring sink; scopes seen: %v",
 		wantScope, scopes)
 
-	// Only the Db2 receiver may be routed here. filter/dbmon_only is what keeps unrelated
-	// records out of Database Monitoring, so anything else arriving is a routing fault.
+	// Only the Db2 scope may be routed here; anything else is a routing fault.
 	for _, got := range scopes {
 		require.Equal(t, wantScope, got,
 			"a record from scope %q reached the Database Monitoring sink", got)
