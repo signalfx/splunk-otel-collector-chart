@@ -3,7 +3,8 @@ Config for the otel-collector k8s cluster receiver deployment.
 The values can be overridden in .Values.clusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
-{{- $useEntityEventsForK8sProperties := and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useEntityEventsForK8sProperties -}}
+{{- $useEntityEventsForK8sProperties := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true" -}}
+{{- $k8sEntityEventsViaGateway := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesViaGateway" .) "true" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   health_check:
@@ -306,6 +307,14 @@ exporters:
       "X-Splunk-Instrumentation-Library": o11yevents
   {{- end }}
 
+  {{- if $k8sEntityEventsViaGateway }}
+  # Sends k8s entity events to the gateway that converts them to dimension updates.
+  otlp_grpc/k8s_entities:
+    endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
+    tls:
+      insecure: true
+  {{- end }}
+
   {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}
   otlp_http/o11y_entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
@@ -583,7 +592,9 @@ service:
         {{- if .Values.featureGates.enableK8sEntities }}
         - otlp_http/o11y_entities
         {{- end }}
-        {{- if $useEntityEventsForK8sProperties }}
+        {{- if $k8sEntityEventsViaGateway }}
+        - otlp_grpc/k8s_entities
+        {{- else if $useEntityEventsForK8sProperties }}
         - signalfx
         {{- end }}
     {{- end }}
