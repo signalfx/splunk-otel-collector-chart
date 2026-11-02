@@ -486,14 +486,6 @@ Whether k8s property updates are sent as entity events (featureGates.useEntityEv
 {{- end -}}
 
 {{/*
-Whether k8s entity events for property updates are sent through the gateway.
-The gateway converts them to dimension updates instead of the cluster receiver.
-*/}}
-{{- define "splunk-otel-collector.k8sEntityEventsForPropertiesViaGateway" -}}
-{{- and (eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true") .Values.gateway.enabled -}}
-{{- end -}}
-
-{{/*
 Build the collector feature gates string for cluster receiver.
 */}}
 {{- define "splunk-otel-collector.clusterReceiverFeatureGates" -}}
@@ -515,7 +507,7 @@ Build the collector feature gates string for gateway.
 {{- with .Values.gateway.featureGates -}}
 {{- $gates = append $gates . -}}
 {{- end -}}
-{{- if eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesViaGateway" .) "true" -}}
+{{- if eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true" -}}
 {{- $gates = append $gates "exporter.signalfx.consumeEntityEvents" -}}
 {{- end -}}
 {{- join "," $gates -}}

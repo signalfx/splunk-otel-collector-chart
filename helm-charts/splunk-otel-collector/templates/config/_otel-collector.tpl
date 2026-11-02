@@ -3,9 +3,9 @@ Config for the optional standalone collector
 The values can be overridden in .Values.gateway.config
 */}}
 {{- define "splunk-otel-collector.gatewayConfig" -}}
-{{- $k8sEntityEventsViaGateway := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesViaGateway" .) "true" -}}
+{{- $useEntityEventsForK8sProperties := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true" -}}
 {{- $logsPipelineEnabled := (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled)) -}}
-{{- $routeLogs := and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or $logsPipelineEnabled $k8sEntityEventsViaGateway (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true")) -}}
+{{- $routeLogs := and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or $logsPipelineEnabled $useEntityEventsForK8sProperties (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true")) -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
   {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true "tokenPassthrough" .Values.gateway.tokenPassthrough) .) | nindent 2 }}
@@ -193,7 +193,7 @@ connectors:
         condition: instrumentation_scope.name == "{{ include "splunk-otel-collector.dbMonitoringScope" . }}"
         pipelines: [logs/dbmon]
       {{- end }}
-      {{- if $k8sEntityEventsViaGateway }}
+      {{- if $useEntityEventsForK8sProperties }}
       # k8s entity events sent by the cluster receiver
       - context: resource
         condition: otelcol.grpc.metadata["x-splunk-entity-source"][0] == "k8s_cluster"
@@ -361,7 +361,7 @@ service:
         - batch
       exporters: [otlp_http/dbmon]
     {{- end }}
-    {{- if $k8sEntityEventsViaGateway }}
+    {{- if $useEntityEventsForK8sProperties }}
     # k8s entity events from the cluster receiver converted to dimension updates
     logs/k8s_entities:
       receivers: [routing/logs]

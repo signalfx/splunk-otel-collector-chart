@@ -4,7 +4,7 @@ The values can be overridden in .Values.clusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
 {{- $useEntityEventsForK8sProperties := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true" -}}
-{{- $k8sEntityEventsViaGateway := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesViaGateway" .) "true" -}}
+{{- $k8sEntityEventsViaGateway := and $useEntityEventsForK8sProperties .Values.gateway.enabled -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   health_check:
