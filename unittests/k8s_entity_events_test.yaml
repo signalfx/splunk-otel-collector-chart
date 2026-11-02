@@ -20,6 +20,9 @@ tests:
       - notMatchRegex:
           path: data["relay"]
           pattern: "logs/k8s_entities"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metadata_collection_interval"
 
   - it: should render k8s entities pipeline to signalfx when featureGates.useEntityEventsForK8sProperties is true
     set:
@@ -36,6 +39,9 @@ tests:
       - notMatchRegex:
           path: data["relay"]
           pattern: "otlp_http/o11y_entities"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metadata_collection_interval: 6h"
 
   - it: should not render signalfx entity events when Observability metrics are disabled
     set:

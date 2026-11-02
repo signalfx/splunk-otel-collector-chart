@@ -25,7 +25,10 @@ receivers:
   k8s_cluster:
     auth_type: serviceAccount
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
-    {{- if not $useEntityEventsForK8sProperties }}
+    {{- if $useEntityEventsForK8sProperties }}
+    # Entity events resend the full state of all objects on every periodic collection.
+    metadata_collection_interval: 6h
+    {{- else }}
     metadata_exporters: [signalfx]
     {{- end }}
     resource_attributes:

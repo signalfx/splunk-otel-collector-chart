@@ -1708,6 +1708,8 @@ featureGates:
   # Also enables the exporter.signalfx.consumeEntityEvents collector feature gate on the cluster receiver.
   # When gateway.enabled is true, the entity events are sent to the gateway over OTLP instead, and the gateway
   # converts them to property updates, with the feature gate enabled on the gateway.
+  # Sets the k8s_cluster receiver metadata_collection_interval to 6h, since every periodic collection
+  # resends the full state of all objects.
   # Requires splunkObservability.metricsEnabled.
   useEntityEventsForK8sProperties: false
   # Include "component: otel-collector-agent" in the agent DaemonSet's selector.matchLabels.

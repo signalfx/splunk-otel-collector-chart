@@ -151,7 +151,7 @@ configured separately.
 
 ### Kubernetes property updates through the gateway
 
-**Experimental.** With `featureGates.useEntityEventsForK8sProperties`, the
+With `featureGates.useEntityEventsForK8sProperties`, the
 cluster receiver sends Kubernetes metadata as entity events instead of
 dimension property updates (`PATCH`). When the gateway is enabled, the entity
 events go to the gateway over OTLP, and the gateway converts them to dimension
@@ -186,8 +186,9 @@ Cluster receiver metrics are still sent directly to Splunk Observability.
 Each update replaces all properties and tags of the dimension, so properties
 not present in the Kubernetes object anymore are removed. Updates are sent when
 an object changes and for all objects every
-`clusterReceiver.config.receivers.k8s_cluster.metadata_collection_interval`
-(5 minutes by default).
+`clusterReceiver.config.receivers.k8s_cluster.metadata_collection_interval`.
+The chart sets it to `6h` with this feature gate, instead of the receiver
+default of `5m`.
 
 To verify the setup, check a pod dimension with the same token:
 
