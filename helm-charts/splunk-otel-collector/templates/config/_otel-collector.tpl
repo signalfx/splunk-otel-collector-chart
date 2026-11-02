@@ -196,7 +196,7 @@ connectors:
       {{- if $useEntityEventsForK8sProperties }}
       # k8s entity events sent by the cluster receiver
       - context: resource
-        condition: otelcol.grpc.metadata["x-splunk-entity-source"][0] == "k8s_cluster"
+        condition: otelcol.grpc.metadata["x-splunk-instrumentation-library"][0] == "k8sentities"
         pipelines: [logs/k8s_entities]
       {{- end }}
       - context: log

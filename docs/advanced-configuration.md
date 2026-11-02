@@ -174,7 +174,7 @@ With these values, the chart:
 
 - sets `k8s_cluster.metadata_exporters: []` and sends the `logs/k8s_entities`
   pipeline of the cluster receiver to the gateway with the `otlp_grpc/k8s_entities`
-  exporter, which adds the `X-Splunk-Entity-Source: k8s_cluster` header;
+  exporter, which adds the `X-Splunk-Instrumentation-Library: k8sentities` header;
 - enables the `exporter.signalfx.consumeEntityEvents` feature gate on the gateway
   instead of the cluster receiver;
 - routes data with that header to a `logs/k8s_entities` gateway pipeline that
