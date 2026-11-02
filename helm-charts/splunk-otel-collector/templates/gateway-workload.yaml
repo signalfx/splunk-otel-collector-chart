@@ -82,8 +82,8 @@ spec:
       - name: otel-collector
         args:
         - --config=/conf/relay.yaml
-        {{- if .Values.gateway.featureGates }}
-        - --feature-gates={{ .Values.gateway.featureGates }}
+        {{- with include "splunk-otel-collector.gatewayFeatureGates" . }}
+        - --feature-gates={{ . }}
         {{- end }}
         {{- with .Values.gateway.containerSecurityContext }}
         securityContext:
