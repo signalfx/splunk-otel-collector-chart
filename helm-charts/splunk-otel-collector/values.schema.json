@@ -250,6 +250,10 @@
           "description": "Whether Secure Application features are enabled for Splunk Observability",
           "type": "boolean"
         },
+        "dbMonitoringEnabled": {
+          "description": "Whether query samples and top queries from database receivers are routed to Database Monitoring",
+          "type": "boolean"
+        },
         "infrastructureMonitoringEventsEnabled": {
           "description": "Send Kubernetes events to Splunk Observability Infrastructure Monitoring",
           "type": "boolean"

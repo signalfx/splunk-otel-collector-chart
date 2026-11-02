@@ -227,6 +227,11 @@ splunkObservability:
   # Enables Secure Application features
   secureAppEnabled: false
 
+  # Routes database query samples and top queries to Database Monitoring. These are OTLP log
+  # records from a database receiver, not metrics, so they need their own destination.
+  # Applies to any supported database receiver, not just db2.
+  dbMonitoringEnabled: false
+
 ################################################################################
 # Logs collection engine:
 # Only `otel` (native OpenTelemetry log collection) is supported.
@@ -1648,22 +1653,6 @@ db2:
   # The Db2 receiver image is Linux-only.
   nodeSelector:
     kubernetes.io/os: linux
-  # Routes the receiver's query samples and top queries to Observability Cloud Database
-  # Monitoring: a dedicated exporter plus a routing rule keyed on the receiver's
-  # instrumentation scope, so these records carry the Database Monitoring library header
-  # without touching the shared entity-events exporter.
-  #
-  # Left unset on purpose. With no `enabled` key it follows the receivers: on as soon as any
-  # of them enables events.dbServerQuerySample or events.dbServerTopQuery, and off
-  # otherwise. There is no configuration in which those events are wanted and this routing
-  # is not — without it the records reach the entity-events exporter instead, or are
-  # rejected outright by an agent, which has no OTLP logs pipeline.
-  #
-  # Set it explicitly to override that: `true` to render the routing with no event enabled
-  # yet, `false` to suppress it when you route these records yourself. Note that enabling
-  # it requires gateway.enabled and a receiver exporting to the gateway; the chart reports
-  # the combination at template time rather than installing something that cannot deliver.
-  dbMonitoring: {}
 
 ################################################################################
 # Helm Chart Feature Gates.

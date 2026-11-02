@@ -52,21 +52,6 @@ receivers:
 
 # By default k8s_attributes, memory_limiter and batch processors enabled.
 processors:
-  {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
-  # Scope-keyed split for Db2 query events. Filters rather than the logs routing connector,
-  # so this works whether or not a logs destination is configured: that connector needs a
-  # pipeline feeding it, which only exists when logs are enabled.
-  filter/dbmon_only:
-    error_mode: ignore
-    logs:
-      log_record:
-        - 'instrumentation_scope.name != "github.com/signalfx/splunk-otel-db2"'
-  filter/exclude_dbmon:
-    error_mode: ignore
-    logs:
-      log_record:
-        - 'instrumentation_scope.name == "github.com/signalfx/splunk-otel-db2"'
-  {{- end }}
   {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
@@ -140,10 +125,7 @@ exporters:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     auth:
       authenticator: headers_setter
-  {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
-  # Db2 query events. Separate from otlp_http/entities on purpose: that exporter is shared
-  # with Kubernetes entity events, and putting the Database Monitoring library header there
-  # would mark those as Database Monitoring data too.
+  {{- if eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true" }}
   otlp_http/dbmon:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     auth:
@@ -191,14 +173,26 @@ exporters:
   {{- end }}
 
 {{- if and
-  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled))
+  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled) (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true"))
   (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
 }}
 connectors:
   # Routing connector to separate entity events from regular logs
   routing/logs:
+    {{- /* Must mirror the default logs pipeline's own guard, or unrouted logs go nowhere. */}}
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled) }}
     default_pipelines: [logs]
+    {{- else }}
+    default_pipelines: []
+    {{- end }}
     table:
+      {{- if eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true" }}
+      # Matched before the entity route: query events are not entity-marked, so the default
+      # route would otherwise send query text to the ordinary logs destination.
+      - context: log
+        condition: instrumentation_scope.name == "{{ include "splunk-otel-collector.dbMonitoringScope" . }}"
+        pipelines: [logs/dbmon]
+      {{- end }}
       - context: log
         condition: instrumentation_scope.attributes["otel.entity.event_as_log"] == true
         pipelines: [logs/entities]
@@ -338,27 +332,22 @@ service:
     # entity events
     logs/entities:
       receivers:
-        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true")  (.Values.splunkObservability.secureAppEnabled) }}
+        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true")  (.Values.splunkObservability.secureAppEnabled) (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") }}
         - routing/logs
         {{- else }}
         - otlp
         {{- end }}
       processors:
         - memory_limiter
-        {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
-        # Db2 query events have their own exporter; keep them out of entity ingestion.
-        - filter/exclude_dbmon
-        {{- end }}
         - batch
       exporters: [otlp_http/entities]
-    {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
+    {{- if eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true" }}
     # Db2 query events
     logs/dbmon:
       receivers:
-        - otlp
+        - routing/logs
       processors:
         - memory_limiter
-        - filter/dbmon_only
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resource_detection/k8s_cluster_name
         {{- end }}
@@ -386,12 +375,12 @@ service:
       exporters: [otlp_http/secureapp]
     {{- end }}
     {{- end }}
-    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled)}}
-    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled) (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true")) }}
     logs/split:
       receivers: [otlp]
       exporters: [routing/logs]
     {{- end }}
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled)}}
     # default logs + profiling data pipeline
     logs:
       receivers:
@@ -402,13 +391,6 @@ service:
         {{- end }}
       processors:
         - memory_limiter
-        {{- if eq (include "splunk-otel-collector.db2DbMonEnabled" .) "true" }}
-        # Db2 query events reach this pipeline too: they arrive over OTLP and are not
-        # entity-marked, so routing/logs hands them to this default route. They carry query
-        # text and belong only in Database Monitoring, so drop them before the ordinary logs
-        # destination indexes them.
-        - filter/exclude_dbmon
-        {{- end }}
         - k8s_attributes
         - filter/logs
         - batch

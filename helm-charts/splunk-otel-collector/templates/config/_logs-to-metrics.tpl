@@ -442,9 +442,9 @@ The complete agent connectors section is kept here because the top-level YAML ke
 with Secure App routing.
 */}}
 {{- define "splunk-otel-collector.logsToMetricsAgentConnectors" -}}
-{{- if or .Values.splunkObservability.secureAppEnabled (eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true") }}
+{{- if or .Values.splunkObservability.secureAppEnabled (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") (eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true") }}
 connectors:
-  {{- if .Values.splunkObservability.secureAppEnabled }}
+  {{- if or .Values.splunkObservability.secureAppEnabled (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") }}
   routing/logs:
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}
     default_pipelines: [logs]
@@ -452,9 +452,16 @@ connectors:
     default_pipelines: []
     {{- end }}
     table:
+      {{- if eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true" }}
+      - context: log
+        condition: instrumentation_scope.name == "{{ include "splunk-otel-collector.dbMonitoringScope" . }}"
+        pipelines: [logs/dbmon]
+      {{- end }}
+      {{- if .Values.splunkObservability.secureAppEnabled }}
       - context: log
         condition: instrumentation_scope.name == "secureapp"
         pipelines: [logs/secureapp]
+      {{- end }}
   {{- end }}
   {{- include "splunk-otel-collector.logsToMetricsAgentConnectorDefinitions" . | nindent 2 }}
 {{- end }}

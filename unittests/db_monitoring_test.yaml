@@ -1,0 +1,119 @@
+suite: Database Monitoring routing
+values:
+  - ./values/basic.yaml
+release:
+  name: test-release
+  namespace: test-ns
+
+tests:
+  - it: should route query events to the dbmon exporter on the agent when there is no gateway
+    templates:
+      - configmap-agent.yaml
+    set:
+      splunkObservability.dbMonitoringEnabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'logs/dbmon:\s*\n\s*exporters:\s*\n\s*- otlp_http/dbmon'
+      - matchRegex:
+          path: data.relay
+          pattern: 'receivers:\s*\n\s*- routing/logs'
+      - matchRegex:
+          path: data.relay
+          pattern: 'X-Splunk-Instrumentation-Library: dbmon'
+
+  # With a gateway the agent forwards over the existing OTLP exporter and the gateway is
+  # the only thing that talks to Observability Cloud.
+  - it: should forward through otlp_grpc on the agent when a gateway is present
+    templates:
+      - configmap-agent.yaml
+    set:
+      splunkObservability.dbMonitoringEnabled: true
+      gateway.enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'logs/dbmon:\s*\n\s*exporters:\s*\n\s*- otlp_grpc'
+      - notMatchRegex:
+          path: data.relay
+          pattern: 'otlp_http/dbmon'
+
+  - it: should export to Observability Cloud from the gateway
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.dbMonitoringEnabled: true
+      gateway.enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'logs/dbmon:\s*\n\s*exporters:\s*\n\s*- otlp_http/dbmon'
+      - matchRegex:
+          path: data.relay
+          pattern: 'otlp_http/dbmon:'
+
+  # Query events are not entity-marked, so the entity route would not catch them and the
+  # default route would send query text to the ordinary logs destination.
+  - it: should match database monitoring before the entity route
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.dbMonitoringEnabled: true
+      gateway.enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'logs/dbmon[\s\S]*otel\.entity\.event_as_log'
+
+  # Nothing else feeds the routing connector in this configuration, so the default route
+  # has nowhere to go.
+  - it: should leave the default route empty when database monitoring is the only destination
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.dbMonitoringEnabled: true
+      gateway.enabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'default_pipelines: \[\]'
+
+  - it: should keep the default route when another logs destination is configured
+    templates:
+      - configmap-gateway.yaml
+    set:
+      splunkObservability.dbMonitoringEnabled: true
+      gateway.enabled: true
+      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
+      splunkPlatform.token: token
+      splunkPlatform.index: main
+      splunkPlatform.logsEnabled: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'default_pipelines:\s*\n\s*- logs'
+      - matchRegex:
+          path: data.relay
+          pattern: 'splunk_hec/platform_logs'
+
+  - it: should render nothing when disabled
+    templates:
+      - configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+    asserts:
+      - notMatchRegex:
+          path: data.relay
+          pattern: 'dbmon'
+
+  - it: should refuse database monitoring without an Observability destination
+    set:
+      splunkObservability.realm: ""
+      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
+      splunkPlatform.token: token
+      splunkPlatform.index: main
+      gateway.enabled: true
+      splunkObservability.dbMonitoringEnabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires Splunk Observability Cloud"
