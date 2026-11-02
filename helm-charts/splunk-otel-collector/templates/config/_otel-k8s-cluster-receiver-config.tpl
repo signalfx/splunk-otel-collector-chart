@@ -316,9 +316,6 @@ exporters:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
-    # Lets the gateway route these entity events to its logs/k8s_entities pipeline.
-    headers:
-      X-Splunk-Entity-Source: k8s_cluster
   {{- end }}
 
   {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}

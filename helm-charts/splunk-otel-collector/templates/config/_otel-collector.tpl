@@ -194,9 +194,9 @@ connectors:
         pipelines: [logs/dbmon]
       {{- end }}
       {{- if $k8sEntityEventsViaGateway }}
-      # k8s entity events sent by the cluster receiver
-      - context: resource
-        condition: otelcol.grpc.metadata["x-splunk-entity-source"][0] == "k8s_cluster"
+      # k8s entity events converted to property updates
+      - context: log
+        condition: instrumentation_scope.attributes["otel.entity.event_as_log"] == true and (IsMatch(attributes["otel.entity.type"], "^k8s\\.") or attributes["otel.entity.type"] == "container")
         pipelines: [logs/k8s_entities]
       {{- end }}
       - context: log

@@ -108,9 +108,9 @@ tests:
       - matchRegex:
           path: data["relay"]
           pattern: "otlp_grpc/k8s_entities:\\n\\s+endpoint: test-release-splunk-otel-collector:4317"
-      - matchRegex:
+      - notMatchRegex:
           path: data["relay"]
-          pattern: "headers:\\n\\s+X-Splunk-Entity-Source: k8s_cluster"
+          pattern: "X-Splunk-Entity-Source"
       - matchRegex:
           path: data["relay"]
           pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- otlp_grpc/k8s_entities\\n\\s+processors"
@@ -137,7 +137,10 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "condition: otelcol.grpc.metadata\\[\"x-splunk-entity-source\"\\]\\[0\\] == \"k8s_cluster\"\\n\\s+context: resource\\n\\s+pipelines:\\n\\s+- logs/k8s_entities"
+          pattern: "IsMatch\\(attributes\\[\"otel.entity.type\"\\]"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "context: log\\n\\s+pipelines:\\n\\s+- logs/k8s_entities"
       - matchRegex:
           path: data["relay"]
           pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- signalfx\\n\\s+processors:\\n\\s+- memory_limiter\\n\\s+- batch\\n\\s+receivers:\\n\\s+- routing/logs"
@@ -180,7 +183,7 @@ tests:
           pattern: "logs/k8s_entities"
       - notMatchRegex:
           path: data["relay"]
-          pattern: "x-splunk-entity-source"
+          pattern: "otel.entity.type"
       - notMatchRegex:
           path: data["relay"]
           pattern: "logs/split"
