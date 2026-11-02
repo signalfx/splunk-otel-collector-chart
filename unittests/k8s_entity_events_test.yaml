@@ -110,6 +110,9 @@ tests:
           pattern: "otlp_grpc/k8s_entities:\\n\\s+endpoint: test-release-splunk-otel-collector:4317"
       - matchRegex:
           path: data["relay"]
+          pattern: "headers:\\n\\s+X-Splunk-Entity-Source: k8s_cluster"
+      - matchRegex:
+          path: data["relay"]
           pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- otlp_grpc/k8s_entities\\n\\s+processors"
 
   - it: should not enable the collector entity events feature gate on the cluster receiver when gateway is enabled
@@ -134,12 +137,21 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- signalfx\\n\\s+processors:\\n\\s+- memory_limiter\\n\\s+- filter/drop_other_entity_events"
+          pattern: "condition: otelcol.grpc.metadata\\[\"x-splunk-entity-source\"\\]\\[0\\] == \"k8s_cluster\"\\n\\s+context: resource\\n\\s+pipelines:\\n\\s+- logs/k8s_entities"
       - matchRegex:
           path: data["relay"]
-          pattern: "logs/entities:\\n\\s+exporters:\\n\\s+- otlp_http/entities\\n\\s+processors:\\n\\s+- memory_limiter\\n\\s+- filter/drop_k8s_entity_events"
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- signalfx\\n\\s+processors:\\n\\s+- memory_limiter\\n\\s+- batch\\n\\s+receivers:\\n\\s+- routing/logs"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/entities:\\n(.*\\n)*?\\s+receivers:\\n\\s+- routing/logs"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/split:\\n\\s+exporters:\\n\\s+- routing/logs"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "default_pipelines"
 
-  - it: should route entity events to both gateway entity pipelines when logs are enabled
+  - it: should keep the default logs route when logs are enabled
     set:
       featureGates:
         useEntityEventsForK8sProperties: true
@@ -152,10 +164,10 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "pipelines:\\n\\s+- logs/entities\\n\\s+- logs/k8s_entities"
+          pattern: "routing/logs:\\n\\s+default_pipelines:\\n\\s+- logs\\n"
       - matchRegex:
           path: data["relay"]
-          pattern: "logs/k8s_entities:\\n(.*\\n)*?\\s+receivers:\\n\\s+- routing/logs"
+          pattern: "pipelines:\\n\\s+- logs/k8s_entities"
 
   - it: should not render gateway k8s entity pipelines by default
     set:
@@ -168,7 +180,10 @@ tests:
           pattern: "logs/k8s_entities"
       - notMatchRegex:
           path: data["relay"]
-          pattern: "filter/drop_k8s_entity_events"
+          pattern: "x-splunk-entity-source"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "logs/split"
 
   - it: should append the collector entity events feature gate to configured gateway gates
     set:

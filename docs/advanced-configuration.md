@@ -174,11 +174,11 @@ With these values, the chart:
 
 - sets `k8s_cluster.metadata_exporters: []` and sends the `logs/k8s_entities`
   pipeline of the cluster receiver to the gateway with the `otlp_grpc/k8s_entities`
-  exporter;
+  exporter, which adds the `X-Splunk-Entity-Source: k8s_cluster` header;
 - enables the `exporter.signalfx.consumeEntityEvents` feature gate on the gateway
   instead of the cluster receiver;
-- adds a `logs/k8s_entities` gateway pipeline that sends Kubernetes and container
-  entity events to the `signalfx` exporter. Other entity events, for example from
+- routes data with that header to a `logs/k8s_entities` gateway pipeline that
+  sends it to the `signalfx` exporter. Other entity events, for example from
   discovery mode, still go to `otlp_http/entities`.
 
 Cluster receiver metrics are still sent directly to Splunk Observability.
