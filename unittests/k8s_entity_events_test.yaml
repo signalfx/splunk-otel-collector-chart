@@ -254,3 +254,23 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].args
           content: "--feature-gates=existing.gate,exporter.signalfx.consumeEntityEvents"
+
+  - it: should send all k8s entity events from the cluster receiver to the gateway with featureGates.enableK8sEntities
+    set:
+      featureGates:
+        enableK8sEntities: true
+      gateway:
+        enabled: true
+      clusterReceiver:
+        sendThroughGateway: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- otlp_grpc/k8s_entities\\n\\s+processors"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "otlp_http/o11y_entities"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "\\n  signalfx:"

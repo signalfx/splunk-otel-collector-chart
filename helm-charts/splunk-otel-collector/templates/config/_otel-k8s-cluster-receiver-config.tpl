@@ -294,7 +294,7 @@ processors:
         value: k8scluster
 
 exporters:
-  {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true") }}
+  {{- if or (and (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (not $throughGateway)) (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true") }}
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
@@ -328,7 +328,7 @@ exporters:
       "X-Splunk-Instrumentation-Library": k8sentities
   {{- end }}
 
-  {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}
+  {{- if and (eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true") (not $throughGateway) }}
   otlp_http/o11y_entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
