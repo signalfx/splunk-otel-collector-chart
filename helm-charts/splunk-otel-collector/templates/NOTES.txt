@@ -23,8 +23,13 @@ Splunk OpenTelemetry Collector is installed and configured to send data to Splun
           This field will be removed in a future release.
 {{ end }}
 {{- if not (eq (toString .Values.clusterReceiver.k8sEventsEnabled) "<nil>") }}
-[WARNING] "clusterReceiver.k8sEventsEnabled" parameter is deprecated. Please use clusterReceiver.eventsEnabled and splunkObservability.infrastructureMonitoringEventsEnabled.
+[WARNING] "clusterReceiver.k8sEventsEnabled" parameter is deprecated. Please use clusterReceiver.eventsEnabled.
           Upgrade guidelines: https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#0532-to-0540
+{{ end }}
+{{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
+[WARNING] "splunkObservability.infrastructureMonitoringEventsEnabled" is deprecated and will be removed in a future release.
+          It sends Kubernetes events to Splunk Observability Infrastructure Monitoring with the "smartagent/kubernetes-events" receiver.
+          Use "clusterReceiver.eventsEnabled" instead to send Kubernetes events as logs.
 {{ end }}
 {{- if .Values.operator.enabled }}
 [INFO] Auto-instrumentation is enabled (operator.enabled=true).
