@@ -74,6 +74,7 @@ tests:
   - it: should target the gateway when asked
     template: charts/db2/templates/configmap.yaml
     set:
+      gateway.enabled: true
       db2:
         enabled: true
         otlp:
@@ -195,3 +196,39 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "db2.enabled cannot derive the Collector address"
+
+  # The subchart derives the address of whichever Collector collectorTarget names, but cannot
+  # see whether this release deploys it.
+  - it: should refuse the gateway target when no gateway is deployed
+    set:
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: gateway
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "but gateway.enabled is false"
+
+  - it: should refuse the agent target when no agent is deployed
+    set:
+      agent.enabled: false
+      gateway.enabled: true
+      db2:
+        enabled: true
+        otlp:
+          collectorTarget: agent
+        receivers:
+          - name: default
+            hostname: db2.example.com
+            database: PROD
+            port: 50001
+            credentialsSecret: my-db2-credentials
+    asserts:
+      - failedTemplate:
+          errorPattern: "but agent.enabled is false"

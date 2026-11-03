@@ -724,6 +724,18 @@ derive a Service name this release never creates.
 {{- $otlp := dig "otlp" dict $db2 | default dict -}}
 {{- if not (dig "endpoint" "" $otlp) -}}
 {{- $collectorNs := lower (include "splunk-otel-collector.namespace" .) -}}
+{{- /*
+The subchart derives the address of whichever Collector collectorTarget names, but cannot
+see whether this release deploys it: gateway.enabled and agent.enabled are parent top-level
+values.
+*/ -}}
+{{- $target := dig "collectorTarget" "gateway" $otlp -}}
+{{- if and (eq $target "gateway") (not .Values.gateway.enabled) -}}
+{{- fail "db2.otlp.collectorTarget is \"gateway\", but gateway.enabled is false, so that Service is never created. Enable the gateway, or set db2.otlp.collectorTarget: agent." -}}
+{{- end -}}
+{{- if and (eq $target "agent") (not .Values.agent.enabled) -}}
+{{- fail "db2.otlp.collectorTarget is \"agent\", but agent.enabled is false, so that Service is never created. Enable the agent, or set db2.otlp.collectorTarget: gateway." -}}
+{{- end -}}
 {{- if or .Values.nameOverride .Values.fullnameOverride -}}
 {{- fail (printf "db2.enabled cannot derive the Collector address while nameOverride or fullnameOverride is set. Set db2.otlp.endpoint explicitly -- this release's gateway is %s.%s.svc.cluster.local:4317." (lower (include "splunk-otel-collector.fullname" .)) $collectorNs) -}}
 {{- end -}}

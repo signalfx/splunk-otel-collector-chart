@@ -833,6 +833,13 @@ processors:
   # It's important to put this processor after resource_detection to make sure that
   # k8s.name.cluster attribute is always set to "{{ .Values.clusterName }}" when
   # it's declared.
+  {{- if and (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") .Values.clusterName }}
+  resource/add_cluster_name:
+    attributes:
+      - action: upsert
+        key: k8s.cluster.name
+        value: {{ .Values.clusterName }}
+  {{- end }}
   resource:
     attributes:
       - action: insert
@@ -1146,15 +1153,19 @@ service:
         {{- end }}
     {{- end }}
     {{- if (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") }}
+    {{- /*
+    No k8s_attributes or node stamping here: these records describe a remote database, not a
+    Pod on this Node, so pod_association would resolve the receiver's own Pod.
+    */}}
     logs/dbmon:
       receivers: [routing/logs]
       processors:
         - memory_limiter
-        - k8s_attributes
         {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
         - resource_detection/k8s_cluster_name
+        {{- else if .Values.clusterName }}
+        - resource/add_cluster_name
         {{- end }}
-        - resource
         - batch
       exporters:
         {{- if .Values.gateway.enabled }}

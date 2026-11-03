@@ -10,14 +10,7 @@ issues: [2658]
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  Collects IBM Db2 metrics and active query samples and exports them over OTLP to this
-  release's Collector, running as its own Deployment rather than inside the Collector.
-  See https://github.com/signalfx/splunk-otel-db2 for configuration.
-
-  Query samples and top queries are OTLP log records rather than metrics, so they need
-  their own destination. `splunkObservability.dbMonitoringEnabled` adds an
-  `otlp_http/dbmon` exporter and a `logs/dbmon` pipeline that the `routing/logs` connector
-  selects on the receiver's instrumentation scope, leaving the shared entity-events
-  exporter untouched. Without a gateway the agent exports these records directly; with one
-  it forwards them and the gateway exports. The setting applies to any supported database
-  receiver.
+  Collects IBM Db2 metrics and query events, exporting over OTLP to this release's
+  Collector. Query events are OTLP log records, so routing them to Database Monitoring is
+  opt-in via `splunkObservability.dbMonitoringEnabled`. See the Db2 section of
+  docs/advanced-configuration.md for the supported setup.
