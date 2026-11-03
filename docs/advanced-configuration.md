@@ -176,10 +176,11 @@ With these values, the chart:
   The `logs/k8s_entities` pipeline of the cluster receiver sends them to the
   gateway with the `otlp_grpc/k8s_entities` exporter, which adds the
   `X-Splunk-Instrumentation-Library: k8sentities` header;
-- routes data with that header to a `logs/k8s_entities` gateway pipeline. It
+- routes data with that header to a `logs/k8s_entities` gateway pipeline that
   converts the entity events to dimension updates (`PUT`) with the `signalfx`
-  exporter and the `exporter.signalfx.consumeEntityEvents` feature gate, and
-  also sends them to `otlp_http/entities` with `featureGates.enableK8sEntities`.
+  exporter and the `exporter.signalfx.consumeEntityEvents` feature gate. With
+  `featureGates.enableK8sEntities`, the entity events are also routed to the
+  `logs/entities` pipeline.
 
 Kubernetes events, objects, and EKS API server histograms are still sent
 directly to the configured backends.

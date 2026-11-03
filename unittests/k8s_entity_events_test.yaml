@@ -201,7 +201,10 @@ tests:
     asserts:
       - matchRegex:
           path: data["relay"]
-          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- signalfx\\n\\s+- otlp_http/entities"
+          pattern: "pipelines:\\n\\s+- logs/k8s_entities\\n\\s+- logs/entities"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- signalfx\\n\\s+processors"
 
   - it: should keep the default logs route when logs are enabled
     set:

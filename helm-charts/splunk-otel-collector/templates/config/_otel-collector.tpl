@@ -199,7 +199,13 @@ connectors:
       # k8s entity events sent by the cluster receiver
       - context: resource
         condition: otelcol.grpc.metadata["x-splunk-instrumentation-library"][0] == "k8sentities"
-        pipelines: [logs/k8s_entities]
+        pipelines:
+          {{- if $useEntityEventsForK8sProperties }}
+          - logs/k8s_entities
+          {{- end }}
+          {{- if $k8sEntitiesEnabled }}
+          - logs/entities
+          {{- end }}
       {{- end }}
       - context: log
         condition: instrumentation_scope.attributes["otel.entity.event_as_log"] == true
@@ -363,19 +369,12 @@ service:
         - batch
       exporters: [otlp_http/dbmon]
     {{- end }}
-    {{- if $clusterReceiverEntityEvents }}
-    # k8s entity events sent by the cluster receiver
+    {{- if and $clusterReceiverEntityEvents $useEntityEventsForK8sProperties }}
+    # k8s entity events from the cluster receiver converted to property updates
     logs/k8s_entities:
       receivers: [routing/logs]
       processors: [memory_limiter, batch]
-      exporters:
-        {{- if $useEntityEventsForK8sProperties }}
-        # Converts the entity events to property updates.
-        - signalfx
-        {{- end }}
-        {{- if $k8sEntitiesEnabled }}
-        - otlp_http/entities
-        {{- end }}
+      exporters: [signalfx]
     {{- end }}
     {{- if .Values.splunkObservability.secureAppEnabled }}
     # secureapp events
