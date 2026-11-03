@@ -184,20 +184,6 @@ With these values, the chart:
 Kubernetes events, objects, and EKS API server histograms are still sent
 directly to the configured backends.
 
-Each property update replaces all properties and tags of the dimension, so
-properties not present in the Kubernetes object anymore are removed. Updates
-are sent when an object changes and for all objects every
-`clusterReceiver.config.receivers.k8s_cluster.metadata_collection_interval`.
-The chart sets it to `6h` with entity events, instead of the receiver default
-of `5m`.
-
-To verify the setup, check a pod dimension with the same token:
-
-```bash
-curl -H "X-SF-TOKEN: <token>" \
-  https://api.<realm>.signalfx.com/v2/dimension/k8s.pod.uid/<pod-uid>
-```
-
 ## Send logs to Splunk Platform with Splunk Connect for OTLP
 
 By default, this chart sends logs to Splunk Enterprise or Splunk Cloud Platform with
