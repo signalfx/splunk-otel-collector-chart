@@ -47,6 +47,27 @@ tests:
       - notMatchRegexRaw:
           pattern: "Splunk Platform logs to OTLP endpoint"
 
+  - it: should warn when infrastructure monitoring events are enabled
+    set:
+      splunkObservability:
+        infrastructureMonitoringEventsEnabled: true
+    asserts:
+      - matchRegexRaw:
+          pattern: '\[WARNING\] "splunkObservability\.infrastructureMonitoringEventsEnabled" is deprecated'
+
+  - it: should warn when infrastructure monitoring events are enabled with the legacy k8sEventsEnabled option
+    set:
+      clusterReceiver:
+        k8sEventsEnabled: true
+    asserts:
+      - matchRegexRaw:
+          pattern: '\[WARNING\] "splunkObservability\.infrastructureMonitoringEventsEnabled" is deprecated'
+
+  - it: should not warn when infrastructure monitoring events are disabled
+    asserts:
+      - notMatchRegexRaw:
+          pattern: "infrastructureMonitoringEventsEnabled"
+
   - it: should allow custom collector config token env vars by default
     set:
       agent:
