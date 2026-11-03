@@ -3,8 +3,11 @@ Config for the otel-collector k8s cluster receiver deployment.
 The values can be overridden in .Values.clusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
+{{- if and .Values.clusterReceiver.sendThroughGateway (not .Values.gateway.enabled) }}
+{{- fail "clusterReceiver.sendThroughGateway requires gateway.enabled" }}
+{{- end }}
 {{- $useEntityEventsForK8sProperties := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true" -}}
-{{- $k8sEntityEventsViaGateway := and $useEntityEventsForK8sProperties .Values.gateway.enabled -}}
+{{- $throughGateway := eq (include "splunk-otel-collector.clusterReceiverThroughGateway" .) "true" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   health_check:
@@ -310,7 +313,11 @@ exporters:
       "X-Splunk-Instrumentation-Library": o11yevents
   {{- end }}
 
-  {{- if $k8sEntityEventsViaGateway }}
+  {{- if $throughGateway }}
+  otlp_grpc:
+    endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
+    tls:
+      insecure: true
   # Sends k8s entity events to the gateway that converts them to dimension updates.
   otlp_grpc/k8s_entities:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
@@ -435,11 +442,15 @@ service:
         {{- end }}
         - resource/k8s_cluster
       exporters:
+        {{- if $throughGateway }}
+        - otlp_grpc
+        {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - splunk_hec/platform_metrics
+        {{- end }}
         {{- end }}
 
     {{- if eq .Values.distribution "eks/fargate" }}
@@ -459,11 +470,15 @@ service:
         {{- end }}
         {{- end }}
       exporters:
+        {{- if $throughGateway }}
+        - otlp_grpc
+        {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - splunk_hec/platform_metrics
+        {{- end }}
         {{- end }}
     {{- end }}
 
@@ -478,11 +493,15 @@ service:
         - k8s_attributes/metrics
         {{- end }}
       exporters:
+        {{- if $throughGateway }}
+        - otlp_grpc
+        {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - splunk_hec/platform_metrics
+        {{- end }}
         {{- end }}
     {{- end }}
 
@@ -595,13 +614,15 @@ service:
         {{- end }}
         - resource
       exporters:
+        {{- if $throughGateway }}
+        - otlp_grpc/k8s_entities
+        {{- else }}
         {{- if .Values.featureGates.enableK8sEntities }}
         - otlp_http/o11y_entities
         {{- end }}
-        {{- if $k8sEntityEventsViaGateway }}
-        - otlp_grpc/k8s_entities
-        {{- else if $useEntityEventsForK8sProperties }}
+        {{- if $useEntityEventsForK8sProperties }}
         - signalfx
+        {{- end }}
         {{- end }}
     {{- end }}
 

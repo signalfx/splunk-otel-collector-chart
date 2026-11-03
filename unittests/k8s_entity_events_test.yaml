@@ -94,7 +94,7 @@ tests:
           path: spec.template.spec.containers[0].args
           content: "--feature-gates=existing.gate,exporter.signalfx.consumeEntityEvents"
 
-  - it: should send k8s entity events to the gateway when gateway is enabled
+  - it: should convert k8s entity events in the cluster receiver when only gateway is enabled
     set:
       featureGates:
         useEntityEventsForK8sProperties: true
@@ -102,37 +102,75 @@ tests:
         enabled: true
     template: configmap-cluster-receiver.yaml
     asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- signalfx"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "otlp_grpc"
+
+  - it: should send metrics and k8s entity events to the gateway with clusterReceiver.sendThroughGateway
+    set:
+      gateway:
+        enabled: true
+      clusterReceiver:
+        sendThroughGateway: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
       - notMatchRegex:
           path: data["relay"]
           pattern: "metadata_exporters:\\n\\s+- signalfx"
       - matchRegex:
           path: data["relay"]
+          pattern: "metadata_collection_interval: 6h"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "otlp_grpc:\\n\\s+endpoint: test-release-splunk-otel-collector:4317"
+      - matchRegex:
+          path: data["relay"]
           pattern: "otlp_grpc/k8s_entities:\\n\\s+endpoint: test-release-splunk-otel-collector:4317"
       - matchRegex:
           path: data["relay"]
-          pattern: "headers:\\n\\s+X-Splunk-Instrumentation-Library: k8sentities"
+          pattern: "X-Splunk-Instrumentation-Library: k8sentities"
       - matchRegex:
           path: data["relay"]
           pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- otlp_grpc/k8s_entities\\n\\s+processors"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics:\\n\\s+exporters:\\n\\s+- otlp_grpc\\n\\s+processors"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics/collector:\\n\\s+exporters:\\n\\s+- otlp_grpc\\n\\s+processors"
 
-  - it: should not enable the collector entity events feature gate on the cluster receiver when gateway is enabled
+  - it: should not enable the collector entity events feature gate on the cluster receiver with clusterReceiver.sendThroughGateway
     set:
       featureGates:
         useEntityEventsForK8sProperties: true
       gateway:
         enabled: true
+      clusterReceiver:
+        sendThroughGateway: true
     template: deployment-cluster-receiver.yaml
     asserts:
       - notContains:
           path: spec.template.spec.containers[0].args
           content: "--feature-gates=exporter.signalfx.consumeEntityEvents"
 
+  - it: should fail when clusterReceiver.sendThroughGateway is set without gateway
+    set:
+      clusterReceiver:
+        sendThroughGateway: true
+    template: deployment-cluster-receiver.yaml
+    asserts:
+      - failedTemplate:
+          errorMessage: "clusterReceiver.sendThroughGateway requires gateway.enabled"
+
   - it: should convert k8s entity events to dimension updates in the gateway
     set:
-      featureGates:
-        useEntityEventsForK8sProperties: true
       gateway:
         enabled: true
+      clusterReceiver:
+        sendThroughGateway: true
     template: configmap-gateway.yaml
     asserts:
       - matchRegex:
@@ -151,12 +189,26 @@ tests:
           path: data["relay"]
           pattern: "default_pipelines"
 
-  - it: should keep the default logs route when logs are enabled
+  - it: should send k8s entities to /v3/event from the gateway with featureGates.enableK8sEntities
     set:
       featureGates:
-        useEntityEventsForK8sProperties: true
+        enableK8sEntities: true
       gateway:
         enabled: true
+      clusterReceiver:
+        sendThroughGateway: true
+    template: configmap-gateway.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "logs/k8s_entities:\\n\\s+exporters:\\n\\s+- signalfx\\n\\s+- otlp_http/entities"
+
+  - it: should keep the default logs route when logs are enabled
+    set:
+      gateway:
+        enabled: true
+      clusterReceiver:
+        sendThroughGateway: true
       splunkPlatform:
         endpoint: https://splunk:8088/services/collector
         token: token
@@ -171,6 +223,8 @@ tests:
 
   - it: should not render gateway k8s entity pipelines by default
     set:
+      featureGates:
+        useEntityEventsForK8sProperties: true
       gateway:
         enabled: true
     template: configmap-gateway.yaml
@@ -187,11 +241,11 @@ tests:
 
   - it: should append the collector entity events feature gate to configured gateway gates
     set:
-      featureGates:
-        useEntityEventsForK8sProperties: true
       gateway:
         enabled: true
         featureGates: existing.gate
+      clusterReceiver:
+        sendThroughGateway: true
     template: gateway-workload.yaml
     asserts:
       - contains:

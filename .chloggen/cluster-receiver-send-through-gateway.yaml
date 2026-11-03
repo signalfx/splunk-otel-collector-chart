@@ -1,9 +1,9 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
 change_type: enhancement
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
-component: gateway
+component: clusterReceiver
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: "Send k8s entity events for property updates through the gateway when `featureGates.useEntityEventsForK8sProperties` and `gateway.enabled` are set."
+note: "Add `clusterReceiver.sendThroughGateway` to send cluster receiver metrics and Kubernetes entity events through the gateway. The gateway converts the entity events to Kubernetes property updates."
 # One or more tracking issues related to the change
 issues: [2701]
 # (Optional) One or more lines of additional information to render under the primary note.

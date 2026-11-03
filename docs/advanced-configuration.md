@@ -120,7 +120,7 @@ transparently forwarded or remain direct, as described below.
 | --- | --- |
 | Agent data sent by the chart-managed `otlp_grpc` or `otlp_http/entities` exporters | Received by the gateway's `otlp` receiver and processed by the corresponding metrics, traces, or logs pipeline. |
 | Agent SignalFx exporters, including `signalfx/histograms`, and agent or cluster receiver OpAMP traffic | Transparently forwarded by the gateway; gateway processors do not apply. |
-| Cluster receiver metrics, EKS API server histograms, Kubernetes events, objects, and entities | Sent directly to the configured backends. Cluster receiver exports to Splunk Platform also remain direct. The exception is Kubernetes property updates with `featureGates.useEntityEventsForK8sProperties`, see [below](#kubernetes-property-updates-through-the-gateway). |
+| Cluster receiver metrics, EKS API server histograms, Kubernetes events, objects, and entities | Sent directly to the configured backends. Cluster receiver exports to Splunk Platform also remain direct. Set `clusterReceiver.sendThroughGateway` to send cluster receiver metrics and Kubernetes entity events through the gateway, see [below](#send-cluster-receiver-data-through-the-gateway). |
 
 To send cluster receiver SignalFx metrics and metadata requests through the
 gateway's transparent forwarders, override the SignalFx exporter endpoints:
@@ -149,46 +149,47 @@ cluster receiver exporters, including `otlp_http/o11y_events`,
 `otlp_http/o11y_entities`, and Splunk Platform exporters, remain direct unless
 configured separately.
 
-### Kubernetes property updates through the gateway
+### Send cluster receiver data through the gateway
 
-With `featureGates.useEntityEventsForK8sProperties`, the
-cluster receiver sends Kubernetes metadata as entity events instead of
-dimension property updates (`PATCH`). When the gateway is enabled, the entity
-events go to the gateway over OTLP, and the gateway converts them to dimension
-updates (`PUT`) with its `signalfx` exporter:
+Set `clusterReceiver.sendThroughGateway: true` to send cluster receiver
+metrics and Kubernetes entity events to the gateway over OTLP:
 
 ```yaml
 splunkObservability:
   realm: <realm>
   accessToken: <token>
-  metricsEnabled: true
 
 gateway:
   enabled: true
 
-featureGates:
-  useEntityEventsForK8sProperties: true
+clusterReceiver:
+  sendThroughGateway: true
 ```
 
 With these values, the chart:
 
-- sets `k8s_cluster.metadata_exporters: []` and sends the `logs/k8s_entities`
-  pipeline of the cluster receiver to the gateway with the `otlp_grpc/k8s_entities`
-  exporter, which adds the `X-Splunk-Instrumentation-Library: k8sentities` header;
-- enables the `exporter.signalfx.consumeEntityEvents` feature gate on the gateway
-  instead of the cluster receiver;
-- routes data with that header to a `logs/k8s_entities` gateway pipeline that
-  sends it to the `signalfx` exporter. Other entity events, for example from
-  discovery mode, still go to `otlp_http/entities`.
+- sends the cluster receiver `metrics` and `metrics/collector` pipelines to the
+  gateway with the `otlp_grpc` exporter. The gateway `metrics` pipeline exports
+  them to Splunk Observability and Splunk Platform;
+- sends Kubernetes metadata as entity events instead of dimension property
+  updates (`PATCH`), the same as `featureGates.useEntityEventsForK8sProperties`.
+  The `logs/k8s_entities` pipeline of the cluster receiver sends them to the
+  gateway with the `otlp_grpc/k8s_entities` exporter, which adds the
+  `X-Splunk-Instrumentation-Library: k8sentities` header;
+- routes data with that header to a `logs/k8s_entities` gateway pipeline. It
+  converts the entity events to dimension updates (`PUT`) with the `signalfx`
+  exporter and the `exporter.signalfx.consumeEntityEvents` feature gate, and
+  also sends them to `otlp_http/entities` with `featureGates.enableK8sEntities`.
 
-Cluster receiver metrics are still sent directly to Splunk Observability.
+Kubernetes events, objects, and EKS API server histograms are still sent
+directly to the configured backends.
 
-Each update replaces all properties and tags of the dimension, so properties
-not present in the Kubernetes object anymore are removed. Updates are sent when
-an object changes and for all objects every
+Each property update replaces all properties and tags of the dimension, so
+properties not present in the Kubernetes object anymore are removed. Updates
+are sent when an object changes and for all objects every
 `clusterReceiver.config.receivers.k8s_cluster.metadata_collection_interval`.
-The chart sets it to `6h` with this feature gate, instead of the receiver
-default of `5m`.
+The chart sets it to `6h` with entity events, instead of the receiver default
+of `5m`.
 
 To verify the setup, check a pod dimension with the same token:
 

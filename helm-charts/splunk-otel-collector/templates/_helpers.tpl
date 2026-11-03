@@ -479,10 +479,18 @@ Sends k8s_cluster receiver data to Splunk Observability v3/event endpoint via ot
 {{- end -}}
 
 {{/*
-Whether k8s property updates are sent as entity events (featureGates.useEntityEventsForK8sProperties).
+Whether the cluster receiver sends its data through the gateway (clusterReceiver.sendThroughGateway).
+*/}}
+{{- define "splunk-otel-collector.clusterReceiverThroughGateway" -}}
+{{- and .Values.clusterReceiver.sendThroughGateway .Values.gateway.enabled (eq (include "splunk-otel-collector.clusterReceiverEnabled" .) "true") -}}
+{{- end -}}
+
+{{/*
+Whether k8s property updates are sent as entity events, enabled by featureGates.useEntityEventsForK8sProperties
+or clusterReceiver.sendThroughGateway.
 */}}
 {{- define "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" -}}
-{{- and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useEntityEventsForK8sProperties -}}
+{{- and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") (or .Values.featureGates.useEntityEventsForK8sProperties (eq (include "splunk-otel-collector.clusterReceiverThroughGateway" .) "true")) -}}
 {{- end -}}
 
 {{/*
@@ -493,7 +501,7 @@ Build the collector feature gates string for cluster receiver.
 {{- with .Values.clusterReceiver.featureGates -}}
 {{- $gates = append $gates . -}}
 {{- end -}}
-{{- if and (eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true") (not .Values.gateway.enabled) -}}
+{{- if and (eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true") (ne (include "splunk-otel-collector.clusterReceiverThroughGateway" .) "true") -}}
 {{- $gates = append $gates "exporter.signalfx.consumeEntityEvents" -}}
 {{- end -}}
 {{- join "," $gates -}}
@@ -507,7 +515,7 @@ Build the collector feature gates string for gateway.
 {{- with .Values.gateway.featureGates -}}
 {{- $gates = append $gates . -}}
 {{- end -}}
-{{- if eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true" -}}
+{{- if and (eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true") (eq (include "splunk-otel-collector.clusterReceiverThroughGateway" .) "true") -}}
 {{- $gates = append $gates "exporter.signalfx.consumeEntityEvents" -}}
 {{- end -}}
 {{- join "," $gates -}}
