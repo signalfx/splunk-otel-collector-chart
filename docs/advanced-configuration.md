@@ -1275,6 +1275,10 @@ splunkObservability:
 
 clusterName: my-cluster
 
+# The Db2 receiver targets the gateway by default; see below for running without one.
+gateway:
+  enabled: true
+
 db2:
   enabled: true
   receivers:
@@ -1341,8 +1345,10 @@ marked as Database Monitoring data.
 destination.
 
 Key Database Monitoring queries on `server.address`, which identifies the database the
-records came from. `host.name` is the Collector's, because the agent metrics pipeline runs
-`resource_detection` with `override: true`.
+records came from on every path. On the default gateway target `host.name` is the database's
+too, and metrics and query events agree on it. With `collectorTarget: agent` the metrics
+pipeline runs `resource_detection` with `override: true`, so metrics carry the Collector's
+`host.name` while query events keep the database's.
 
 ## Using feature gates
 
