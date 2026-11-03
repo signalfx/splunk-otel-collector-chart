@@ -61,6 +61,10 @@ dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart wi
 		helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || exit 1; \
 	fi ;\
 	helm repo update open-telemetry || exit 1; \
+	if ! (helm repo list | awk '{print $$1}' | grep -qx splunk-otel-db2) ; then \
+		helm repo add splunk-otel-db2 https://signalfx.github.io/splunk-otel-db2 || exit 1; \
+	fi ;\
+	helm repo update splunk-otel-db2 || exit 1; \
 	DEP_STATUS=$$(helm dependencies list $$DIR) || { echo "Error: helm dependencies list failed"; exit 1; } ;\
 	if echo "$$DEP_STATUS" | grep -qE 'missing|wrong version' ; then \
 		echo "Dependencies need updating..."; \
@@ -108,13 +112,21 @@ unittest: ## Run unittests on the Helm chart
 	fi
 	cd helm-charts/splunk-otel-collector && helm unittest --strict -f "../../unittests/*.yaml" . || exit 1
 
+# Has to exceed the sum of a suite's own waits plus its cleanup, since go test counts
+# cleanup against the same deadline: a suite that hits its inner timeouts should fail on
+# its own assertion rather than panic here and skip teardown. The db2 suite is the
+# longest: 15m Helm + 15m Db2 + 5m + 5m readiness + 5m metrics + 4m events, then up to
+# 15m of teardown. The workflow sets no timeout-minutes, so the job's own ceiling is
+# GitHub's 360m default.
+TEST_TIMEOUT ?= 75m
+
 # Example Usage:
 #   make functionaltest
 #   make functionaltest SKIP_SETUP=true SKIP_TEARDOWN=true SKIP_TESTS=true TEARDOWN_BEFORE_SETUP=true SUITE="functional" UPDATE_EXPECTED_RESULTS=true KUBE_TEST_ENV="kind" KUBECONFIG="/path/to/kubeconfig"
 .PHONY: functionaltest
 functionaltest: ## Run functional tests for this Helm chart with optional tags and environment variables
 	@echo "Running functional tests for this helm chart..."
-	cd functional_tests && go test -v -timeout 45m ./$(SUITE)/... || exit 1
+	cd functional_tests && go test -v -timeout $(TEST_TIMEOUT) ./$(SUITE)/... || exit 1
 
 ##@ Changelog
 # Tasks related to changelog management

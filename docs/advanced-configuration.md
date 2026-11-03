@@ -1260,6 +1260,96 @@ autodetect:
   prometheus: true
 ```
 
+## IBM Db2 monitoring
+
+The [splunk-otel-db2](https://github.com/signalfx/splunk-otel-db2) receiver is available as
+an optional subchart, disabled by default. It runs as its own Deployment and exports over
+OTLP *into* this release's Collector.
+
+```yaml
+splunkObservability:
+  realm: <realm>
+  accessToken: <token>
+  # Routes query samples and top queries to Database Monitoring. Omit for metrics only.
+  dbMonitoringEnabled: true
+
+clusterName: my-cluster
+
+# The Db2 receiver targets the gateway by default; see below for running without one.
+gateway:
+  enabled: true
+
+db2:
+  enabled: true
+  receivers:
+    - name: default
+      hostname: db2.example.com
+      port: 50001
+      database: PROD
+      # A Secret with DB2_USER and DB2_PASSWORD.
+      credentialsSecret: my-db2-credentials
+      events:
+        dbServerQuerySample:
+          enabled: true
+        dbServerTopQuery:
+          enabled: true
+```
+
+One entry per database; `db2.receivers` replaces the default list wholesale rather than
+merging into it.
+
+### Pointing the receiver at the Collector
+
+`db2.otlp.endpoint` is left unset above so the subchart derives the address from the release
+name. It targets the gateway, because the agent's pipelines stamp their own Node onto the
+resource and replace the database's `host.name` with the Collector's. Override that when any
+of the following apply:
+
+```yaml
+db2:
+  otlp:
+    # Required when no gateway is deployed. Accepts the Node stamping described above.
+    collectorTarget: agent
+    # Required with namespaceOverride, which moves the Collector Services.
+    collectorNamespace: my-namespace
+    # Required with nameOverride or fullnameOverride: Helm passes a parent's values to a
+    # subchart only through `global`, so the derivation cannot see either.
+    endpoint: http://my-collector.my-namespace.svc.cluster.local:4317
+```
+
+The chart fails at template time if the derived address cannot be right — including when
+`collectorTarget` names a Collector this release does not deploy — rather than exporting
+into a Service name that does not resolve.
+
+See the [receiver's configuration
+reference](https://github.com/signalfx/splunk-otel-db2#configuration) for collection
+intervals, TLS, SQL obfuscation and the full attribute list.
+
+### Where the data goes
+
+Metrics follow the chart's usual metrics path to Observability Cloud.
+
+Query samples and top queries are OTLP **log records**, so `dbMonitoringEnabled` gives them
+their own destination: an `otlp_http/dbmon` exporter carrying
+`X-Splunk-Instrumentation-Library: dbmon`, fed by a `logs/dbmon` pipeline that the
+`routing/logs` connector selects on the receiver's instrumentation scope. Other logs keep
+their existing destinations.
+
+Without a gateway the agent exports these records directly. With `gateway.enabled: true` the
+agent forwards them over its OTLP exporter and the gateway exports them. Either way the
+shared `otlp_http/entities` exporter is untouched, so Kubernetes entity events are not
+marked as Database Monitoring data.
+
+`dbMonitoringEnabled` applies to any supported database receiver and requires
+`splunkObservability` to be configured; Database Monitoring has no Splunk Platform
+destination.
+
+Key Database Monitoring queries on `server.address`, which identifies the database the
+records came from on every path. On the default gateway target `host.name` is the database's
+too, and metrics and query events agree on it. With `collectorTarget: agent` the metrics
+pipeline runs `resource_detection` with `override: true`, so metrics carry the Collector's
+`host.name` while query events keep the database's.
+
 ## Using feature gates
 
 Enable or disable features of the otel-collector agent, clusterReceiver, and gateway (respectively) using feature

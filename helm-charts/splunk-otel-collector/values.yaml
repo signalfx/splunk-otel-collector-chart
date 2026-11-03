@@ -229,6 +229,11 @@ splunkObservability:
   # Enables Secure Application features
   secureAppEnabled: false
 
+  # Routes database query samples and top queries to Database Monitoring. These are OTLP log
+  # records from a database receiver, not metrics, so they need their own destination.
+  # Applies to any supported database receiver, not just db2.
+  dbMonitoringEnabled: false
+
 ################################################################################
 # Logs collection engine:
 # Only `otel` (native OpenTelemetry log collection) is supported.
@@ -1630,6 +1635,26 @@ targetallocator:
       collector_selector:
         matchlabels:
           component: otel-collector-agent
+
+################################################################################
+# IBM Db2 receiver. Collects Db2 metrics and query samples and exports them over OTLP
+# to this release's Collector, running as its own Deployment rather than inside it.
+#
+# Query samples are OTLP log records, so they need a logs destination enabled on this
+# chart; metrics need nothing extra. Endpoint overrides and that setup are covered in
+# docs/advanced-configuration.md#ibm-db2-monitoring, and the full receiver reference in
+# https://github.com/signalfx/splunk-otel-db2
+#
+# Not available in EKS Add-on.
+################################################################################
+
+db2:
+  # Keep this key present even when false. Helm ignores a `condition` whose values
+  # path does not resolve and installs the subchart anyway.
+  enabled: false
+  # The Db2 receiver image is Linux-only.
+  nodeSelector:
+    kubernetes.io/os: linux
 
 ################################################################################
 # Helm Chart Feature Gates.

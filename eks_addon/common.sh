@@ -60,6 +60,7 @@ EOF" > "${tmp_file}"
     "instrumentation"
     "remoteManagement"
     "targetallocator"
+    "db2"
   )
   for prop in "${disabled_properties[@]}"; do
       yq e "del(.properties.\"${prop}\")" -i "${EKS_CHART_DIR}/aws_mp_configuration_schema.json"

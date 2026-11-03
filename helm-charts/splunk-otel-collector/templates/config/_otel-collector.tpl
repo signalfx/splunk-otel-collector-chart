@@ -125,6 +125,14 @@ exporters:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     auth:
       authenticator: headers_setter
+  {{- if eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true" }}
+  otlp_http/dbmon:
+    logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    auth:
+      authenticator: headers_setter
+    headers:
+      "X-Splunk-Instrumentation-Library": dbmon
+  {{- end }}
   {{- if .Values.splunkObservability.secureAppEnabled }}
   otlp_http/secureapp:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
@@ -165,14 +173,26 @@ exporters:
   {{- end }}
 
 {{- if and
-  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled))
+  (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled) (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true"))
   (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true")
 }}
 connectors:
   # Routing connector to separate entity events from regular logs
   routing/logs:
+    {{- /* Must mirror the default logs pipeline's own guard, or unrouted logs go nowhere. */}}
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled) }}
     default_pipelines: [logs]
+    {{- else }}
+    default_pipelines: []
+    {{- end }}
     table:
+      {{- if eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true" }}
+      # Matched before the entity route: query events are not entity-marked, so the default
+      # route would otherwise send query text to the ordinary logs destination.
+      - context: log
+        condition: instrumentation_scope.name == "{{ include "splunk-otel-collector.dbMonitoringScope" . }}"
+        pipelines: [logs/dbmon]
+      {{- end }}
       - context: log
         condition: instrumentation_scope.attributes["otel.entity.event_as_log"] == true
         pipelines: [logs/entities]
@@ -312,13 +332,31 @@ service:
     # entity events
     logs/entities:
       receivers:
-        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true")  (.Values.splunkObservability.secureAppEnabled) }}
+        {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true")  (.Values.splunkObservability.secureAppEnabled) (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") }}
         - routing/logs
         {{- else }}
         - otlp
         {{- end }}
-      processors: [memory_limiter, batch]
+      processors:
+        - memory_limiter
+        - batch
       exporters: [otlp_http/entities]
+    {{- if eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true" }}
+    # Db2 query events
+    logs/dbmon:
+      receivers:
+        - routing/logs
+      processors:
+        - memory_limiter
+        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
+        - resource_detection/k8s_cluster_name
+        {{- end }}
+        {{- if .Values.clusterName }}
+        - resource/add_cluster_name
+        {{- end }}
+        - batch
+      exporters: [otlp_http/dbmon]
+    {{- end }}
     {{- if .Values.splunkObservability.secureAppEnabled }}
     # secureapp events
     logs/secureapp:
@@ -337,12 +375,12 @@ service:
       exporters: [otlp_http/secureapp]
     {{- end }}
     {{- end }}
-    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled)}}
-    {{- if (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") }}
+    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled) (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true")) }}
     logs/split:
       receivers: [otlp]
       exporters: [routing/logs]
     {{- end }}
+    {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled)}}
     # default logs + profiling data pipeline
     logs:
       receivers:

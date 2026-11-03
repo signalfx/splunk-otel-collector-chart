@@ -1,3 +1,4 @@
+{{- include "splunk-otel-collector.validateDb2Derivation" . -}}
 {{/*
 Fargate doesn't support daemonsets so never use for that platform
 */}}

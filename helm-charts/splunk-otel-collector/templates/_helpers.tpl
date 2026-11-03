@@ -688,3 +688,61 @@ Create the target allocator endpoint to match subchart's naming logic
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Whether Database Monitoring routing should render. Independent of any one receiver so other
+database receivers can use it.
+*/}}
+{{- define "splunk-otel-collector.dbMonitoringEnabled" -}}
+{{- .Values.splunkObservability.dbMonitoringEnabled | default false -}}
+{{- end -}}
+
+{{/*
+Instrumentation scope that marks a record as Database Monitoring data. Matched by the
+routing connector in both the agent and gateway configs.
+*/}}
+{{- define "splunk-otel-collector.dbMonitoringScope" -}}
+github.com/signalfx/splunk-otel-db2
+{{- end -}}
+
+{{- define "splunk-otel-collector.validateDbMonitoring" -}}
+{{- if eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true" -}}
+{{- if ne (include "splunk-otel-collector.splunkO11yEnabled" .) "true" -}}
+{{- fail "splunkObservability.dbMonitoringEnabled requires Splunk Observability Cloud: set splunkObservability.realm and splunkObservability.accessToken. Database Monitoring has no Splunk Platform destination." -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+The db2 subchart rebuilds the Collector address from the release and chart names. Helm only
+passes a parent's values down through `global`, so it cannot see these overrides and would
+derive a Service name this release never creates.
+*/}}
+{{- define "splunk-otel-collector.validateDb2Derivation" -}}
+{{- $db2 := .Values.db2 | default dict -}}
+{{- if dig "enabled" false $db2 -}}
+{{- $otlp := dig "otlp" dict $db2 | default dict -}}
+{{- if not (dig "endpoint" "" $otlp) -}}
+{{- $collectorNs := lower (include "splunk-otel-collector.namespace" .) -}}
+{{- /*
+The subchart derives the address of whichever Collector collectorTarget names, but cannot
+see whether this release deploys it: gateway.enabled and agent.enabled are parent top-level
+values.
+*/ -}}
+{{- $target := dig "collectorTarget" "gateway" $otlp -}}
+{{- if and (eq $target "gateway") (not .Values.gateway.enabled) -}}
+{{- fail "db2.otlp.collectorTarget is \"gateway\", but gateway.enabled is false, so that Service is never created. Enable the gateway, or set db2.otlp.collectorTarget: agent." -}}
+{{- end -}}
+{{- if and (eq $target "agent") (not .Values.agent.enabled) -}}
+{{- fail "db2.otlp.collectorTarget is \"agent\", but agent.enabled is false, so that Service is never created. Enable the agent, or set db2.otlp.collectorTarget: gateway." -}}
+{{- end -}}
+{{- if or .Values.nameOverride .Values.fullnameOverride -}}
+{{- fail (printf "db2.enabled cannot derive the Collector address while nameOverride or fullnameOverride is set. Set db2.otlp.endpoint explicitly -- this release's gateway is %s.%s.svc.cluster.local:4317." (lower (include "splunk-otel-collector.fullname" .)) $collectorNs) -}}
+{{- end -}}
+{{- $derivedNs := lower (dig "collectorNamespace" "" $otlp | default (lower .Release.Namespace)) -}}
+{{- if ne $derivedNs $collectorNs -}}
+{{- fail (printf "db2 would derive the Collector in namespace %q, but it runs in %q. Set db2.otlp.collectorNamespace: %s." $derivedNs $collectorNs $collectorNs) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
