@@ -639,7 +639,7 @@ prometheus/{{ $receiver }}:
         regex: ".*otelcol\\.k8s\\.pod\\.association"
         source_labels:
         - __name__
-      scrape_interval: 10s
+      scrape_interval: 60s
       static_configs:
       - targets: [localhost:{{ $port }}]
 {{- end }}

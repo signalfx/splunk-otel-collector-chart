@@ -97,7 +97,7 @@ receivers:
         rule: type == "k8s.node" && name contains "fargate"
         config:
           auth_type: serviceAccount
-          collection_interval: 10s
+          collection_interval: 60s
           endpoint: "`joinHostPort(endpoint, kubelet_endpoint_port)`"
           extra_metadata_labels:
             - container.id

@@ -357,7 +357,7 @@ agent:
     # This value is also used by the EKS apiserver Prometheus receiver in the
     # cluster receiver when featureGates.enableEKSApiServerMetrics is enabled.
     # Accepts Prometheus duration strings (e.g. 10s, 1m).
-    scrapeInterval: 10s
+    scrapeInterval: 1m
     apiserver:
       # Specifies whether to collect apiserver metrics.
       enabled: true

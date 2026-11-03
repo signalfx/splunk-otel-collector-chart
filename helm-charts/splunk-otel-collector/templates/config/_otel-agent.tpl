@@ -74,7 +74,7 @@ receivers:
 
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   host_metrics:
-    collection_interval: 10s
+    collection_interval: 60s
     {{- if not .Values.isWindows }}
     root_path: "/hostfs"
     {{- end }}
@@ -119,7 +119,7 @@ receivers:
             scrape_configs:
               - job_name: 'autodetect-metrics'
                 metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
-                scrape_interval: 10s
+                scrape_interval: 60s
                 static_configs:
                   - targets: ['`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090)`']
                 {{- if not .Values.autodetect.prometheus }}
@@ -565,7 +565,7 @@ receivers:
     {{- end }}
 
   kubelet_stats:
-    collection_interval: 10s
+    collection_interval: 60s
     auth_type: serviceAccount
     endpoint: ${K8S_NODE_IP}:10250
     metric_groups:

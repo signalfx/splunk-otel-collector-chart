@@ -159,7 +159,7 @@ data:
           - merge_histogram_buckets(32, method="limit_buckets")
     receivers:
       host_metrics:
-        collection_interval: 10s
+        collection_interval: 60s
         root_path: /hostfs
         scrapers:
           cpu: null
@@ -176,7 +176,7 @@ data:
           processes: null
       kubelet_stats:
         auth_type: serviceAccount
-        collection_interval: 10s
+        collection_interval: 60s
         endpoint: ${K8S_NODE_IP}:10250
         extra_metadata_labels:
         - container.id
@@ -215,7 +215,7 @@ data:
               regex: .*otelcol\.k8s\.pod\.association
               source_labels:
               - __name__
-            scrape_interval: 10s
+            scrape_interval: 60s
             static_configs:
             - targets:
               - localhost:8889
@@ -231,7 +231,7 @@ data:
                     regex: (coredns_dns_request_duration_seconds|coredns_cache_misses_total|coredns_cache_hits_total|coredns_cache_entries|coredns_dns_responses_total|coredns_dns_requests_total|rest_client_requests_total|rest_client_request_duration_seconds)(?:_sum|_count|_bucket)?
                     source_labels:
                     - __name__
-                  scrape_interval: 10s
+                  scrape_interval: 1m
                   static_configs:
                   - targets:
                     - '`joinHostPort(endpoint, 9153)`'
@@ -250,7 +250,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
-                  scrape_interval: 10s
+                  scrape_interval: 1m
                   static_configs:
                   - targets:
                     - '`joinHostPort(endpoint, 10257)`'
@@ -273,7 +273,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
-                  scrape_interval: 10s
+                  scrape_interval: 1m
                   static_configs:
                   - targets:
                     - '`endpoint`'
@@ -297,7 +297,7 @@ data:
                     source_labels:
                     - __name__
                     - le
-                  scrape_interval: 10s
+                  scrape_interval: 1m
                   static_configs:
                   - targets:
                     - '`joinHostPort(endpoint, 10249)`'
@@ -316,7 +316,7 @@ data:
                     source_labels:
                     - __name__
                   scheme: https
-                  scrape_interval: 10s
+                  scrape_interval: 1m
                   static_configs:
                   - targets:
                     - '`joinHostPort(endpoint, 10259)`'

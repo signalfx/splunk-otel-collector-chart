@@ -147,7 +147,7 @@ data:
               regex: .*otelcol\.k8s\.pod\.association
               source_labels:
               - __name__
-            scrape_interval: 10s
+            scrape_interval: 60s
             static_configs:
             - targets:
               - localhost:8899
@@ -163,7 +163,7 @@ data:
               source_labels:
               - __name__
             scheme: https
-            scrape_interval: 10s
+            scrape_interval: 1m
             static_configs:
             - targets:
               - ${KUBERNETES_SERVICE_HOST}:443
@@ -174,7 +174,7 @@ data:
           kubelet_stats:
             config:
               auth_type: serviceAccount
-              collection_interval: 10s
+              collection_interval: 60s
               endpoint: '`joinHostPort(endpoint, kubelet_endpoint_port)`'
               extra_metadata_labels:
               - container.id
