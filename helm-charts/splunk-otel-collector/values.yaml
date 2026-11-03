@@ -210,9 +210,11 @@ splunkObservability:
   metricsEnabled: true
   tracesEnabled: true
 
+  # DEPRECATED: This option will be removed in a future release.
   # Option to send Kubernetes events to Splunk Observability Infrastructure Monitoring in the old
-  # format that doesn't provide any correlation with traces and logs.
-  # Consider using `clusterReceiver.eventsEnabled` option instead.
+  # format that doesn't provide any correlation with traces and logs, using the
+  # `smartagent/kubernetes-events` receiver.
+  # Use `clusterReceiver.eventsEnabled` option instead to send Kubernetes events as logs.
   infrastructureMonitoringEventsEnabled: false
 
   # Enables the shared logs pipeline and the splunk_hec/o11y exporter for profiling data.

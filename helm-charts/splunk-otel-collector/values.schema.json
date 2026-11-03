@@ -255,8 +255,9 @@
           "type": "boolean"
         },
         "infrastructureMonitoringEventsEnabled": {
-          "description": "Send Kubernetes events to Splunk Observability Infrastructure Monitoring",
-          "type": "boolean"
+          "description": "[DEPRECATED] Send Kubernetes events to Splunk Observability Infrastructure Monitoring. Use clusterReceiver.eventsEnabled instead.",
+          "type": "boolean",
+          "deprecated": true
         }
       },
       "anyOf": [

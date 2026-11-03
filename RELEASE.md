@@ -13,6 +13,16 @@ of `version` field.
 
 ### Release Procedure
 
+Before merging a release PR, the [**Chart release gate**](.github/workflows/functional_test_eks.yaml) must pass:
+
+- Merge pending Target Allocator, operator, and instrumentation dependency updates after their relevant tests pass.
+  Routine output changes, such as attribute renames, are usually fine to merge; when updating test fixtures,
+  leave a short PR note explaining what changed in the output.
+- If an update has significant issues, label its PR `blocked` and note your findings so the team can discuss next steps.
+  This allows the release to proceed without that update.
+- Approve the `aws-eks-functional-tests` environment and wait for all EKS install and upgrade checks to pass.
+  Update or recreate the release PR if pending changelog entries remain.
+
 #### Using GitHub Workflows
 
 1. When a new upstream collector release is available, the [Release Drafter workflow](https://github.com/signalfx/splunk-otel-collector-chart/actions/workflows/release_drafter.yaml) automatically creates a release PR every 12 hours at **00:55 UTC and 12:55 UTC**.
