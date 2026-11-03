@@ -982,8 +982,9 @@ exporters:
   {{- if and (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") (not .Values.gateway.enabled) }}
   otlp_http/dbmon:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
+    auth:
+      authenticator: headers_setter
     headers:
-      "X-SF-TOKEN": "{{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}"
       "X-Splunk-Instrumentation-Library": dbmon
   {{- end }}
   {{- $_ := set . "addPersistentStorage" .Values.splunkPlatform.sendingQueue.persistentQueue.enabled }}

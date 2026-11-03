@@ -117,3 +117,19 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "requires Splunk Observability Cloud"
+
+  # The caller's token must survive agent.tokenPassthrough, so the exporter authenticates
+  # through headers_setter rather than pinning the configured token in a header.
+  - it: should authenticate the agent dbmon exporter through headers_setter
+    templates:
+      - configmap-agent.yaml
+    set:
+      splunkObservability.dbMonitoringEnabled: true
+      agent.tokenPassthrough: true
+    asserts:
+      - matchRegex:
+          path: data.relay
+          pattern: 'otlp_http/dbmon:\s*\n\s*auth:\s*\n\s*authenticator: headers_setter'
+      - notMatchRegex:
+          path: data.relay
+          pattern: 'otlp_http/dbmon:[\s\S]{0,200}X-SF-TOKEN'
