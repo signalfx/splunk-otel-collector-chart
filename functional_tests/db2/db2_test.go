@@ -328,6 +328,15 @@ func deployDb2(t *testing.T, client *kubernetes.Clientset) {
 	_, err = deployments.Create(t.Context(), dep, metav1.CreateOptions{})
 	require.NoError(t, err)
 
+	// Registered before the readiness wait so it also runs when that wait is what failed.
+	// The run archive is not always retrievable afterwards, so the reason the fixture did
+	// not start has to reach the test output itself.
+	t.Cleanup(func() {
+		if t.Failed() {
+			dumpDb2Fixture(t, client)
+		}
+	})
+
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			return
@@ -339,6 +348,55 @@ func deployDb2(t *testing.T, client *kubernetes.Clientset) {
 	// rather than when the port is merely listening.
 	internal.CheckPodsReady(t, client, internal.DefaultNamespace, "app=db2",
 		db2ReadyTimeout, 15*time.Second)
+}
+
+// dumpDb2Fixture reports why the Db2 Pod is not usable: its phase and container states,
+// the Events the scheduler and kubelet recorded, and the tail of its log.
+func dumpDb2Fixture(t *testing.T, client *kubernetes.Clientset) {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 60*time.Second)
+	defer cancel()
+
+	pods, err := client.CoreV1().Pods(internal.DefaultNamespace).
+		List(ctx, metav1.ListOptions{LabelSelector: "app=db2"})
+	if err != nil {
+		t.Logf("db2 diagnostics: listing pods failed: %v", err)
+		return
+	}
+	if len(pods.Items) == 0 {
+		t.Log("db2 diagnostics: no pod matched app=db2")
+	}
+
+	for _, pod := range pods.Items {
+		t.Logf("db2 diagnostics: pod %s phase=%s node=%s", pod.Name, pod.Status.Phase, pod.Spec.NodeName)
+		for _, c := range pod.Status.Conditions {
+			t.Logf("  condition %s=%s %s %s", c.Type, c.Status, c.Reason, c.Message)
+		}
+		for _, cs := range pod.Status.ContainerStatuses {
+			t.Logf("  container %s ready=%t restarts=%d state=%+v",
+				cs.Name, cs.Ready, cs.RestartCount, cs.State)
+		}
+
+		events, eventsErr := client.CoreV1().Events(internal.DefaultNamespace).List(ctx, metav1.ListOptions{
+			FieldSelector: "involvedObject.name=" + pod.Name,
+		})
+		if eventsErr != nil {
+			t.Logf("  events unavailable: %v", eventsErr)
+		}
+		for _, e := range events.Items {
+			t.Logf("  event %s/%s x%d: %s", e.Type, e.Reason, e.Count, e.Message)
+		}
+
+		tail := int64(60)
+		logs, logsErr := client.CoreV1().Pods(internal.DefaultNamespace).
+			GetLogs(pod.Name, &corev1.PodLogOptions{TailLines: &tail}).DoRaw(ctx)
+		if logsErr != nil {
+			t.Logf("  logs unavailable: %v", logsErr)
+			continue
+		}
+		t.Logf("  last %d log lines:\n%s", tail, string(logs))
+	}
 }
 
 // deleteDb2Fixture removes the Service and Deployment created by deployDb2. Shared by the
