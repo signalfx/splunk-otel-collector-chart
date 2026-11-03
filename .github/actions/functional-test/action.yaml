@@ -94,26 +94,6 @@ runs:
       shell: bash
       run: make dep-update
 
-    # The Db2 image is large and comes from icr.io. Pulled inside the Pod it has a
-    # containerd deadline and backs off into ImagePullBackOff, which has failed one matrix
-    # cell at a time. Pulling it here gets retries, and the fixture's
-    # imagePullPolicy: IfNotPresent then finds it already in the cluster.
-    - name: Pre-load the Db2 image into kind
-      if: inputs.suite == 'db2'
-      shell: bash
-      run: |
-        image=$(grep -oE 'icr\.io/db2_community/db2:[^ ]+' functional_tests/db2/testdata/db2/deployment.yaml | head -1)
-        echo "pre-loading $image"
-        for attempt in 1 2 3; do
-          if docker pull --quiet "$image"; then
-            kind load docker-image --name kind "$image"
-            exit 0
-          fi
-          echo "pull attempt $attempt failed; retrying in 30s"
-          sleep 30
-        done
-        echo "::warning::could not pre-load $image; the Pod will attempt its own pull"
-
     - name: Build and load test images into kind
       if: inputs.build-test-images == 'true'
       shell: bash
