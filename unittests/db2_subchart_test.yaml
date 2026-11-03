@@ -19,6 +19,7 @@ tests:
   - it: should render the receiver when enabled
     template: charts/db2/templates/deployment.yaml
     set:
+      gateway.enabled: true
       db2:
         enabled: true
         receivers:
@@ -38,6 +39,7 @@ tests:
   - it: should schedule the receiver on Linux
     template: charts/db2/templates/deployment.yaml
     set:
+      gateway.enabled: true
       db2:
         enabled: true
         receivers:
@@ -60,6 +62,8 @@ tests:
     template: charts/db2/templates/configmap.yaml
     set:
       db2:
+        otlp:
+          collectorTarget: agent
         enabled: true
         receivers:
           - name: default
