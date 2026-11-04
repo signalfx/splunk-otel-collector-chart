@@ -1,5 +1,87 @@
 # Upgrade guidelines
 
+## 0.164.0 to 0.165.0
+
+### Scraping period set to 1 minute
+
+By moving to one minute by default, we reduce the number of data points emitted and therefore the expenditure of data collection.
+
+To revert this behavior, edit the `defaultCollectionInterval` to change the global collection interval:
+
+```
+defaultCollectionInterval: 10s
+```
+
+You can also override specific collection intervals per deployment using the `config` key:
+
+```
+agent:
+  enabled: true
+  config:
+    receivers:
+      host_metrics:
+        # Change to 10s
+        collection_interval: 10s
+      kubelet_stats:
+        # Change to 10s
+        collection_interval: 10s
+
+gateway:
+  enabled: true
+  config:
+    receivers:
+      prometheus/collector:
+        config:
+          scrape_configs:
+            - job_name: otel-collector
+              metric_relabel_configs:
+              - action: drop
+                regex: promhttp_metric_handler_errors.*
+                source_labels:
+                - __name__
+              - action: drop
+                regex: otelcol_processor_batch_.*
+                source_labels:
+                - __name__
+              - action: drop
+                regex: .*otelcol\.k8s\.pod\.association
+                source_labels:
+                - __name__
+              # Change to 10s
+              scrape_interval: 10s
+              static_configs:
+                - targets:
+                  - localhost:8889
+
+clusterReceiver:
+  enabled: true
+  config:
+    receivers:
+      prometheus/k8s_cluster_receiver:
+        config:
+          scrape_configs:
+            - job_name: otel-k8s-cluster-receiver
+              metric_relabel_configs:
+              - action: drop
+                regex: promhttp_metric_handler_errors.*
+                source_labels:
+                  - __name__
+              - action: drop
+                regex: otelcol_processor_batch_.*
+                source_labels:
+                  - __name__
+              - action: drop
+                regex: .*otelcol\.k8s\.pod\.association
+                source_labels:
+                  - __name__
+              # Change to 10s
+              scrape_interval: 10s
+              static_configs:
+                - targets:
+                  - localhost:8889
+```
+
+
 ## 0.162.0 to 0.163.0
 
 ### Light Prometheus Receiver removed

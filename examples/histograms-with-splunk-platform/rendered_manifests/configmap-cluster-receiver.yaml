@@ -195,6 +195,7 @@ data:
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
+        collection_interval: 1m
       k8s_events:
         auth_type: serviceAccount
       k8s_objects:
@@ -228,7 +229,7 @@ data:
               regex: .*otelcol\.k8s\.pod\.association
               source_labels:
               - __name__
-            scrape_interval: 60s
+            scrape_interval: 1m
             static_configs:
             - targets:
               - localhost:8899

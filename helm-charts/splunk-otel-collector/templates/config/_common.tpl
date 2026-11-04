@@ -622,6 +622,7 @@ Provide the component name as the input.
 {{- $receiver := .receiver | lower | replace "-" "_" }}
 {{- $job := .receiver | lower }}
 {{- $port := .port | default "8889" }}
+{{- $collectionInterval := .collectionInterval | default "1m" }}
 prometheus/{{ $receiver }}:
   config:
     scrape_configs:
@@ -639,7 +640,7 @@ prometheus/{{ $receiver }}:
         regex: ".*otelcol\\.k8s\\.pod\\.association"
         source_labels:
         - __name__
-      scrape_interval: 60s
+      scrape_interval: {{ $collectionInterval }}
       static_configs:
       - targets: [localhost:{{ $port }}]
 {{- end }}
