@@ -4,8 +4,8 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"testing"
 	"time"
@@ -15,30 +15,30 @@ import (
 
 const SignalFxAPIPort = 8881
 
+// SetupSignalFxAPIServer starts a local API endpoint that accepts all requests.
 func SetupSignalFxAPIServer(t *testing.T) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(writer http.ResponseWriter, _ *http.Request) {
+	t.Helper()
+	SetupSignalFxAPIServerWithHandler(t, http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
 		writer.WriteHeader(http.StatusOK)
-	})
+	}))
+}
+
+// SetupSignalFxAPIServerWithHandler starts the API endpoint with a custom handler.
+func SetupSignalFxAPIServerWithHandler(t *testing.T, handler http.Handler) {
+	t.Helper()
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", SignalFxAPIPort))
+	require.NoError(t, err)
 
 	s := &http.Server{
-		Addr:              fmt.Sprintf("0.0.0.0:%d", SignalFxAPIPort),
-		Handler:           mux,
-		ReadHeaderTimeout: 60 * time.Minute,
+		Handler:           handler,
+		ReadHeaderTimeout: time.Minute,
 	}
-
-	errCh := make(chan error)
+	errCh := make(chan error, 1)
 	t.Cleanup(func() {
-		err := s.Close()
-		require.NoError(t, err)
-		err = <-errCh
-		require.NoError(t, err)
+		require.NoError(t, s.Close())
+		require.ErrorIs(t, <-errCh, http.ErrServerClosed)
 	})
-
 	go func() {
-		if err := s.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			errCh <- err
-		}
-		errCh <- nil
+		errCh <- s.Serve(listener)
 	}()
 }

@@ -8,6 +8,7 @@ The values can be overridden in .Values.clusterReceiver.config
 {{- end }}
 {{- $useEntityEventsForK8sProperties := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true" -}}
 {{- $throughGateway := eq (include "splunk-otel-collector.clusterReceiverThroughGateway" .) "true" -}}
+{{- $forwardK8sMetadata := and $throughGateway (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") (not $useEntityEventsForK8sProperties) -}}
 {{- $k8sEntityEvents := and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or .Values.featureGates.enableK8sEntities $useEntityEventsForK8sProperties) -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
@@ -306,6 +307,11 @@ exporters:
     {{- end }}
     access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     timeout: 10s
+    {{- if $forwardK8sMetadata }}
+    # Metrics use OTLP; keep this exporter active only for metadata updates.
+    exclude_metrics:
+      - metric_name: "**"
+    {{- end }}
     {{- if not (eq .Values.distribution "eks/fargate") }}
     disable_default_translation_rules: true
     {{- end}}
@@ -503,6 +509,10 @@ service:
       exporters:
         {{- if $throughGateway }}
         - otlp_grpc
+        {{- if $forwardK8sMetadata }}
+        # metadata_exporters requires an active metrics exporter.
+        - signalfx
+        {{- end }}
         {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx

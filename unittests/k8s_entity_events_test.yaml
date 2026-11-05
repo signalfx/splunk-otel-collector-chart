@@ -134,7 +134,10 @@ tests:
           pattern: "metrics:\\n\\s+exporters:\\n\\s+- otlp_grpc\\n\\s+processors"
       - matchRegex:
           path: data["relay"]
-          pattern: "metrics/collector:\\n\\s+exporters:\\n\\s+- otlp_grpc\\n\\s+processors"
+          pattern: "metrics/collector:\\n\\s+exporters:\\n\\s+- otlp_grpc\\n\\s+- signalfx\\n\\s+processors"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "exclude_metrics:\\n\\s+- metric_name: '\\*\\*'"
       - notMatchRegex:
           path: data["relay"]
           pattern: "logs/k8s_entities|otlp_grpc/k8s_entities"
@@ -354,3 +357,50 @@ tests:
       - matchRegex:
           path: data["relay"]
           pattern: "metadata_exporters:\\n\\s+- signalfx"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics/collector:\\n\\s+exporters:\\n\\s+- otlp_grpc\\n\\s+- signalfx\\n\\s+processors"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "exclude_metrics:\\n\\s+- metric_name: '\\*\\*'"
+
+  - it: should keep the metadata exporter active on EKS Fargate without changing its translation rules
+    set:
+      distribution: eks/fargate
+      gateway:
+        enabled: true
+      clusterReceiver:
+        sendThroughGateway: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics/collector:\\n\\s+exporters:\\n\\s+- otlp_grpc\\n\\s+- signalfx\\n\\s+processors"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "exclude_metrics:\\n\\s+- metric_name: '\\*\\*'"
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "disable_default_translation_rules"
+
+  - it: should not activate metadata forwarding when Observability metrics are disabled
+    set:
+      splunkObservability:
+        metricsEnabled: false
+      splunkPlatform:
+        endpoint: https://splunk:8088/services/collector
+        token: token
+        metricsEnabled: true
+        metricsIndex: metrics
+      gateway:
+        enabled: true
+      clusterReceiver:
+        sendThroughGateway: true
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["relay"]
+          pattern: "metadata_exporters|exclude_metrics|\\n  signalfx:"
+      - matchRegex:
+          path: data["relay"]
+          pattern: "metrics/collector:\\n\\s+exporters:\\n\\s+- otlp_grpc\\n\\s+processors"
