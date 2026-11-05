@@ -718,7 +718,7 @@
           "type": "boolean"
         },
         "sendThroughGateway": {
-          "description": "Send cluster receiver metrics and Kubernetes entity events to the gateway over OTLP. Requires gateway.enabled.",
+          "description": "Send cluster receiver metrics, Kubernetes property updates, and Kubernetes entity events through the gateway. Requires gateway.enabled.",
           "type": "boolean"
         },
         "resources": {

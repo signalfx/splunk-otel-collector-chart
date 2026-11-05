@@ -171,16 +171,21 @@ With these values, the chart:
 - sends the cluster receiver `metrics` and `metrics/collector` pipelines to the
   gateway with the `otlp_grpc` exporter. The gateway `metrics` pipeline exports
   them to Splunk Observability and Splunk Platform;
-- sends Kubernetes metadata as entity events instead of dimension property
-  updates (`PATCH`), the same as `featureGates.useEntityEventsForK8sProperties`.
-  The `logs/k8s_entities` pipeline of the cluster receiver sends them to the
-  gateway with the `otlp_grpc/k8s_entities` exporter, which adds the
-  `X-Splunk-Instrumentation-Library: k8sentities` header;
-- routes data with that header to a `logs/k8s_entities` gateway pipeline that
-  converts the entity events to dimension updates (`PUT`) with the `signalfx`
-  exporter and the `exporter.signalfx.consumeEntityEvents` feature gate. With
-  `featureGates.enableK8sEntities`, the entity events are also routed to the
-  `logs/entities` pipeline.
+- sends Kubernetes dimension property updates (`PATCH`) from the cluster
+  receiver `signalfx` exporter through the gateway's `http_forwarder` on port
+  `6060`;
+- with `featureGates.enableK8sEntities`, sends Kubernetes entity events from the
+  cluster receiver `logs/k8s_entities` pipeline to the gateway with the
+  `otlp_grpc/k8s_entities` exporter, which adds the
+  `X-Splunk-Instrumentation-Library: k8sentities` header. The gateway routes
+  data with that header to its `logs/entities` pipeline.
+
+With `featureGates.useEntityEventsForK8sProperties` also set, the cluster
+receiver sends Kubernetes metadata as entity events with
+`otlp_grpc/k8s_entities` instead of dimension property updates, and the gateway
+routes them to a `logs/k8s_entities` pipeline that converts them to dimension
+updates (`PUT`) with the `signalfx` exporter and the
+`exporter.signalfx.consumeEntityEvents` feature gate.
 
 Kubernetes events, objects, and EKS API server histograms are still sent
 directly to the configured backends.

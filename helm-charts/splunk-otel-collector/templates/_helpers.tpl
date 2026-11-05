@@ -486,11 +486,10 @@ Whether the cluster receiver sends its data through the gateway (clusterReceiver
 {{- end -}}
 
 {{/*
-Whether k8s property updates are sent as entity events, enabled by featureGates.useEntityEventsForK8sProperties
-or clusterReceiver.sendThroughGateway.
+Whether k8s property updates are sent as entity events (featureGates.useEntityEventsForK8sProperties).
 */}}
 {{- define "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" -}}
-{{- and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") (or .Values.featureGates.useEntityEventsForK8sProperties (eq (include "splunk-otel-collector.clusterReceiverThroughGateway" .) "true")) -}}
+{{- and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useEntityEventsForK8sProperties -}}
 {{- end -}}
 
 {{/*

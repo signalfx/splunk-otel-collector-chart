@@ -8,6 +8,7 @@ The values can be overridden in .Values.clusterReceiver.config
 {{- end }}
 {{- $useEntityEventsForK8sProperties := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true" -}}
 {{- $throughGateway := eq (include "splunk-otel-collector.clusterReceiverThroughGateway" .) "true" -}}
+{{- $k8sEntityEvents := and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or .Values.featureGates.enableK8sEntities $useEntityEventsForK8sProperties) -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   health_check:
@@ -294,10 +295,15 @@ processors:
         value: k8scluster
 
 exporters:
-  {{- if or (and (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (not $throughGateway)) (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true") }}
+  {{- if or (and (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (not (and $throughGateway $useEntityEventsForK8sProperties))) (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true") }}
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+    {{- if $throughGateway }}
+    # Sends k8s property updates through the gateway's http_forwarder.
+    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
+    {{- else }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+    {{- end }}
     access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     timeout: 10s
     {{- if not (eq .Values.distribution "eks/fargate") }}
@@ -318,14 +324,16 @@ exporters:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
-  # Sends k8s entity events to the gateway that converts them to dimension updates.
+  {{- if $k8sEntityEvents }}
+  # Sends k8s entity events to the gateway.
   otlp_grpc/k8s_entities:
     endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
     tls:
       insecure: true
-    # Lets the gateway route these entity events to its logs/k8s_entities pipeline.
+    # Lets the gateway route these entity events to its entity pipelines.
     headers:
       "X-Splunk-Instrumentation-Library": k8sentities
+  {{- end }}
   {{- end }}
 
   {{- if and (eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true") (not $throughGateway) }}
@@ -602,7 +610,7 @@ service:
         - signalfx/histograms
     {{- end }}
 
-    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or .Values.featureGates.enableK8sEntities $useEntityEventsForK8sProperties) }}
+    {{- if $k8sEntityEvents }}
     logs/k8s_entities:
       receivers:
         - k8s_cluster
