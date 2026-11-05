@@ -308,7 +308,6 @@ exporters:
     access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     timeout: 10s
     {{- if $forwardK8sMetadata }}
-    # Metrics use OTLP; keep this exporter active only for metadata updates.
     exclude_metrics:
       - metric_name: "**"
     {{- end }}
@@ -510,7 +509,6 @@ service:
         {{- if $throughGateway }}
         - otlp_grpc
         {{- if $forwardK8sMetadata }}
-        # metadata_exporters requires an active metrics exporter.
         - signalfx
         {{- end }}
         {{- else }}
