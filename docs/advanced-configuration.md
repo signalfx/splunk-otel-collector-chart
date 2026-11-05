@@ -120,7 +120,7 @@ transparently forwarded or remain direct, as described below.
 | --- | --- |
 | Agent data sent by the chart-managed `otlp_grpc` or `otlp_http/entities` exporters | Received by the gateway's `otlp` receiver and processed by the corresponding metrics, traces, or logs pipeline. |
 | Agent SignalFx exporters, including `signalfx/histograms`, and agent or cluster receiver OpAMP traffic | Transparently forwarded by the gateway; gateway processors do not apply. |
-| Cluster receiver metrics, EKS API server histograms, Kubernetes events, objects, and entities | Sent directly to the configured backends. Cluster receiver exports to Splunk Platform also remain direct. |
+| Cluster receiver metrics, EKS API server histograms, Kubernetes events, objects, and entities | Sent directly to the configured backends. Cluster receiver exports to Splunk Platform also remain direct. Set `clusterReceiver.sendThroughGateway` to send cluster receiver metrics and Kubernetes entity events through the gateway, see [below](#send-cluster-receiver-data-through-the-gateway). |
 
 To send cluster receiver SignalFx metrics and metadata requests through the
 gateway's transparent forwarders, override the SignalFx exporter endpoints:
@@ -148,6 +148,47 @@ dimension and property updates, which OTLP metrics alone do not replace. Other
 cluster receiver exporters, including `otlp_http/o11y_events`,
 `otlp_http/o11y_entities`, and Splunk Platform exporters, remain direct unless
 configured separately.
+
+### Send cluster receiver data through the gateway
+
+Set `clusterReceiver.sendThroughGateway: true` to send cluster receiver
+metrics and Kubernetes entity events to the gateway over OTLP:
+
+```yaml
+splunkObservability:
+  realm: <realm>
+  accessToken: <token>
+
+gateway:
+  enabled: true
+
+clusterReceiver:
+  sendThroughGateway: true
+```
+
+With these values, the chart:
+
+- sends the cluster receiver `metrics` and `metrics/collector` pipelines to the
+  gateway with the `otlp_grpc` exporter. The gateway `metrics` pipeline exports
+  them to Splunk Observability and Splunk Platform;
+- sends Kubernetes dimension property updates (`PATCH`) from the cluster
+  receiver `signalfx` exporter through the gateway's `http_forwarder` on port
+  `6060`;
+- with `featureGates.enableK8sEntities`, sends Kubernetes entity events from the
+  cluster receiver `logs/k8s_entities` pipeline to the gateway with the
+  `otlp_grpc/k8s_entities` exporter, which adds the
+  `X-Splunk-Instrumentation-Library: k8sentities` header. The gateway routes
+  data with that header to its `logs/entities` pipeline.
+
+With `featureGates.useEntityEventsForK8sProperties` also set, the cluster
+receiver sends Kubernetes metadata as entity events with
+`otlp_grpc/k8s_entities` instead of dimension property updates, and the gateway
+routes them to a `logs/k8s_entities` pipeline that converts them to dimension
+updates (`PUT`) with the `signalfx` exporter and the
+`exporter.signalfx.consumeEntityEvents` feature gate.
+
+Kubernetes events, objects, and EKS API server histograms are still sent
+directly to the configured backends.
 
 ## Send logs to Splunk Platform with Splunk Connect for OTLP
 

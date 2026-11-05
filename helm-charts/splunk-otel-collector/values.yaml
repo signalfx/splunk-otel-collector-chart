@@ -555,6 +555,12 @@ agent:
 clusterReceiver:
   enabled: true
 
+  # Send cluster receiver metrics and Kubernetes entity events to the gateway over OTLP instead of directly
+  # to the backends. Kubernetes property updates are sent through the gateway's http_forwarder or, with
+  # featureGates.useEntityEventsForK8sProperties, as entity events converted to property updates by the gateway.
+  # Requires gateway.enabled. Kubernetes events, objects, and EKS API server histograms are still sent directly.
+  sendThroughGateway: false
+
   # Need to be adjusted based on size of the monitored cluster
   resources:
     limits:
@@ -1706,6 +1712,9 @@ featureGates:
   # Enable entity events mode for Kubernetes property updates. When enabled, the k8s_cluster receiver
   # skips metadata_exporters (PATCH mode) and routes entity events to the signalfx exporter using PUT semantics.
   # Also enables the exporter.signalfx.consumeEntityEvents collector feature gate on the cluster receiver.
+  # With clusterReceiver.sendThroughGateway, the gateway converts the entity events instead.
+  # Sets the k8s_cluster receiver metadata_collection_interval to 6h, since every periodic collection
+  # resends the full state of all objects.
   # Requires splunkObservability.metricsEnabled.
   useEntityEventsForK8sProperties: false
   # Include "component: otel-collector-agent" in the agent DaemonSet's selector.matchLabels.

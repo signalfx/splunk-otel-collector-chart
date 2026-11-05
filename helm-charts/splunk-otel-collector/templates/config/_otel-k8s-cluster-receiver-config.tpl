@@ -3,7 +3,12 @@ Config for the otel-collector k8s cluster receiver deployment.
 The values can be overridden in .Values.clusterReceiver.config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverConfig" -}}
-{{- $useEntityEventsForK8sProperties := and (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") .Values.featureGates.useEntityEventsForK8sProperties -}}
+{{- if and .Values.clusterReceiver.sendThroughGateway (not .Values.gateway.enabled) }}
+{{- fail "clusterReceiver.sendThroughGateway requires gateway.enabled" }}
+{{- end }}
+{{- $useEntityEventsForK8sProperties := eq (include "splunk-otel-collector.k8sEntityEventsForPropertiesEnabled" .) "true" -}}
+{{- $throughGateway := eq (include "splunk-otel-collector.clusterReceiverThroughGateway" .) "true" -}}
+{{- $k8sEntityEvents := and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or .Values.featureGates.enableK8sEntities $useEntityEventsForK8sProperties) -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   health_check:
@@ -24,7 +29,10 @@ receivers:
   k8s_cluster:
     auth_type: serviceAccount
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
-    {{- if not $useEntityEventsForK8sProperties }}
+    {{- if $useEntityEventsForK8sProperties }}
+    # Entity events resend the full state of all objects on every periodic collection.
+    metadata_collection_interval: 6h
+    {{- else }}
     metadata_exporters: [signalfx]
     {{- end }}
     resource_attributes:
@@ -287,10 +295,15 @@ processors:
         value: k8scluster
 
 exporters:
-  {{- if or (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true") }}
+  {{- if or (and (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (not (and $throughGateway $useEntityEventsForK8sProperties))) (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true") }}
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
+    {{- if $throughGateway }}
+    # Sends k8s property updates through the gateway's http_forwarder.
+    api_url: http://{{ include "splunk-otel-collector.fullname" . }}:6060
+    {{- else }}
     api_url: {{ include "splunk-otel-collector.o11yApiUrl" . }}
+    {{- end }}
     access_token: {{ include "splunk-otel-collector.splunkObservabilityAccessToken" . }}
     timeout: 10s
     {{- if not (eq .Values.distribution "eks/fargate") }}
@@ -306,7 +319,24 @@ exporters:
       "X-Splunk-Instrumentation-Library": o11yevents
   {{- end }}
 
-  {{- if eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true" }}
+  {{- if $throughGateway }}
+  otlp_grpc:
+    endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
+    tls:
+      insecure: true
+  {{- if $k8sEntityEvents }}
+  # Sends k8s entity events to the gateway.
+  otlp_grpc/k8s_entities:
+    endpoint: {{ include "splunk-otel-collector.fullname" . }}:4317
+    tls:
+      insecure: true
+    # Lets the gateway route these entity events to its entity pipelines.
+    headers:
+      "X-Splunk-Instrumentation-Library": k8sentities
+  {{- end }}
+  {{- end }}
+
+  {{- if and (eq (include "splunk-otel-collector.k8sEntitiesEnabled" .) "true") (not $throughGateway) }}
   otlp_http/o11y_entities:
     logs_endpoint: {{ include "splunk-otel-collector.o11yIngestUrl" . }}/v3/event
     headers:
@@ -420,11 +450,15 @@ service:
         {{- end }}
         - resource/k8s_cluster
       exporters:
+        {{- if $throughGateway }}
+        - otlp_grpc
+        {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - splunk_hec/platform_metrics
+        {{- end }}
         {{- end }}
 
     {{- if eq .Values.distribution "eks/fargate" }}
@@ -444,11 +478,15 @@ service:
         {{- end }}
         {{- end }}
       exporters:
+        {{- if $throughGateway }}
+        - otlp_grpc
+        {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - splunk_hec/platform_metrics
+        {{- end }}
         {{- end }}
     {{- end }}
 
@@ -463,11 +501,15 @@ service:
         - k8s_attributes/metrics
         {{- end }}
       exporters:
+        {{- if $throughGateway }}
+        - otlp_grpc
+        {{- else }}
         {{- if (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}
         - signalfx
         {{- end }}
         {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
         - splunk_hec/platform_metrics
+        {{- end }}
         {{- end }}
     {{- end }}
 
@@ -568,7 +610,7 @@ service:
         - signalfx/histograms
     {{- end }}
 
-    {{- if and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or .Values.featureGates.enableK8sEntities $useEntityEventsForK8sProperties) }}
+    {{- if $k8sEntityEvents }}
     logs/k8s_entities:
       receivers:
         - k8s_cluster
@@ -580,11 +622,15 @@ service:
         {{- end }}
         - resource
       exporters:
+        {{- if $throughGateway }}
+        - otlp_grpc/k8s_entities
+        {{- else }}
         {{- if .Values.featureGates.enableK8sEntities }}
         - otlp_http/o11y_entities
         {{- end }}
         {{- if $useEntityEventsForK8sProperties }}
         - signalfx
+        {{- end }}
         {{- end }}
     {{- end }}
 

@@ -717,6 +717,10 @@
         "enabled": {
           "type": "boolean"
         },
+        "sendThroughGateway": {
+          "description": "Send cluster receiver metrics, Kubernetes property updates, and Kubernetes entity events through the gateway. Requires gateway.enabled.",
+          "type": "boolean"
+        },
         "resources": {
           "type": "object",
           "additionalProperties": false,
