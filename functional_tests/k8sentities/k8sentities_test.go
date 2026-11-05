@@ -1,17 +1,19 @@
 // Copyright Splunk Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-// Package k8sentities contains a black-box functional test for the experimental
-// featureGates.enableK8sEntities feature gate.
+// Package k8sentities tests featureGates.enableK8sEntities with direct and gateway
+// delivery, with featureGates.useEntityEventsForK8sProperties both off and on.
 //
 // When enabled, the helm chart adds a logs/k8s_entities pipeline to the cluster
 // receiver that collects Kubernetes entity data via the k8s_cluster receiver and
-// forwards it to the Splunk Observability v3/event endpoint using an otlp_http
-// exporter. This test deploys the chart with the feature gate enabled, waits for
-// data to arrive at a local OTLP HTTP sink that mimics the v3/event endpoint,
-// and compares the collected logs against a golden file.
+// forwards it to the Splunk Observability v3/event endpoint, directly or through
+// the gateway. The tests also exercise PATCH and entity-based PUT property
+// updates with metrics enabled, and compare the entity logs against a golden file.
 //
-// Environment variables (all optional):
+// When using SKIP_SETUP or SKIP_TEARDOWN, select one configuration with -run,
+// for example: go test ./k8sentities -run '^Test_K8SEntities/gateway_patch$'.
+//
+// Environment variables:
 //
 //	TEARDOWN_BEFORE_SETUP    – run teardown before setup when set to "true"
 //	SKIP_SETUP               – skip chart installation when set to "true"
@@ -22,49 +24,61 @@
 package k8sentities
 
 import (
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
-	k8stest "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/xk8stest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
 const otlpEntitiesPort = 4319
 
-var entitiesLogsSink *consumertest.LogsSink
-
 func Test_K8SEntities(t *testing.T) {
+	// Cases share a Helm release and sink ports, so they must run sequentially.
+	for _, tt := range []struct {
+		name             string
+		throughGateway   bool
+		entityProperties bool
+	}{
+		{name: "direct_patch"},
+		{name: "direct_put", entityProperties: true},
+		{name: "gateway_patch", throughGateway: true},
+		{name: "gateway_put", throughGateway: true, entityProperties: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			testK8SEntities(t, tt.throughGateway, tt.entityProperties)
+		})
+	}
+}
+
+func testK8SEntities(t *testing.T, throughGateway, entityProperties bool) {
 	if os.Getenv("TEARDOWN_BEFORE_SETUP") == "true" {
 		t.Log("Running teardown before setup as TEARDOWN_BEFORE_SETUP is set to true")
-		testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
-		require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
-		k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
-		require.NoError(t, err)
-		teardown(t, k8sClient)
+		teardown(t)
 	}
 
-	internal.SetupSignalFxAPIServer(t)
+	requests := setupDimensionAPIServer(t)
+	metricsSink := internal.SetupSignalfxReceiver(t, internal.SignalFxReceiverPort)
 
 	// Receive OTLP logs sent by the otlp_http/o11y_entities exporter to the /v3/event path.
-	entitiesLogsSink = internal.SetupOTLPLogsSinkOnPort(t, otlpEntitiesPort, "/v3/event")
+	entitiesLogsSink := internal.SetupOTLPLogsSinkOnPort(t, otlpEntitiesPort, "/v3/event")
 
 	if os.Getenv("SKIP_SETUP") == "true" {
 		t.Log("Skipping setup as SKIP_SETUP is set to true")
 	} else {
-		deployCollector(t)
+		deployCollector(t, throughGateway, entityProperties)
 	}
 
 	if os.Getenv("SKIP_TESTS") == "true" {
@@ -73,14 +87,30 @@ func Test_K8SEntities(t *testing.T) {
 	}
 
 	internal.WaitForLogs(t, 1, entitiesLogsSink)
+	internal.WaitForMetrics(t, 1, metricsSink)
+	if entityProperties {
+		require.Eventually(t, func() bool { return requests.puts.Load() > 0 }, time.Minute, time.Second,
+			"expected entity-based dimension PUT requests")
+		assert.Zero(t, requests.patches.Load(), "entity-based properties should not use PATCH")
+	} else {
+		require.Eventually(t, func() bool { return requests.patches.Load() > 0 }, time.Minute, time.Second,
+			"expected dimension PATCH requests")
+		assert.Zero(t, requests.puts.Load(), "PATCH properties should not use PUT")
+		if throughGateway {
+			require.Eventually(t, func() bool { return requests.forwardedPatches.Load() > 0 }, time.Minute, time.Second,
+				"expected dimension PATCH requests forwarded through gateway port 6060")
+		} else {
+			assert.Zero(t, requests.forwardedPatches.Load(), "direct PATCH properties should bypass the gateway")
+		}
+	}
 
 	t.Run("CheckK8SEntitiesLogs", func(t *testing.T) {
 		allLogs := entitiesLogsSink.AllLogs()
 		require.NotEmpty(t, allLogs, "expected at least one log batch from the k8s entities pipeline")
 
-		// Merge all received log batches into a single plog.Logs.
-		actualLogs := allLogs[0]
-		for _, l := range allLogs[1:] {
+		// Copy the batches so validation never modifies data owned by the sink.
+		actualLogs := plog.NewLogs()
+		for _, l := range allLogs {
 			for i := 0; i < l.ResourceLogs().Len(); i++ {
 				l.ResourceLogs().At(i).CopyTo(actualLogs.ResourceLogs().AppendEmpty())
 			}
@@ -185,7 +215,8 @@ func Test_K8SEntities(t *testing.T) {
 	})
 }
 
-func deployCollector(t *testing.T) {
+func deployCollector(t *testing.T, throughGateway, entityProperties bool) {
+	t.Helper()
 	testKubeConfig, setKubeConfig := os.LookupEnv("KUBECONFIG")
 	require.True(t, setKubeConfig, "the environment variable KUBECONFIG must be set")
 
@@ -196,36 +227,53 @@ func deployCollector(t *testing.T) {
 	require.NoError(t, err)
 
 	replacements := map[string]any{
-		"IngestURL": internal.HostPortHTTP(hostEp, otlpEntitiesPort),
-		"ApiURL":    internal.HostPortHTTP(hostEp, internal.SignalFxAPIPort),
+		"IngestURL":        internal.HostPortHTTP(hostEp, internal.SignalFxReceiverPort),
+		"EntitiesURL":      internal.HostPortHTTP(hostEp, otlpEntitiesPort) + "/v3/event",
+		"ApiURL":           internal.HostPortHTTP(hostEp, internal.SignalFxAPIPort),
+		"ThroughGateway":   throughGateway,
+		"EntityProperties": entityProperties,
 	}
-
-	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 0, internal.GetDefaultChartOptions())
-
-	config, err := clientcmd.BuildConfigFromFlags("", testKubeConfig)
-	require.NoError(t, err)
-	clientset, err := kubernetes.NewForConfig(config)
-	require.NoError(t, err)
-
-	internal.CheckPodsReady(t, clientset, internal.DefaultNamespace, "component=otel-k8s-cluster-receiver", 3*time.Minute, 0)
-	// Give the cluster receiver time to emit entity data.
-	time.Sleep(30 * time.Second)
-
-	k8sClient, err := k8stest.NewK8sClient(testKubeConfig)
-	require.NoError(t, err)
 
 	t.Cleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			t.Log("Skipping teardown as SKIP_TEARDOWN is set to true")
 			return
 		}
-		teardown(t, k8sClient)
+		teardown(t)
 	})
+	internal.ChartInstallOrUpgrade(t, testKubeConfig, valuesFile, replacements, 30*time.Second, internal.GetDefaultChartOptions())
 }
 
-func teardown(t *testing.T, _ *k8stest.K8sClient) {
+func teardown(t *testing.T) {
+	t.Helper()
 	testKubeConfig := os.Getenv("KUBECONFIG")
 	internal.ChartUninstall(t, testKubeConfig)
+}
+
+type dimensionRequests struct {
+	patches          atomic.Int64
+	forwardedPatches atomic.Int64
+	puts             atomic.Int64
+}
+
+func setupDimensionAPIServer(t *testing.T) *dimensionRequests {
+	t.Helper()
+	requests := new(dimensionRequests)
+	internal.SetupSignalFxAPIServerWithHandler(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/v2/dimension/") {
+			switch r.Method {
+			case http.MethodPatch:
+				requests.patches.Add(1)
+				if strings.Contains(r.Header.Get("Via"), ":6060") {
+					requests.forwardedPatches.Add(1)
+				}
+			case http.MethodPut:
+				requests.puts.Add(1)
+			}
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	return requests
 }
 
 // extractEntityTypes returns the set of entity types found in the logs.

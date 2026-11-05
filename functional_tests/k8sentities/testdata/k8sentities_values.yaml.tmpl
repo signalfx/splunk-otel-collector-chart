@@ -3,15 +3,43 @@ splunkObservability:
   accessToken: "00000000-0000-0000-0000-0000000000000"
   ingestUrl: {{ .IngestURL }}
   apiUrl: {{ .ApiURL }}
-  metricsEnabled: false
+  metricsEnabled: true
 
 agent:
   enabled: false
 
 clusterReceiver:
   enabled: true
+  sendThroughGateway: {{ .ThroughGateway }}
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 1
+    requests:
+      memory: 64Mi
+      cpu: 100m
+  config:
+    exporters:
+      otlp_http/o11y_entities:
+        logs_endpoint: {{ .EntitiesURL }}
+
+gateway:
+  enabled: {{ .ThroughGateway }}
+  replicaCount: 1
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 1
+    requests:
+      memory: 64Mi
+      cpu: 100m
+  config:
+    exporters:
+      otlp_http/entities:
+        logs_endpoint: {{ .EntitiesURL }}
 
 clusterName: dev-operator
 
 featureGates:
   enableK8sEntities: true
+  useEntityEventsForK8sProperties: {{ .EntityProperties }}
