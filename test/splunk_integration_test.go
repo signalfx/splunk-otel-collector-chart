@@ -144,7 +144,7 @@ func testVerifyMetricNamespaceAnnotations(t *testing.T) {
 			}
 			searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\" | search \"k8s.namespace.name\"=" + namespace + " \"k8s.pod.name\"=" + podName
 			fmt.Println("Search Query: ", searchQuery)
-			startTime := fmt.Sprintf("%d", time.Now().Unix())
+			startTime := fmt.Sprintf("%d", time.Now().Unix()-60)
 			events := waitForMinimumEventCount(t, searchQuery, startTime, 2)
 			fmt.Println(" =========>  Events received: ", len(events))
 			assert.GreaterOrEqual(t, len(events), 2)
@@ -195,7 +195,7 @@ func testVerifyMetricPodAnnotations(t *testing.T) {
 			}
 			searchQuery := METRIC_SEARCH_QUERY_STRING + "index=" + index + " filter=\"sourcetype=" + sourcetype + "\" | search \"k8s.pod.name\"=" + podName
 			fmt.Println("Search Query: ", searchQuery)
-			startTime := fmt.Sprintf("%d", time.Now().Unix())
+			startTime := fmt.Sprintf("%d", time.Now().Unix()-60)
 			events := waitForMinimumEventCount(t, searchQuery, startTime, 2)
 			fmt.Println(" =========>  Events received: ", len(events))
 			assert.GreaterOrEqual(t, len(events), 2)

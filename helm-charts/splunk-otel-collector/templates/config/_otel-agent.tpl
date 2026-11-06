@@ -70,11 +70,11 @@ receivers:
   {{- end }}
 
   # Prometheus receiver scraping metrics from the pod itself
-  {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "agent") | nindent 2}}
+  {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "agent" "collectionInterval" .Values.defaultCollectionInterval) | nindent 2}}
 
   {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
   host_metrics:
-    collection_interval: 10s
+    collection_interval: {{ .Values.defaultCollectionInterval }}
     {{- if not .Values.isWindows }}
     root_path: "/hostfs"
     {{- end }}
@@ -119,7 +119,7 @@ receivers:
             scrape_configs:
               - job_name: 'autodetect-metrics'
                 metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
-                scrape_interval: 10s
+                scrape_interval: 60s
                 static_configs:
                   - targets: ['`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090)`']
                 {{- if not .Values.autodetect.prometheus }}
@@ -565,7 +565,7 @@ receivers:
     {{- end }}
 
   kubelet_stats:
-    collection_interval: 10s
+    collection_interval: {{ .Values.defaultCollectionInterval }}
     auth_type: serviceAccount
     endpoint: ${K8S_NODE_IP}:10250
     metric_groups:
@@ -595,10 +595,10 @@ receivers:
   prometheus/ta:
     config:
       global:
-        scrape_interval: 30s
+        scrape_interval: {{ .Values.defaultCollectionInterval }}
     target_allocator:
       endpoint: http://{{ include "splunk-otel-collector.targetAllocatorFullname" . }}-ta.{{ .Release.Namespace }}.svc.cluster.local:80
-      interval: 30s
+      interval: {{ .Values.defaultCollectionInterval }}
       collector_id: ${env:K8S_POD_NAME}
   {{- end }}
 

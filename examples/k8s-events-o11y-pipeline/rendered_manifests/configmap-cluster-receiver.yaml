@@ -120,6 +120,7 @@ data:
     receivers:
       k8s_cluster:
         auth_type: serviceAccount
+        collection_interval: 1m
         metadata_exporters:
         - signalfx
         metrics:
@@ -189,7 +190,7 @@ data:
               regex: .*otelcol\.k8s\.pod\.association
               source_labels:
               - __name__
-            scrape_interval: 10s
+            scrape_interval: 1m
             static_configs:
             - targets:
               - localhost:8899

@@ -257,7 +257,7 @@ data:
         start_at: beginning
         storage: file_storage
       host_metrics:
-        collection_interval: 10s
+        collection_interval: 1m
         root_path: /hostfs
         scrapers:
           cpu: null
@@ -274,7 +274,7 @@ data:
           processes: null
       kubelet_stats:
         auth_type: serviceAccount
-        collection_interval: 10s
+        collection_interval: 1m
         endpoint: ${K8S_NODE_IP}:10250
         extra_metadata_labels:
         - container.id
@@ -307,7 +307,7 @@ data:
               regex: .*otelcol\.k8s\.pod\.association
               source_labels:
               - __name__
-            scrape_interval: 10s
+            scrape_interval: 1m
             static_configs:
             - targets:
               - localhost:8889

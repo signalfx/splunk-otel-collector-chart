@@ -28,6 +28,7 @@ receivers:
   {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "k8s-cluster-receiver" "port" "8899") | nindent 2}}
 
   k8s_cluster:
+    collection_interval: {{ .Values.defaultCollectionInterval }}
     auth_type: serviceAccount
     {{- if eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true" }}
     {{- if $useEntityEventsForK8sProperties }}
@@ -106,7 +107,7 @@ receivers:
         rule: type == "k8s.node" && name contains "fargate"
         config:
           auth_type: serviceAccount
-          collection_interval: 10s
+          collection_interval: {{ .Values.defaultCollectionInterval }}
           endpoint: "`joinHostPort(endpoint, kubelet_endpoint_port)`"
           extra_metadata_labels:
             - container.id
