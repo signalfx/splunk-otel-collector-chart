@@ -16,8 +16,10 @@ jobs:
     timeout-minutes: 35
     env:
       TALOS_VERSION: v1.14.6
+      TALOS_IMAGE: ghcr.io/siderolabs/talos:v1.14.6@sha256:7015cf6be90c17b283d887088872256c3af24299c42d3aa91e5e4f99a8207331
       TALOS_CLUSTER_NAME: splunk-otel-talos-ci
       TALOS_TEST_DIR: /tmp/splunk-otel-talos
+      TALOSCONFIG: /tmp/splunk-otel-talos/talosconfig
       KUBECONFIG: /tmp/splunk-otel-talos/kubeconfig
       HOST_ENDPOINT: 0.0.0.0
       KUBE_TEST_ENV: talos
@@ -48,9 +50,17 @@ jobs:
 
       - name: Create Talos cluster on the newest tested Kubernetes version
         run: |
-          # Talos' Docker provisioner requires bridge netfilter on GitHub runners.
+          # https://docs.siderolabs.com/talos/v1.14/platform-specific-installations/local-platforms/github-actions
           sudo modprobe br_netfilter
-          ci_scripts/talos-cluster.sh create
+          mkdir -p "$TALOS_TEST_DIR"
+          chmod 700 "$TALOS_TEST_DIR"
+          k8s_version=$(jq -er '.functional_test_v2["k8s-kind-version"] | sort_by(ltrimstr("v") | split(".") | map(tonumber)) | last' ci-matrix.json)
+          talosctl cluster create docker \
+            --name "$TALOS_CLUSTER_NAME" --state "$TALOS_TEST_DIR/state" \
+            --talosconfig-destination "$TALOSCONFIG" \
+            --image "$TALOS_IMAGE" --kubernetes-version "${k8s_version#v}" \
+            --workers 1
+          kubectl label namespace default pod-security.kubernetes.io/enforce=privileged
 
       - name: Run Talos telemetry sanity checks
         run: |
@@ -59,20 +69,28 @@ jobs:
 
       - name: Collect Talos diagnostics
         if: failure()
-        run: ci_scripts/talos-cluster.sh diagnostics
+        working-directory: tools
+        run: |
+          ./splunk_kubernetes_debug_info.sh || true
+          mkdir -p "$TALOS_TEST_DIR/diagnostics"
+          for node in controlplane-1 worker-1; do
+            docker logs --tail 1000 "$TALOS_CLUSTER_NAME-$node" > "$TALOS_TEST_DIR/diagnostics/talos-$node.log" 2>&1 || true
+          done
 
       - name: Upload Talos diagnostics
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: talos-debug-info
-          path: ${{ env.TALOS_TEST_DIR }}/diagnostics
+          path: |
+            tools/splunk_kubernetes_debug_info_*
+            ${{ env.TALOS_TEST_DIR }}/diagnostics
           if-no-files-found: ignore
           retention-days: 5
 
       - name: Destroy disposable Talos cluster
         if: always()
         run: |
-          if [[ -f "$TALOS_TEST_DIR/cluster-name" ]]; then
-            ci_scripts/talos-cluster.sh destroy
+          if [[ -d "$TALOS_TEST_DIR/state/$TALOS_CLUSTER_NAME" ]]; then
+            talosctl cluster destroy --name "$TALOS_CLUSTER_NAME" --state "$TALOS_TEST_DIR/state"
           fi

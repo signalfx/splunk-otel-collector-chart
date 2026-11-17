@@ -6,10 +6,3 @@ component: agent
 note: 'Add experimental support for Kubernetes on Talos Linux with `distribution: talos`.'
 # One or more tracking issues related to the change
 issues: [2608]
-# (Optional) One or more lines of additional information to render under the primary note.
-# These lines will be padded with 2 spaces and then inserted directly into the document.
-# Use pipe (|) for multiline entries.
-subtext: |
-  Omit the unavailable /usr/lib/os-release and /var/lib/docker/containers host paths
-  while retaining node metrics and container log collection. Install the chart in a
-  namespace that allows the agent's host networking, host ports, and host paths.

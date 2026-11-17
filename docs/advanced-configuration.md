@@ -379,9 +379,10 @@ The chart retains the generic Kubernetes control plane receiver configuration;
 individual scrapes depend on the endpoints and authentication configured on your
 cluster.
 
-Talos enforces the `baseline` Pod Security profile by default outside
-`kube-system`. The agent uses host networking, host ports, and host paths, so
-create a dedicated namespace that permits these workloads before installing:
+Talos enforces the [`baseline` Pod Security profile](https://docs.siderolabs.com/kubernetes-guides/security/pod-security)
+by default outside `kube-system`. The agent uses host networking, host ports, and
+host paths, so create a dedicated namespace that permits these workloads before
+installing:
 
 ```bash
 kubectl create namespace splunk-otel-collector
@@ -394,8 +395,7 @@ helm install splunk-otel-collector splunk-otel-collector/splunk-otel-collector \
 ```
 
 Provide your destination settings in `my-values.yaml`. Follow your organization's
-policy for granting namespace permissions. See the
-[Talos Pod Security documentation](https://docs.siderolabs.com/kubernetes-guides/security/pod-security).
+policy for granting namespace permissions.
 
 Talos does not use systemd; journald collection is not supported. This preset
 does not change kubelet or control plane TLS settings. If your kubelet serving

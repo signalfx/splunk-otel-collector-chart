@@ -80,7 +80,6 @@ func deployCharts(
 	case gceTestKubeEnv:
 		addChartInfo("gce_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case talosTestKubeEnv:
-		deployTalosLogFixture(t, client)
 		addChartInfo("talos_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())

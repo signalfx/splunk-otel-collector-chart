@@ -119,49 +119,6 @@ Supported hosted environments are `eks`, `eks/auto-mode`, `eks/fargate`, `gke`,
 assertions. Other suite directories are currently focused on kind; selecting a
 hosted `KUBE_TEST_ENV` does not make them cloud-ready.
 
-## Talos experimental support
-
-The dedicated Talos CI job runs a single Kubernetes version: the newest numeric
-version in `functional_test_v2.k8s-kind-version` in `ci-matrix.json`. It pins Talos
-v1.14.6 and creates a disposable Docker cluster with one control plane and one
-worker. Update the Talos pin when the matrix moves beyond that release's supported
-Kubernetes versions.
-
-The `talos` functional environment checks actual hostmetrics, kubeletstats, and
-cluster-receiver telemetry, plus a known container log with Kubernetes metadata.
-It exports telemetry to pod-local files and needs no Splunk backend credentials or
-connection from the cluster back to the runner. The focused values disable the
-operator and use `insecure_skip_verify` only for the disposable cluster's
-self-signed kubelet serving certificates.
-
-For a local run, install Docker, `talosctl` v1.14.6, `kubectl`, and `jq`. On Linux,
-load `br_netfilter` first (`sudo modprobe br_netfilter`). Docker Desktop on macOS
-can run this container-based sanity check; VM or bare-metal validation is still
-needed for host OS and kernel behavior beyond the Docker environment.
-
-Run from the repository root:
-
-```bash
-export TALOS_TEST_DIR="$(mktemp -d /tmp/splunk-otel-talos.XXXXXX)"
-export TALOS_CLUSTER_NAME=splunk-otel-talos-local
-export KUBECONFIG="$TALOS_TEST_DIR/kubeconfig"
-ci_scripts/talos-cluster.sh create
-make dep-update
-HOST_ENDPOINT=0.0.0.0 KUBE_TEST_ENV=talos SKIP_TEARDOWN=true \
-  make functionaltest SUITE=functional TEST_TIMEOUT=20m
-# On failure, collect logs before destroying the cluster:
-ci_scripts/talos-cluster.sh diagnostics
-ci_scripts/talos-cluster.sh destroy
-```
-
-Creation selects the newest matrix version automatically; set `K8S_VERSION` to
-exercise a specific version. The helper writes Talos state and credentials only
-under `TALOS_TEST_DIR`, leaves the default Talos and Kubernetes contexts untouched,
-and labels the disposable cluster's `default` namespace to allow the agent's
-host paths and networking. Cleanup destroys only the named cluster recorded in
-that directory. Diagnostic files are under `$TALOS_TEST_DIR/diagnostics`; Talos
-credentials and kubeconfig are never included in CI artifacts.
-
 ## IPv6 control plane coverage
 
 CI runs the existing `histogram` suite on the newest kind Kubernetes version with

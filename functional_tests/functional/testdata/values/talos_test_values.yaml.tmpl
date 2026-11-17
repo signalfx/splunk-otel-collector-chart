@@ -1,8 +1,5 @@
-# Exercise the chart's default receivers without external backend credentials.
-# Every active pipeline exports locally; no connection to the test runner is needed.
 distribution: talos
 clusterName: ci-talos-cluster
-# Collect several batches during the shared one-minute readiness wait.
 defaultCollectionInterval: 10s
 splunkPlatform:
   endpoint: http://127.0.0.1:8088/services/collector/event
