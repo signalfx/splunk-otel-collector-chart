@@ -53,7 +53,7 @@ receivers:
         include_metadata: {{ .Values.gateway.tokenPassthrough }}
 
   # Prometheus receiver scraping metrics from the pod itself
-  {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "collector") | nindent 2}}
+  {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "collector" "collectionInterval" .Values.defaultCollectionInterval) | nindent 2}}
 
 # By default k8s_attributes, memory_limiter and batch processors enabled.
 processors:

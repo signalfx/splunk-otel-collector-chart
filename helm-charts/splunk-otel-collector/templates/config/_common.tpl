@@ -622,7 +622,7 @@ Provide the component name as the input.
 {{- $receiver := .receiver | lower | replace "-" "_" }}
 {{- $job := .receiver | lower }}
 {{- $port := .port | default "8889" }}
-{{- $collectionInterval := .collectionInterval | default "1m" }}
+{{- $collectionInterval := required "defaultCollectionInterval is required" .collectionInterval }}
 prometheus/{{ $receiver }}:
   config:
     scrape_configs:
@@ -688,3 +688,25 @@ http_forwarder/opamp_splunk_o11y:
       {{- end }}
 {{- end }}
 {{- end }}
+
+{{/* Input durations have already passed the values schema. */}}
+{{- define "splunk-otel-collector.intervalSeconds" -}}
+{{- $milliseconds := int64 0 -}}
+{{/* Maximum Go duration, expressed in milliseconds. */}}
+{{- $maxMilliseconds := int64 9223372036854 -}}
+{{- $multipliers := dict "h" 3600000 "m" 60000 "s" 1000 "ms" 1 -}}
+{{- range regexFindAll "[0-9]+(ms|s|m|h)" . -1 -}}
+  {{/* Strip leading zeros to avoid Sprig's octal parsing. */}}
+  {{- $digits := regexReplaceAll "^0+" (regexFind "[0-9]+" .) "" | default "0" -}}
+  {{- $number := int64 $digits -}}
+  {{- $multiplier := get $multipliers (regexFind "(ms|s|m|h)$" .) -}}
+  {{- if or (gt (len $digits) 13) (gt $number (div (sub $maxMilliseconds $milliseconds) $multiplier)) -}}
+    {{- fail "Legacy control-plane interval exceeds the maximum supported Go duration" -}}
+  {{- end -}}
+  {{- $milliseconds = add $milliseconds (mul $number $multiplier) -}}
+{{- end -}}
+{{- if or (lt $milliseconds 1000) (ne (mod $milliseconds 1000) 0) -}}
+  {{- fail "Legacy control-plane monitors require whole seconds (at least 1s)" -}}
+{{- end -}}
+{{- div $milliseconds 1000 -}}
+{{- end -}}

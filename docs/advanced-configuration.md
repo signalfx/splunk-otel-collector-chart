@@ -717,7 +717,9 @@ For EKS clusters, although the control plane pods are not directly accessible, A
 can still be collected via `featureGates.enableEKSApiServerMetrics` (enabled by default). This
 configures a Prometheus receiver in the cluster receiver that scrapes the Kubernetes API server
 endpoint. The scrape interval for this receiver is controlled by
-`agent.controlPlaneMetrics.scrapeInterval` (default: `10s`).
+`agent.controlPlaneMetrics.scrapeInterval`. Its default empty value inherits
+`defaultCollectionInterval` (default: `1m`). An explicit value overrides the shared
+interval for both agent control plane receivers and this EKS API server receiver.
 
 ### Tuning agent memory for control plane metrics
 
@@ -739,9 +741,11 @@ agent:
       value: "100"
 ```
 
-If 10-second resolution is not required, increasing
-`agent.controlPlaneMetrics.scrapeInterval` can also reduce control plane scrape CPU and data
-volume. It does not have the same effect on the Prometheus series cache or on worker agents.
+Increasing `agent.controlPlaneMetrics.scrapeInterval` can reduce control plane scrape CPU
+and data volume at the cost of lower metric resolution. It does not have the same effect
+on the Prometheus series cache or on worker agents. See the
+[upgrade guidance](../UPGRADING.md#01640-to-01650) for the impact of the one-minute
+default and how to retain 10-second collection.
 
 The default configurations for the control plane receivers can be found in
 [_otel-agent.tpl](../helm-charts/splunk-otel-collector/templates/config/_otel-agent.tpl).

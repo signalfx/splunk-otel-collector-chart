@@ -350,7 +350,7 @@ data:
                     - __name__
                   metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"]
                     : "/metrics"`'
-                  scrape_interval: 60s
+                  scrape_interval: 1m
                   static_configs:
                   - targets:
                     - '`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"]

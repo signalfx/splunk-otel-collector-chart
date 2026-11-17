@@ -3,6 +3,7 @@ Config for the otel-collector agent
 The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
+{{- $controlPlaneInterval := .Values.agent.controlPlaneMetrics.scrapeInterval | default .Values.defaultCollectionInterval -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "tokenPassthrough" .Values.agent.tokenPassthrough) .) | nindent 2 }}
@@ -119,7 +120,7 @@ receivers:
             scrape_configs:
               - job_name: 'autodetect-metrics'
                 metrics_path: '`"prometheus.io/path" in annotations ? annotations["prometheus.io/path"] : "/metrics"`'
-                scrape_interval: 60s
+                scrape_interval: {{ .Values.defaultCollectionInterval }}
                 static_configs:
                   - targets: ['`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9090)`']
                 {{- if not .Values.autodetect.prometheus }}
@@ -214,6 +215,7 @@ receivers:
         rule: type == "pod" && labels["k8s-app"] == "kube-dns"
         {{- end }}
         config:
+          intervalSeconds: {{ include "splunk-otel-collector.intervalSeconds" $controlPlaneInterval }}
           extraDimensions:
             metric_source: k8s-coredns
           type: coredns
@@ -234,6 +236,7 @@ receivers:
         rule: type == "pod" && (labels["k8s-app"] == "etcd-manager-events" || labels["k8s-app"] == "etcd-manager-main")
         {{- end }}
         config:
+          intervalSeconds: {{ include "splunk-otel-collector.intervalSeconds" $controlPlaneInterval }}
           clientCertPath: /otel/etc/etcd/tls.crt
           clientKeyPath: /otel/etc/etcd/tls.key
           useHTTPS: true
@@ -258,6 +261,7 @@ receivers:
         rule: type == "pod" && labels["k8s-app"] == "kube-controller-manager"
         {{- end }}
         config:
+          intervalSeconds: {{ include "splunk-otel-collector.intervalSeconds" $controlPlaneInterval }}
           extraDimensions:
             metric_source: kubernetes-controller-manager
           port: 10257
@@ -274,6 +278,7 @@ receivers:
         rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
         {{- end }}
         config:
+          intervalSeconds: {{ include "splunk-otel-collector.intervalSeconds" $controlPlaneInterval }}
           extraDimensions:
             metric_source: kubernetes-apiserver
           skipVerify: true
@@ -289,6 +294,7 @@ receivers:
         rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
         {{- end }}
         config:
+          intervalSeconds: {{ include "splunk-otel-collector.intervalSeconds" $controlPlaneInterval }}
           extraDimensions:
             metric_source: kubernetes-proxy
           type: kubernetes-proxy
@@ -313,6 +319,7 @@ receivers:
         rule: type == "pod" && labels["k8s-app"] == "kube-scheduler"
         {{- end }}
         config:
+          intervalSeconds: {{ include "splunk-otel-collector.intervalSeconds" $controlPlaneInterval }}
           extraDimensions:
             metric_source: kubernetes-scheduler
           skipVerify: true
@@ -335,7 +342,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubedns"
-              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+              scrape_interval: {{ $controlPlaneInterval }}
               static_configs:
                 - targets: ['`joinHostPort(endpoint, "prometheus.io/port" in annotations ? annotations["prometheus.io/port"] : 9153)`']
               tls_config:
@@ -351,7 +358,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "coredns"
-              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+              scrape_interval: {{ $controlPlaneInterval }}
               {{- if eq .Values.distribution "openshift" }}
               static_configs:
                 - targets: ['`joinHostPort(endpoint, 9154)`']
@@ -388,7 +395,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "etcd"
-              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+              scrape_interval: {{ $controlPlaneInterval }}
               {{- if and (or .Values.agent.controlPlaneMetrics.etcd.secret.create .Values.agent.controlPlaneMetrics.etcd.secret.name) (eq .Values.distribution "openshift") }}
               static_configs:
                 - targets: ['`joinHostPort(endpoint, {{ .Values.agent.controlPlaneMetrics.etcd.port | default 9979 }})`']
@@ -437,7 +444,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kube-controller-manager"
-              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+              scrape_interval: {{ $controlPlaneInterval }}
               static_configs:
                 - targets: ['`joinHostPort(endpoint, 10257)`']
               scheme: https
@@ -467,7 +474,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-apiserver"
-              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+              scrape_interval: {{ $controlPlaneInterval }}
               scheme: https
               authorization:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -502,7 +509,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-proxy"
-              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+              scrape_interval: {{ $controlPlaneInterval }}
               {{- if eq .Values.distribution "openshift" }}
               scheme: https
               tls_config:
@@ -540,7 +547,7 @@ receivers:
           config:
             scrape_configs:
             - job_name: "kubernetes-scheduler"
-              scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+              scrape_interval: {{ $controlPlaneInterval }}
               static_configs:
                 - targets: ['`joinHostPort(endpoint, 10259)`']
               scheme: https
@@ -598,7 +605,7 @@ receivers:
         scrape_interval: {{ .Values.defaultCollectionInterval }}
     target_allocator:
       endpoint: http://{{ include "splunk-otel-collector.targetAllocatorFullname" . }}-ta.{{ .Release.Namespace }}.svc.cluster.local:80
-      interval: {{ .Values.defaultCollectionInterval }}
+      interval: 30s
       collector_id: ${env:K8S_POD_NAME}
   {{- end }}
 
