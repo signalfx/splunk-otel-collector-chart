@@ -89,9 +89,6 @@ tests:
       - matchRegex:
           path: data["relay"]
           pattern: 'smartagent/kubernetes-proxy:'
-      - matchRegex:
-          path: data["relay"]
-          pattern: 'scrapeFailureLogLevel: debug'
 
   - it: preserves native control plane receivers on Talos by default
     template: configmap-agent.yaml

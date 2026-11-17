@@ -397,8 +397,9 @@ helm install splunk-otel-collector splunk-otel-collector/splunk-otel-collector \
 Provide your destination settings in `my-values.yaml`. Follow your organization's
 policy for granting namespace permissions.
 
-Talos does not use systemd; journald collection is not supported. This preset
-does not change kubelet or control plane TLS settings. If your kubelet serving
+[Talos uses native services rather than systemd](https://docs.siderolabs.com/talos/v1.14/learn-more/talos-for-linux-admins#processes-and-services);
+the chart's journald collection is not supported for Talos host service logs.
+This preset does not change kubelet or control plane TLS settings. If your kubelet serving
 certificate is self-signed, configure a trusted serving certificate or explicitly
 set `agent.config.receivers.kubelet_stats.insecure_skip_verify: true` according to
 your security requirements.

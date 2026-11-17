@@ -300,7 +300,7 @@ receivers:
           type: kubernetes-proxy
           # Connecting to kube proxy in unknown Kubernetes distributions can be troublesome and generate log noise
           # For now, set the scrape failure log level to debug when no specific distribution is selected
-          {{- if or (eq .Values.distribution "") (eq .Values.distribution "talos") }}
+          {{- if eq .Values.distribution "" }}
           scrapeFailureLogLevel: debug
           {{- end }}
           {{- if eq .Values.distribution "openshift" }}
