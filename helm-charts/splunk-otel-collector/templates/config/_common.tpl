@@ -466,11 +466,11 @@ splunk_hec/platform_logs:
   index: {{ .Values.splunkPlatform.index | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
   keepalive:
+    idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
     max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
     max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
-  idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
   splunk_app_name: {{ .Chart.Name }}-chart
   splunk_app_version: {{ .Chart.Version }}
   profiling_data_enabled: false
@@ -522,11 +522,11 @@ splunk_hec/platform_metrics:
   index: {{ .Values.splunkPlatform.metricsIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
   keepalive:
+    idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
     max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
     max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
-  idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
   splunk_app_name: {{ .Chart.Name }}-chart
   splunk_app_version: {{ .Chart.Version }}
   tls:
@@ -567,11 +567,11 @@ splunk_hec/platform_traces:
   sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
   {{- end }}
   keepalive:
+    idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
     max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
     max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
-  idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
   splunk_app_name: {{ .Chart.Name }}-chart
   splunk_app_version: {{ .Chart.Version }}
   tls:
