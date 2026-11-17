@@ -465,8 +465,9 @@ splunk_hec/platform_logs:
   token: "{{ include "splunk-otel-collector.splunkPlatformHecToken" . }}"
   index: {{ .Values.splunkPlatform.index | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
-  max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
-  max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
+  keepalive:
+    max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
+    max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
   idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
@@ -520,8 +521,9 @@ splunk_hec/platform_metrics:
   token: "{{ include "splunk-otel-collector.splunkPlatformHecToken" . }}"
   index: {{ .Values.splunkPlatform.metricsIndex | quote }}
   source: {{ .Values.splunkPlatform.source | quote }}
-  max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
-  max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
+  keepalive:
+    max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
+    max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
   idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
@@ -564,8 +566,9 @@ splunk_hec/platform_traces:
   {{- if .Values.splunkPlatform.sourcetype }}
   sourcetype: {{ .Values.splunkPlatform.sourcetype | quote }}
   {{- end }}
-  max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
-  max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
+  keepalive:
+    max_idle_conns: {{ .Values.splunkPlatform.maxConnections }}
+    max_idle_conns_per_host: {{ .Values.splunkPlatform.maxConnections }}
   disable_compression: {{ .Values.splunkPlatform.disableCompression }}
   timeout: {{ .Values.splunkPlatform.timeout }}
   idle_conn_timeout: {{ .Values.splunkPlatform.idleConnTimeout }}
