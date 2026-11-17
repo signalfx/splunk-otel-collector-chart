@@ -375,9 +375,11 @@ clusterName: my-talos-cluster
 ```
 
 The cluster name is not auto-detected on Talos, so `clusterName` is required.
-The chart retains the generic Kubernetes control plane receiver configuration;
-individual scrapes depend on the endpoints and authentication configured on your
-cluster.
+Control plane collection requires an agent on the control plane node. The chart
+discovers the API server on port `6443` and, with `agent.hostNetwork: true` (the
+default), scrapes the controller manager, scheduler, and kube-proxy on localhost. For custom
+listener addresses or ports, or with host networking disabled, configure receiver
+overrides under `agent.config`.
 
 Talos enforces the [`baseline` Pod Security profile](https://docs.siderolabs.com/kubernetes-guides/security/pod-security)
 by default outside `kube-system`. The agent uses host networking, host ports, and

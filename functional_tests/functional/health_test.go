@@ -37,6 +37,13 @@ func controlPlaneReceiversForEnv(kubeTestEnv string) []string {
 			"prometheus/kubernetes-apiserver",
 			"prometheus/kubernetes-scheduler",
 		}
+	case talosTestKubeEnv:
+		return []string{
+			"prometheus/kube-controller-manager",
+			"prometheus/kubernetes-apiserver",
+			"prometheus/kubernetes-proxy",
+			"prometheus/kubernetes-scheduler",
+		}
 	default:
 		return nil
 	}

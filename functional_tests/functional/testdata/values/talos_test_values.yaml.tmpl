@@ -1,5 +1,9 @@
 distribution: talos
 clusterName: ci-talos-cluster
+splunkObservability:
+  realm: test
+  accessToken: test
+  tracesEnabled: false
 splunkPlatform:
   endpoint: http://127.0.0.1:8088/services/collector/event
   token: test
@@ -28,7 +32,11 @@ agent:
           exporters: [file/metrics]
         metrics/agent:
           exporters: [file/metrics]
+        metrics/histograms:
+          exporters: [file/metrics]
         logs:
+          exporters: [file/logs]
+        logs/entities:
           exporters: [file/logs]
 clusterReceiver:
   eventsEnabled: false
@@ -40,6 +48,9 @@ clusterReceiver:
     - name: telemetry-output
       mountPath: /splunk-telemetry
   config:
+    receivers:
+      k8s_cluster:
+        metadata_exporters: []
     exporters:
       file/metrics:
         path: /splunk-telemetry/metrics.json
