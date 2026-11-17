@@ -237,7 +237,7 @@ data:
         target_allocator:
           collector_id: ${env:K8S_POD_NAME}
           endpoint: http://default-targetallocator-ta.default.svc.cluster.local:80
-          interval: 1m
+          interval: 30s
       receiver_creator:
         receivers:
           prometheus/coredns:

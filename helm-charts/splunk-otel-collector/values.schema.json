@@ -33,7 +33,11 @@
     },
     "defaultCollectionInterval": {
       "description": "Default collection interval for periodic metric data collection",
-      "type": "string"
+      "type": "string",
+      "pattern": "^([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?$",
+      "not": {
+        "pattern": "^[0hms]*$"
+      }
     },
     "splunkPlatform": {
       "description": "Splunk Cloud / Splunk Enterprise configuration",
@@ -410,8 +414,8 @@
           "properties": {
             "scrapeInterval": {
               "type": "string",
-              "pattern": "^[0-9]+(ms|s|m|h)$",
-              "description": "Scrape interval for control plane Prometheus receivers (Prometheus duration, e.g. 10s, 1m). Also applies to the EKS apiserver receiver in the cluster receiver."
+              "pattern": "^([0-9]+(ms|s|m|h))?$",
+              "description": "Scrape interval for control plane metrics, including EKS. Empty inherits defaultCollectionInterval."
             },
             "apiserver": {
               "type": "object",

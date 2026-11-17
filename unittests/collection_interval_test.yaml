@@ -1,0 +1,395 @@
+suite: splunk-otel-collector.collectionIntervals
+values:
+  - ./values/basic.yaml
+templates:
+  - configmap-agent.yaml
+  - configmap-cluster-receiver.yaml
+  - configmap-gateway.yaml
+# Ignore empty templates and decode Collector YAML for field assertions.
+postRenderer:
+  cmd: yq
+  args: [eval, 'select(. != null) | .data.relay |= from_yaml', '-']
+# Check each monitor's wiring once; conversion edge cases use CoreDNS only.
+tests:
+  - it: defaults periodic metrics to one minute in every component
+    set:
+      gateway.enabled: true
+    asserts:
+      - equal:
+          path: data.relay.receivers.host_metrics.collection_interval
+          value: 1m
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers.kubelet_stats.collection_interval
+          value: 1m
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/agent"].config.scrape_configs[0].scrape_interval
+          value: 1m
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/coredns"].config.config.scrape_configs[0].scrape_interval
+          value: 1m
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers.k8s_cluster.collection_interval
+          value: 1m
+        template: configmap-cluster-receiver.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/k8s_cluster_receiver"].config.scrape_configs[0].scrape_interval
+          value: 1m
+        template: configmap-cluster-receiver.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/collector"].config.scrape_configs[0].scrape_interval
+          value: 1m
+        template: configmap-gateway.yaml
+  - it: applies 10s metric collection while preserving 30s Target Allocator polling
+    set:
+      defaultCollectionInterval: 10s
+      gateway.enabled: true
+      autodetect.prometheus: true
+      targetallocator.enabled: true
+    asserts:
+      - equal:
+          path: data.relay.receivers.host_metrics.collection_interval
+          value: 10s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers.kubelet_stats.collection_interval
+          value: 10s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/agent"].config.scrape_configs[0].scrape_interval
+          value: 10s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/coredns"].config.config.scrape_configs[0].scrape_interval
+          value: 10s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/autodetect"].config.config.scrape_configs[0].scrape_interval
+          value: 10s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/ta"].config.global.scrape_interval
+          value: 10s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/ta"].target_allocator.interval
+          value: 30s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/collector"].config.scrape_configs[0].scrape_interval
+          value: 10s
+        template: configmap-gateway.yaml
+  - it: inherits 10s for cluster, EKS API, and Fargate kubelet metrics
+    set:
+      defaultCollectionInterval: 10s
+      distribution: eks/fargate
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.k8s_cluster.collection_interval
+          value: 10s
+      - equal:
+          path: data.relay.receivers["prometheus/k8s_cluster_receiver"].config.scrape_configs[0].scrape_interval
+          value: 10s
+      - equal:
+          path: data.relay.receivers["prometheus/kubernetes-apiserver"].config.scrape_configs[0].scrape_interval
+          value: 10s
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers.kubelet_stats.config.collection_interval
+          value: 10s
+  - it: inherits the common interval when only Istio autodetection is enabled
+    set:
+      defaultCollectionInterval: 15s
+      autodetect.prometheus: false
+      autodetect.istio: true
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/autodetect"].config.config.scrape_configs[0].scrape_interval
+          value: 15s
+  - it: inherits the shared 500ms interval for all six native control-plane monitors
+    set:
+      defaultCollectionInterval: 500ms
+      agent.controlPlaneMetrics.etcd.enabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/coredns"].config.config.scrape_configs[0].scrape_interval
+          value: 500ms
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/kubernetes-apiserver"].config.config.scrape_configs[0].scrape_interval
+          value: 500ms
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/etcd"].config.config.scrape_configs[0].scrape_interval
+          value: 500ms
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/kube-controller-manager"].config.config.scrape_configs[0].scrape_interval
+          value: 500ms
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/kubernetes-proxy"].config.config.scrape_configs[0].scrape_interval
+          value: 500ms
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/kubernetes-scheduler"].config.config.scrape_configs[0].scrape_interval
+          value: 500ms
+      - equal:
+          path: data.relay.receivers.host_metrics.collection_interval
+          value: 500ms
+  - it: preserves the control-plane override for EKS API metrics
+    set:
+      defaultCollectionInterval: 10s
+      agent.controlPlaneMetrics.scrapeInterval: 25s
+      distribution: eks
+    template: configmap-cluster-receiver.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers["prometheus/kubernetes-apiserver"].config.scrape_configs[0].scrape_interval
+          value: 25s
+      - equal:
+          path: data.relay.receivers.k8s_cluster.collection_interval
+          value: 10s
+  - it: applies the explicit interval to all six OpenShift legacy monitors
+    set:
+      defaultCollectionInterval: 10s
+      agent.controlPlaneMetrics.scrapeInterval: 2m
+      distribution: openshift
+      featureGates.useControlPlaneMetricsHistogramData: false
+      agent.controlPlaneMetrics.etcd.enabled: true
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/coredns"].config.intervalSeconds
+          value: 120
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/etcd"].config.intervalSeconds
+          value: 120
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/kube-controller-manager"].config.intervalSeconds
+          value: 120
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/kubernetes-apiserver"].config.intervalSeconds
+          value: 120
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/kubernetes-proxy"].config.intervalSeconds
+          value: 120
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/kubernetes-scheduler"].config.intervalSeconds
+          value: 120
+      - equal:
+          path: data.relay.receivers.host_metrics.collection_interval
+          value: 10s
+  - it: inherits a whole-second millisecond setting for legacy monitors
+    set:
+      defaultCollectionInterval: 2000ms
+      featureGates.useControlPlaneMetricsHistogramData: false
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/coredns"].config.intervalSeconds
+          value: 2
+      - equal:
+          path: data.relay.receivers.host_metrics.collection_interval
+          value: 2000ms
+  - it: preserves receiver and Target Allocator polling overrides
+    set:
+      defaultCollectionInterval: 10s
+      targetallocator.enabled: true
+      agent.config.receivers.host_metrics.collection_interval: 13s
+      agent.config.receivers.kubelet_stats.collection_interval: 17s
+      clusterReceiver.config.receivers.k8s_cluster.collection_interval: 19s
+      agent.config.receivers.prometheus/ta.target_allocator.interval: 11s
+    asserts:
+      - equal:
+          path: data.relay.receivers.host_metrics.collection_interval
+          value: 13s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers.kubelet_stats.collection_interval
+          value: 17s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers.k8s_cluster.collection_interval
+          value: 19s
+        template: configmap-cluster-receiver.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/agent"].config.scrape_configs[0].scrape_interval
+          value: 10s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/ta"].config.global.scrape_interval
+          value: 10s
+        template: configmap-agent.yaml
+      - equal:
+          path: data.relay.receivers["prometheus/ta"].target_allocator.interval
+          value: 11s
+        template: configmap-agent.yaml
+  - it: preserves an explicitly replaced Prometheus job list
+    set:
+      defaultCollectionInterval: 10s
+      gateway.enabled: true
+      gateway.config.receivers.prometheus/collector.config.scrape_configs:
+        - job_name: custom-self
+          scrape_interval: 23s
+          static_configs:
+            - targets:
+                - localhost:8889
+    template: configmap-gateway.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers["prometheus/collector"].config.scrape_configs
+          value:
+            - job_name: custom-self
+              scrape_interval: 23s
+              static_configs:
+                - targets:
+                    - localhost:8889
+  - it: preserves a native subsecond control-plane override
+    set:
+      defaultCollectionInterval: 10s
+      agent.controlPlaneMetrics.scrapeInterval: 500ms
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.host_metrics.collection_interval
+          value: 10s
+      - equal:
+          path: data.relay.receivers.kubelet_stats.collection_interval
+          value: 10s
+      - equal:
+          path: data.relay.receivers["prometheus/agent"].config.scrape_configs[0].scrape_interval
+          value: 10s
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/coredns"].config.config.scrape_configs[0].scrape_interval
+          value: 500ms
+  - it: rejects zero shared intervals
+    set:
+      defaultCollectionInterval: 0s
+    template: configmap-agent.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: defaultCollectionInterval
+  - it: rejects malformed shared intervals
+    set:
+      defaultCollectionInterval: 1mgarbage
+    template: configmap-agent.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: defaultCollectionInterval
+  - it: rejects empty shared intervals
+    set:
+      defaultCollectionInterval: ""
+      clusterReceiver.enabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: defaultCollectionInterval
+  - it: rejects removal of the shared interval
+    set:
+      defaultCollectionInterval: null
+      clusterReceiver.enabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: defaultCollectionInterval
+  - it: inherits the common interval for GKE kube-dns
+    set:
+      distribution: gke
+      defaultCollectionInterval: 10s
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["prometheus/kubedns"].config.config.scrape_configs[0].scrape_interval
+          value: 10s
+  - it: rejects fractional seconds when a legacy monitor is generated
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: false
+      agent.controlPlaneMetrics.scrapeInterval: 2500ms
+    template: configmap-agent.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: Legacy control-plane monitors require whole seconds
+  - it: allows fractional seconds when all legacy monitors are disabled
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: false
+      agent.controlPlaneMetrics.scrapeInterval: 2500ms
+      agent.controlPlaneMetrics.coredns.enabled: false
+      agent.controlPlaneMetrics.etcd.enabled: false
+      agent.controlPlaneMetrics.controllerManager.enabled: false
+      agent.controlPlaneMetrics.apiserver.enabled: false
+      agent.controlPlaneMetrics.proxy.enabled: false
+      agent.controlPlaneMetrics.scheduler.enabled: false
+    template: configmap-agent.yaml
+    asserts:
+      - notExists:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/coredns"]
+  - it: allows fractional seconds on distributions without legacy monitors
+    set:
+      distribution: eks
+      featureGates.useControlPlaneMetricsHistogramData: false
+      agent.controlPlaneMetrics.scrapeInterval: 2500ms
+    template: configmap-agent.yaml
+    asserts:
+      - notExists:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/coredns"]
+  - it: requires whole seconds when a legacy monitor inherits the shared setting
+    set:
+      defaultCollectionInterval: 500ms
+      featureGates.useControlPlaneMetricsHistogramData: false
+    template: configmap-agent.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: Legacy control-plane monitors require whole seconds
+  - it: parses zero-padded seconds as decimal
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: false
+      agent.controlPlaneMetrics.scrapeInterval: 010s
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/coredns"].config.intervalSeconds
+          value: 10
+  - it: accepts decimal digits that are invalid in octal
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: false
+      agent.controlPlaneMetrics.scrapeInterval: 08s
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/coredns"].config.intervalSeconds
+          value: 8
+  - it: converts inherited compound durations including an all-zero term
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: false
+      defaultCollectionInterval: 1h2m3s0ms
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/coredns"].config.intervalSeconds
+          value: 3723
+  - it: accepts one second from zero-padded milliseconds
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: false
+      agent.controlPlaneMetrics.scrapeInterval: 001000ms
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.receivers.receiver_creator.receivers["smartagent/coredns"].config.intervalSeconds
+          value: 1
+  - it: rejects inherited compound terms whose sum overflows
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: false
+      defaultCollectionInterval: 2562047h47m17s
+    template: configmap-agent.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: Legacy control-plane interval exceeds the maximum supported Go duration
+  - it: rejects a token whose multiplication would wrap
+    set:
+      featureGates.useControlPlaneMetricsHistogramData: false
+      agent.controlPlaneMetrics.scrapeInterval: 2305843009213693962s
+    template: configmap-agent.yaml
+    asserts:
+      - failedTemplate:
+          errorPattern: Legacy control-plane interval exceeds the maximum supported Go duration

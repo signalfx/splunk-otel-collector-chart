@@ -25,7 +25,7 @@ extensions:
 
 receivers:
   # Prometheus receiver scraping metrics from the pod itself
-  {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "k8s-cluster-receiver" "port" "8899") | nindent 2}}
+  {{- include "splunk-otel-collector.prometheusInternalMetrics" (dict "receiver" "k8s-cluster-receiver" "port" "8899" "collectionInterval" .Values.defaultCollectionInterval) | nindent 2}}
 
   k8s_cluster:
     collection_interval: {{ .Values.defaultCollectionInterval }}
@@ -124,7 +124,7 @@ receivers:
     config:
       scrape_configs:
         - job_name: 'kubernetes-apiserver'
-          scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval }}
+          scrape_interval: {{ .Values.agent.controlPlaneMetrics.scrapeInterval | default .Values.defaultCollectionInterval }}
           tls_config:
             ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
           authorization:

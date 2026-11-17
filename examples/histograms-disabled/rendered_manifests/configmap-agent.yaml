@@ -353,6 +353,7 @@ data:
             config:
               extraDimensions:
                 metric_source: k8s-coredns
+              intervalSeconds: 60
               port: 9153
               type: coredns
             rule: type == "pod" && labels["k8s-app"] == "kube-dns"
@@ -360,6 +361,7 @@ data:
             config:
               extraDimensions:
                 metric_source: kubernetes-controller-manager
+              intervalSeconds: 60
               port: 10257
               skipVerify: true
               type: kube-controller-manager
@@ -370,6 +372,7 @@ data:
             config:
               extraDimensions:
                 metric_source: kubernetes-apiserver
+              intervalSeconds: 60
               skipVerify: true
               type: kubernetes-apiserver
               useHTTPS: true
@@ -379,6 +382,7 @@ data:
             config:
               extraDimensions:
                 metric_source: kubernetes-proxy
+              intervalSeconds: 60
               port: 10249
               scrapeFailureLogLevel: debug
               type: kubernetes-proxy
@@ -387,6 +391,7 @@ data:
             config:
               extraDimensions:
                 metric_source: kubernetes-scheduler
+              intervalSeconds: 60
               port: 10259
               skipVerify: true
               type: kubernetes-scheduler

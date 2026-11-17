@@ -28,7 +28,11 @@ namespaceOverride: ""
 clusterName: ""
 
 ################################################################################
-# Default collection interval for periodic metric data collection.
+# Interval for chart-generated periodic metrics, including Collector self-monitoring.
+# Use a positive duration, such as 10s, 1m, or 500ms.
+# Legacy SmartAgent control plane monitors require whole seconds.
+# Explicit receiver configuration overrides take precedence. Collector-bundled
+# discovery configs and Target Allocator jobs retain their own intervals.
 ################################################################################
 defaultCollectionInterval: "1m"
 
@@ -363,11 +367,12 @@ agent:
   # Metric collection from k8s control plane components.
   # For control plane configuration details see: docs/advanced-configuration.md#control-plane-metrics
   controlPlaneMetrics:
-    # Scrape interval for Prometheus receivers collecting control plane metrics.
+    # Optional interval for control plane metrics, including legacy SmartAgent monitors.
     # This value is also used by the EKS apiserver Prometheus receiver in the
     # cluster receiver when featureGates.enableEKSApiServerMetrics is enabled.
-    # Accepts Prometheus duration strings (e.g. 10s, 1m).
-    scrapeInterval: 1m
+    # An empty value inherits defaultCollectionInterval.
+    # Accepts durations such as 10s or 1m (whole seconds for legacy monitors).
+    scrapeInterval: ""
     apiserver:
       # Specifies whether to collect apiserver metrics.
       enabled: true

@@ -2,21 +2,32 @@
 
 ## 0.164.0 to 0.165.0
 
-### Scraping period set to 1 minute
+### Breaking: scraping period set to 1 minute
 
-By moving to one minute by default, we reduce the number of data points emitted and therefore the expenditure of data collection.
+The default metrics collection interval increases from `10s` to `1m`, so metrics
+are collected less frequently. If your dashboards or detectors rely on
+10-second data, retain `10s` using the setting below.
 
-To revert this behavior, edit the `defaultCollectionInterval` to change the global collection interval:
+To keep 10-second collection for chart-generated metrics, add this to your existing
+values file:
 
-```
+```yaml
 defaultCollectionInterval: 10s
 ```
 
+When upgrading with `--reuse-values`, set `defaultCollectionInterval` explicitly.
+
+Explicit receiver settings and `agent.controlPlaneMetrics.scrapeInterval`
+take precedence. Set the latter to `""` to inherit `defaultCollectionInterval`.
+Legacy SmartAgent control-plane monitors now honor this override and require whole seconds.
+The shared interval also applies to agent, gateway, and cluster receiver
+self-monitoring. Collector-bundled discovery configurations and Target Allocator
+jobs keep their own intervals. Target Allocator configuration polling remains `30s`.
+
 You can also override specific collection intervals per deployment using the `config` key:
 
-```
+```yaml
 agent:
-  enabled: true
   config:
     receivers:
       host_metrics:
@@ -27,7 +38,6 @@ agent:
         collection_interval: 10s
 
 gateway:
-  enabled: true
   config:
     receivers:
       prometheus/collector:
@@ -54,7 +64,6 @@ gateway:
                   - localhost:8889
 
 clusterReceiver:
-  enabled: true
   config:
     receivers:
       prometheus/k8s_cluster_receiver:
@@ -78,7 +87,7 @@ clusterReceiver:
               scrape_interval: 10s
               static_configs:
                 - targets:
-                  - localhost:8889
+                  - localhost:8899
 ```
 
 
