@@ -31,6 +31,7 @@ const (
 	aksTestKubeEnv                         = "aks"
 	rosaTestKubeEnv                        = "rosa"
 	gceTestKubeEnv                         = "gce"
+	talosTestKubeEnv                       = "talos"
 	testDir                                = "testdata"
 	valuesDir                              = "values"
 	manifestsDir                           = "manifests"
@@ -77,7 +78,7 @@ func Test_Functions(t *testing.T) {
 	case kindTestKubeEnv:
 		setupSinks(t)
 		expectedValuesDir = kindValuesDir
-	case eksTestKubeEnv, eksAutoModeTestKubeEnv, gkeTestKubeEnv, autopilotTestKubeEnv, aksTestKubeEnv, rosaTestKubeEnv, gceTestKubeEnv:
+	case eksTestKubeEnv, eksAutoModeTestKubeEnv, gkeTestKubeEnv, autopilotTestKubeEnv, aksTestKubeEnv, rosaTestKubeEnv, gceTestKubeEnv, talosTestKubeEnv:
 	case eksFargateTestKubeEnv:
 		require.True(t, skipTests, "EKS Fargate supports chart install/upgrade checks only; set SKIP_TESTS=true")
 	default:

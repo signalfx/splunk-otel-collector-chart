@@ -1,0 +1,146 @@
+suite: Experimental Talos Linux support
+values:
+  - ./values/basic.yaml
+templates:
+  - daemonset.yaml
+  - configmap-agent.yaml
+
+tests:
+  - it: omits unavailable Talos host paths while keeping host metrics and container logs
+    template: daemonset.yaml
+    set:
+      distribution: talos
+      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
+      splunkPlatform.token: test
+    asserts:
+      - notContains:
+          any: true
+          path: spec.template.spec.volumes
+          content:
+            name: host-usr-lib-osrelease
+      - notContains:
+          any: true
+          path: spec.template.spec.volumes
+          content:
+            name: varlibdockercontainers
+      - notContains:
+          any: true
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: host-usr-lib-osrelease
+      - notContains:
+          any: true
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: varlibdockercontainers
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: host-etc
+            hostPath:
+              path: /etc
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: varlog
+            hostPath:
+              path: /var/log
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: varlog
+            mountPath: /var/log
+            readOnly: true
+
+  - it: retains log permissions initialization without mounting Docker paths on Talos
+    template: daemonset.yaml
+    set:
+      distribution: talos
+      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
+      splunkPlatform.token: test
+      agent.securityContext.runAsUser: 1000
+      agent.securityContext.runAsGroup: 1000
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: varlog
+            mountPath: /var/log
+      - notContains:
+          any: true
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: varlibdockercontainers
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: checkpoint
+            mountPath: /var/addon/splunk/otel_pos
+
+  - it: keeps the existing host paths on generic Kubernetes
+    template: daemonset.yaml
+    set:
+      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
+      splunkPlatform.token: test
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: host-usr-lib-osrelease
+            hostPath:
+              path: /usr/lib/os-release
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: varlibdockercontainers
+            hostPath:
+              path: /var/lib/docker/containers
+
+  - it: preserves legacy control plane receiver configuration on Talos
+    template: configmap-agent.yaml
+    set:
+      distribution: talos
+      featureGates.useControlPlaneMetricsHistogramData: false
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'smartagent/kubernetes-apiserver:'
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'smartagent/kubernetes-proxy:'
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'scrapeFailureLogLevel: debug'
+
+  - it: preserves native control plane receivers on Talos by default
+    template: configmap-agent.yaml
+    set:
+      distribution: talos
+    asserts:
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'prometheus/kubernetes-apiserver:'
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'prometheus/kubernetes-scheduler:'
+      - matchRegex:
+          path: data["relay"]
+          pattern: 'prometheus/kube-controller-manager:'
+
+  - it: requires an explicit cluster name on Talos
+    template: daemonset.yaml
+    set:
+      distribution: talos
+      clusterName: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: /clusterName
+
+  - it: rejects Windows workloads on Talos Linux
+    template: daemonset.yaml
+    set:
+      distribution: talos
+      isWindows: true
+    asserts:
+      - failedTemplate:
+          errorPattern: /isWindows

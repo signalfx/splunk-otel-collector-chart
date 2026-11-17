@@ -1,0 +1,78 @@
+name: functional-tests-talos
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  talos-test:
+    name: Talos experimental support
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      TALOS_VERSION: v1.14.6
+      TALOS_CLUSTER_NAME: splunk-otel-talos-ci
+      TALOS_TEST_DIR: /tmp/splunk-otel-talos
+      KUBECONFIG: /tmp/splunk-otel-talos/kubeconfig
+      HOST_ENDPOINT: 0.0.0.0
+      KUBE_TEST_ENV: talos
+      # Retain failed installations for the diagnostic step; the whole disposable
+      # cluster is destroyed after diagnostics on both successful and failed runs.
+      SKIP_TEARDOWN: 'true'
+      SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-helm
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: functional_tests/go.mod
+          cache-dependency-path: '**/go.sum'
+
+      - name: Install pinned Talos CLI
+        run: |
+          curl -fsSL -o talosctl-linux-amd64 "https://github.com/siderolabs/talos/releases/download/${TALOS_VERSION}/talosctl-linux-amd64"
+          curl -fsSL -o sha256sum.txt "https://github.com/siderolabs/talos/releases/download/${TALOS_VERSION}/sha256sum.txt"
+          grep ' talosctl-linux-amd64$' sha256sum.txt | sha256sum --check -
+          chmod +x talosctl-linux-amd64
+          sudo mv talosctl-linux-amd64 /usr/local/bin/talosctl
+          rm sha256sum.txt
+
+      - name: Create Talos cluster on the newest tested Kubernetes version
+        run: |
+          # Talos' Docker provisioner requires bridge netfilter on GitHub runners.
+          sudo modprobe br_netfilter
+          ci_scripts/talos-cluster.sh create
+
+      - name: Run Talos telemetry sanity checks
+        run: |
+          make dep-update
+          make functionaltest SUITE=functional TEST_TIMEOUT=20m
+
+      - name: Collect Talos diagnostics
+        if: failure()
+        run: ci_scripts/talos-cluster.sh diagnostics
+
+      - name: Upload Talos diagnostics
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: talos-debug-info
+          path: ${{ env.TALOS_TEST_DIR }}/diagnostics
+          if-no-files-found: ignore
+          retention-days: 5
+
+      - name: Destroy disposable Talos cluster
+        if: always()
+        run: |
+          if [[ -f "$TALOS_TEST_DIR/cluster-name" ]]; then
+            ci_scripts/talos-cluster.sh destroy
+          fi

@@ -1,17 +1,15 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type: bug_fix
+change_type: enhancement
 # The name of the component, or a single word describing the area of concern, (e.g. agent, clusterReceiver, gateway, operator, chart, other)
 component: agent
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Add `talos` distribution and skip the os-release mount for it
+note: 'Add experimental support for Kubernetes on Talos Linux with `distribution: talos`.'
 # One or more tracking issues related to the change
-issues: []
+issues: [2608]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
 subtext: |
-  Talos Linux has no /usr/lib/os-release and mounts / as a read-only squashfs, so the
-  container runtime cannot create the bind-mount source and every agent pod fails with
-  CreateContainerError. The hostmetrics receiver still reads OS details through the
-  existing /hostfs/etc mount. Talos is otherwise treated as a vanilla Kubernetes
-  distribution, so control plane metrics are unaffected.
+  Omit the unavailable /usr/lib/os-release and /var/lib/docker/containers host paths
+  while retaining node metrics and container log collection. Install the chart in a
+  namespace that allows the agent's host networking, host ports, and host paths.

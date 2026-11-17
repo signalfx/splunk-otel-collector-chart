@@ -202,7 +202,7 @@ receivers:
       {{- end }}
 
       # Receivers for collecting k8s control plane metrics.
-      # Distributions besides Kubernetes and Openshift are not supported.
+      # Collect from self-managed Kubernetes, including Talos, and OpenShift.
       # Verified with Kubernetes v1.22 and Openshift v4.10.59.
       {{- if and (or (eq .Values.distribution "openshift") (eq .Values.distribution "") (eq .Values.distribution "talos")) (not (.Values.featureGates.useControlPlaneMetricsHistogramData)) }}
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and

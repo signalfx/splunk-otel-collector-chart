@@ -2044,11 +2044,14 @@
       }
     },
     {
-      "$comment": "Amazon EKS Fargate supports Linux Pods only.",
+      "$comment": "Amazon EKS Fargate and Talos Linux support Linux Pods only.",
       "if": {
         "properties": {
           "distribution": {
-            "const": "eks/fargate"
+            "enum": [
+              "eks/fargate",
+              "talos"
+            ]
           }
         },
         "required": [

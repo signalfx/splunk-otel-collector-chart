@@ -358,25 +358,50 @@ scrape additional metadata. The supported options are:
 - `gke` - Google GKE / Standard mode
 - `gke/autopilot` - Google GKE / Autopilot mode
 - `openshift` - Red Hat OpenShift
-- `talos` - Talos Linux
+- `talos` - Kubernetes on Talos Linux (experimental)
 
 This value can be omitted if none of the values apply.
 
-### Talos Linux
+### Talos Linux (experimental)
 
-Talos does not ship `/usr/lib/os-release` and mounts its root filesystem
-read-only, so the container runtime cannot create that bind-mount source and
-the agent pods fail with `CreateContainerError`. Setting `distribution: talos`
-skips that mount:
+Talos Linux is an immutable Linux operating system designed for Kubernetes.
+Support is experimental. Set `distribution: talos` to omit the unavailable
+`/usr/lib/os-release` and `/var/lib/docker/containers` host paths. The agent
+continues to collect node metrics and container logs from `/var/log/pods`:
 
 ```yaml
 distribution: talos
+clusterName: my-talos-cluster
 ```
 
-The `hostmetrics` receiver still reports host OS details, which it reads from
-`/hostfs/etc/os-release`. Talos is treated as a vanilla Kubernetes distribution
-in every other respect, including control plane metrics. The cluster name is not
-auto-detected on Talos, so `clusterName` must be set.
+The cluster name is not auto-detected on Talos, so `clusterName` is required.
+The chart retains the generic Kubernetes control plane receiver configuration;
+individual scrapes depend on the endpoints and authentication configured on your
+cluster.
+
+Talos enforces the `baseline` Pod Security profile by default outside
+`kube-system`. The agent uses host networking, host ports, and host paths, so
+create a dedicated namespace that permits these workloads before installing:
+
+```bash
+kubectl create namespace splunk-otel-collector
+kubectl label namespace splunk-otel-collector \
+  pod-security.kubernetes.io/enforce=privileged
+helm install splunk-otel-collector splunk-otel-collector/splunk-otel-collector \
+  --namespace splunk-otel-collector \
+  --set distribution=talos --set clusterName=my-talos-cluster \
+  --values my-values.yaml
+```
+
+Provide your destination settings in `my-values.yaml`. Follow your organization's
+policy for granting namespace permissions. See the
+[Talos Pod Security documentation](https://docs.siderolabs.com/kubernetes-guides/security/pod-security).
+
+Talos does not use systemd; journald collection is not supported. This preset
+does not change kubelet or control plane TLS settings. If your kubelet serving
+certificate is self-signed, configure a trusted serving certificate or explicitly
+set `agent.config.receivers.kubelet_stats.insecure_skip_verify: true` according to
+your security requirements.
 
 ## AKS KubeletStats Receiver
 

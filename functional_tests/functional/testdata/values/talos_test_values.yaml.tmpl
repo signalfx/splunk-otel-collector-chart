@@ -1,0 +1,59 @@
+# Exercise the chart's default receivers without external backend credentials.
+# Every active pipeline exports locally; no connection to the test runner is needed.
+distribution: talos
+clusterName: ci-talos-cluster
+# Collect several batches during the shared one-minute readiness wait.
+defaultCollectionInterval: 10s
+splunkPlatform:
+  endpoint: http://127.0.0.1:8088/services/collector/event
+  token: test
+  metricsEnabled: true
+  metricsIndex: test
+agent:
+  extraVolumes:
+    - name: telemetry-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: telemetry-output
+      mountPath: /splunk-telemetry
+  config:
+    receivers:
+      kubelet_stats:
+        # The disposable Docker cluster uses self-signed kubelet serving certificates.
+        insecure_skip_verify: true
+    exporters:
+      file/metrics:
+        path: /splunk-telemetry/metrics.json
+      file/logs:
+        path: /splunk-telemetry/logs.json
+    service:
+      pipelines:
+        metrics:
+          exporters: [file/metrics]
+        metrics/agent:
+          exporters: [file/metrics]
+        logs:
+          exporters: [file/logs]
+clusterReceiver:
+  eventsEnabled: false
+  k8sObjects: []
+  extraVolumes:
+    - name: telemetry-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: telemetry-output
+      mountPath: /splunk-telemetry
+  config:
+    exporters:
+      file/metrics:
+        path: /splunk-telemetry/metrics.json
+    service:
+      pipelines:
+        metrics:
+          exporters: [file/metrics]
+        metrics/collector:
+          exporters: [file/metrics]
+operatorcrds:
+  install: false
+operator:
+  enabled: false
