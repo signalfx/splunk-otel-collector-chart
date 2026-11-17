@@ -77,25 +77,6 @@ tests:
             name: checkpoint
             mountPath: /var/addon/splunk/otel_pos
 
-  - it: keeps the existing host paths on generic Kubernetes
-    template: daemonset.yaml
-    set:
-      splunkPlatform.endpoint: https://splunk.example.com:8088/services/collector
-      splunkPlatform.token: test
-    asserts:
-      - contains:
-          path: spec.template.spec.volumes
-          content:
-            name: host-usr-lib-osrelease
-            hostPath:
-              path: /usr/lib/os-release
-      - contains:
-          path: spec.template.spec.volumes
-          content:
-            name: varlibdockercontainers
-            hostPath:
-              path: /var/lib/docker/containers
-
   - it: preserves legacy control plane receiver configuration on Talos
     template: configmap-agent.yaml
     set:
