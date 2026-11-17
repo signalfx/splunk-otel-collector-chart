@@ -4,6 +4,41 @@
 <!-- For unreleased changes, see entries in .chloggen -->
 <!-- next version -->
 
+## [0.165.0] - 2026-11-17
+
+This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.165.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.165.0).
+
+### 🛑 Breaking changes 🛑
+
+- `chart`: Increase default collection interval to 1m across all periodical scrapers and receivers ([#2705](https://github.com/signalfx/splunk-otel-collector-chart/pull/2705))
+  By moving to 1m by default, we reduce the number of data points emitted and therefore the expenditure of data collection.
+  You can override these default settings. See UPGRADING.md for instructions.
+  
+
+### 🚩 Deprecations 🚩
+
+- `clusterReceiver`: Deprecate `splunkObservability.infrastructureMonitoringEventsEnabled` and the `smartagent/kubernetes-events` receiver. ([#2704](https://github.com/signalfx/splunk-otel-collector-chart/pull/2704))
+  The option will be removed in a future release. Use `clusterReceiver.eventsEnabled` instead to send Kubernetes events as logs.
+  
+
+### 🚀 New components 🚀
+
+- `chart`: Add the `splunk-otel-db2` receiver as an optional subchart, disabled by default and enabled with `db2.enabled=true`. ([#2658](https://github.com/signalfx/splunk-otel-collector-chart/pull/2658))
+  Collects IBM Db2 metrics and query events, exporting over OTLP to this release's
+  Collector. Query events are OTLP log records, so routing them to Database Monitoring is
+  opt-in via `splunkObservability.dbMonitoringEnabled`. See the Db2 section of
+  docs/advanced-configuration.md for the supported setup.
+  
+
+### 💡 Enhancements 💡
+
+- `chart`: Bump db2 to 0.1.11 in helm-charts/splunk-otel-collector/Chart.yaml ([#2708](https://github.com/signalfx/splunk-otel-collector-chart/pull/2708))
+- `chart`: Bump obi to 0.16.1 in helm-charts/splunk-otel-collector/Chart.yaml ([#2706](https://github.com/signalfx/splunk-otel-collector-chart/pull/2706))
+- `clusterReceiver`: Add `clusterReceiver.sendThroughGateway` to send cluster receiver metrics, Kubernetes property updates, and Kubernetes entity events through the gateway. With `featureGates.useEntityEventsForK8sProperties`, the gateway converts the entity events to Kubernetes property updates. ([#2701](https://github.com/signalfx/splunk-otel-collector-chart/pull/2701))
+- `operator`: Bump dotnet to v1.17.0 in helm-charts/splunk-otel-collector/values.yaml ([#2712](https://github.com/signalfx/splunk-otel-collector-chart/pull/2712))
+- `operator`: Bump nodejs to v4.13.0 in helm-charts/splunk-otel-collector/values.yaml ([#2714](https://github.com/signalfx/splunk-otel-collector-chart/pull/2714))
+- `operator`: Bump python to v2.14.0 in helm-charts/splunk-otel-collector/values.yaml ([#2720](https://github.com/signalfx/splunk-otel-collector-chart/pull/2720))
+
 ## [0.164.0] - 2026-10-31
 
 This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.164.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.164.0).
