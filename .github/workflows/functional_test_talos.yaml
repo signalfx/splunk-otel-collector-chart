@@ -62,7 +62,7 @@ jobs:
             --workers 1
           kubectl label namespace default pod-security.kubernetes.io/enforce=privileged
 
-      - name: Run Talos telemetry sanity checks
+      - name: Run Talos functional sanity checks
         run: |
           make dep-update
           make functionaltest SUITE=functional TEST_TIMEOUT=20m

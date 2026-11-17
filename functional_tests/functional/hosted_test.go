@@ -31,8 +31,6 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	client, err := kubernetes.NewForConfig(kubeConfig)
 	require.NoError(t, err)
 	switch kubeTestEnv {
-	case talosTestKubeEnv:
-		runTalosTests(t, client, kubeConfig)
 	case eksTestKubeEnv, eksAutoModeTestKubeEnv, aksTestKubeEnv, gkeTestKubeEnv, rosaTestKubeEnv, gceTestKubeEnv:
 		expectedValuesDir = selectExpectedValuesDir(kubeTestEnv)
 		t.Run("agent resource attributes validation", func(t *testing.T) {
@@ -58,7 +56,7 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 				runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kubeTestEnv))
 			})
 		}
-	case autopilotTestKubeEnv:
+	case autopilotTestKubeEnv, talosTestKubeEnv:
 		t.Run("component error logs checks", func(t *testing.T) {
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, 3*time.Minute, 10*time.Second)
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)

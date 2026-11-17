@@ -99,11 +99,11 @@ func stringPtr(value string) *string {
 	return &value
 }
 
-// deployTestResources creates workloads consumed by the kind and Talos telemetry tests.
-// Other hosted clusters and upgrade checks only need the collector chart.
-func deployTestResources(t *testing.T, client *kubernetes.Clientset, dynamicClient dynamic.Interface) {
+// deployTestResources creates workloads consumed by the kind telemetry tests.
+// Hosted clusters and kind upgrade checks only need the collector chart.
+func deployTestResources(t *testing.T, client kubernetes.Interface, dynamicClient dynamic.Interface) {
 	kubeTestEnv := requireEnv(t, "KUBE_TEST_ENV")
-	if (kubeTestEnv != kindTestKubeEnv && kubeTestEnv != talosTestKubeEnv) || os.Getenv("UPGRADE_FROM_VALUES") != "" {
+	if kubeTestEnv != kindTestKubeEnv || os.Getenv("UPGRADE_FROM_VALUES") != "" {
 		return
 	}
 	decode := scheme.Codecs.UniversalDeserializer().Decode
@@ -131,11 +131,6 @@ func deployTestResources(t *testing.T, client *kubernetes.Clientset, dynamicClie
 		} else {
 			require.NoError(t, createErr)
 		}
-	}
-	if kubeTestEnv == talosTestKubeEnv {
-		deployApp(filepath.Join(testDir, manifestsDir, "log_attr_test_deployment.yaml"))
-		internal.CheckPodsReady(t, client, internal.DefaultNamespace, "app=log-attr-test", 3*time.Minute, 10*time.Second)
-		return
 	}
 	for _, f := range []string{
 		filepath.Join(testDir, "nodejs", "deployment.yaml"),

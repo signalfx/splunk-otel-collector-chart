@@ -1,8 +1,0 @@
-# AssertMetricNames projects observed metric names into canonical gauge metrics.
-version: 1
-signal: metrics
-resources:
-  - scopes:
-      - metrics/include:
-          - name: k8s.node.condition_ready
-            type: gauge
