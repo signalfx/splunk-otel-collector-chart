@@ -54,7 +54,7 @@ install-chloggen: $(CHLOGGEN) ## Install chloggen tool (used by CI)
 
 .PHONY: check-helm-version
 check-helm-version: ## Check Helm matches the version used by CI
-	@expected=$$(bash ci_scripts/helm-version.sh) || exit 1; \
+	@expected=$${HELM_VERSION:-$$(bash ci_scripts/helm-version.sh)} || exit 1; \
 	actual=$$(helm version --template='{{ .Version }}' 2>/dev/null) || actual=unavailable; \
 	if [ "$$actual" != "$$expected" ]; then \
 		printf 'Expected Helm %s, found %s (%s).\nRun "make install-helm" to sync with this branch.\n' \
