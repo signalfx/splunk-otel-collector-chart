@@ -264,7 +264,7 @@ data:
                   scrape_interval: 1m
                   static_configs:
                   - targets:
-                    - 127.0.0.1:10257
+                    - '`joinHostPort(endpoint, 10257)`'
                   tls_config:
                     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                     insecure_skip_verify: true
@@ -311,7 +311,7 @@ data:
                   scrape_interval: 1m
                   static_configs:
                   - targets:
-                    - 127.0.0.1:10249
+                    - '`joinHostPort(endpoint, 10249)`'
             rule: type == "pod" && labels["k8s-app"] == "kube-proxy"
           prometheus/kubernetes-scheduler:
             config:
@@ -330,7 +330,7 @@ data:
                   scrape_interval: 1m
                   static_configs:
                   - targets:
-                    - 127.0.0.1:10259
+                    - '`joinHostPort(endpoint, 10259)`'
                   tls_config:
                     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                     insecure_skip_verify: true

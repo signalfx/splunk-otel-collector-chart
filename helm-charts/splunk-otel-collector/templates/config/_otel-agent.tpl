@@ -262,9 +262,6 @@ receivers:
         {{- end }}
         config:
           intervalSeconds: {{ include "splunk-otel-collector.intervalSeconds" $controlPlaneInterval }}
-          {{- if and (eq .Values.distribution "talos") .Values.agent.hostNetwork }}
-          endpoint: 127.0.0.1:10257
-          {{- end }}
           extraDimensions:
             metric_source: kubernetes-controller-manager
           port: 10257
@@ -303,9 +300,6 @@ receivers:
         {{- end }}
         config:
           intervalSeconds: {{ include "splunk-otel-collector.intervalSeconds" $controlPlaneInterval }}
-          {{- if and (eq .Values.distribution "talos") .Values.agent.hostNetwork }}
-          endpoint: 127.0.0.1:10249
-          {{- end }}
           extraDimensions:
             metric_source: kubernetes-proxy
           type: kubernetes-proxy
@@ -331,9 +325,6 @@ receivers:
         {{- end }}
         config:
           intervalSeconds: {{ include "splunk-otel-collector.intervalSeconds" $controlPlaneInterval }}
-          {{- if and (eq .Values.distribution "talos") .Values.agent.hostNetwork }}
-          endpoint: 127.0.0.1:10259
-          {{- end }}
           extraDimensions:
             metric_source: kubernetes-scheduler
           skipVerify: true
@@ -460,11 +451,7 @@ receivers:
             - job_name: "kube-controller-manager"
               scrape_interval: {{ $controlPlaneInterval }}
               static_configs:
-                {{- if and (eq .Values.distribution "talos") .Values.agent.hostNetwork }}
-                - targets: ["127.0.0.1:10257"]
-                {{- else }}
                 - targets: ['`joinHostPort(endpoint, 10257)`']
-                {{- end }}
               scheme: https
               authorization:
                 credentials_file: "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -546,11 +533,7 @@ receivers:
                 - targets: ["`endpoint`"]
               {{- else }}
               static_configs:
-                {{- if and (eq .Values.distribution "talos") .Values.agent.hostNetwork }}
-                - targets: ["127.0.0.1:10249"]
-                {{- else }}
                 - targets: ['`joinHostPort(endpoint, 10249)`']
-                {{- end }}
               {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
@@ -577,11 +560,7 @@ receivers:
             - job_name: "kubernetes-scheduler"
               scrape_interval: {{ $controlPlaneInterval }}
               static_configs:
-                {{- if and (eq .Values.distribution "talos") .Values.agent.hostNetwork }}
-                - targets: ["127.0.0.1:10259"]
-                {{- else }}
                 - targets: ['`joinHostPort(endpoint, 10259)`']
-                {{- end }}
               scheme: https
               tls_config:
                 ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"

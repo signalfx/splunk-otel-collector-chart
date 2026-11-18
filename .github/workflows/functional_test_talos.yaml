@@ -54,11 +54,26 @@ jobs:
           sudo modprobe br_netfilter
           mkdir -p "$TALOS_TEST_DIR"
           chmod 700 "$TALOS_TEST_DIR"
+          cat > "$TALOS_TEST_DIR/controlplane-patch.yaml" <<'EOF'
+          cluster:
+            controllerManager:
+              extraArgs:
+                bind-address: 0.0.0.0
+            scheduler:
+              extraArgs:
+                bind-address: 0.0.0.0
+          ---
+          apiVersion: v1alpha1
+          kind: KubeProxyConfig
+          config:
+            metricsBindAddress: 0.0.0.0:10249
+          EOF
           k8s_version=$(jq -er '.functional_test_v2["k8s-kind-version"] | sort_by(ltrimstr("v") | split(".") | map(tonumber)) | last' ci-matrix.json)
           talosctl cluster create docker \
             --name "$TALOS_CLUSTER_NAME" --state "$TALOS_TEST_DIR/state" \
             --talosconfig-destination "$TALOSCONFIG" \
             --image "$TALOS_IMAGE" --kubernetes-version "${k8s_version#v}" \
+            --config-patch-controlplanes @"$TALOS_TEST_DIR/controlplane-patch.yaml" \
             --workers 1
           kubectl label namespace default pod-security.kubernetes.io/enforce=privileged
 
