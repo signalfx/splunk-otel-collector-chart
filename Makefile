@@ -42,14 +42,28 @@ install-tools: ## Install tools (macOS/Linux)
 	LOCALBIN="$(LOCALBIN)" GOBIN="$(LOCALBIN)" ci_scripts/install-tools.sh || exit 1
 	$(MAKE) goinstall-tools
 
+.PHONY: install-helm
+install-helm: ## Install the pinned Helm version locally
+	LOCALBIN="$(LOCALBIN)" bash ci_scripts/install-helm.sh
+
 .PHONY: install-chloggen
 install-chloggen: $(CHLOGGEN) ## Install chloggen tool (used by CI)
 
 ##@ Build
 # Tasks related to building the Helm chart
 
+.PHONY: check-helm-version
+check-helm-version: ## Check Helm matches the version used by CI
+	@expected=$$(bash ci_scripts/helm-version.sh) || exit 1; \
+	actual=$$(helm version --template='{{ .Version }}' 2>/dev/null) || actual=unavailable; \
+	if [ "$$actual" != "$$expected" ]; then \
+		printf 'Expected Helm %s, found %s (%s).\nRun "make install-helm" to sync with this branch.\n' \
+			"$$expected" "$$actual" "$$(command -v helm || echo 'not found')" >&2; \
+		exit 1; \
+	fi
+
 .PHONY: dep-update
-dep-update: ## Fetch Helm chart dependency repositories, build the Helm chart with the dependencies specified in the Chart.yaml
+dep-update: check-helm-version ## Fetch Helm chart dependency repositories, build the Helm chart with the dependencies specified in the Chart.yaml
 	@{ \
 	DIR=helm-charts/splunk-otel-collector ;\
 	LOCK_FILE=$$DIR/Chart.lock ;\
@@ -90,7 +104,7 @@ render: dep-update ## Render the Helm chart with the examples as input. Users ca
 # Tasks related to testing the Helm chart
 
 .PHONY: lint
-lint: ## Lint the Helm chart with ct
+lint: check-helm-version ## Lint the Helm chart with ct
 	@echo "Linting Helm chart..."
 	ct lint --config=ct.yaml || exit 1
 
@@ -100,7 +114,7 @@ pre-commit: render ## Test the Helm chart with pre-commit
 	pre-commit run --all-files || exit 1
 
 .PHONY: unittest
-unittest: ## Run unittests on the Helm chart
+unittest: check-helm-version ## Run unittests on the Helm chart
 	@echo "Running unit tests on helm chart..."
 	@if [ ! -d "unittests" ]; then \
 		echo "Error: 'unittests' directory does not exist."; \
@@ -248,7 +262,7 @@ for-all-target: $(ALL_MODS)
 tidy-all:
 	@for dir in $$(find . -type f -name "go.mod" -exec dirname {} \; | sort | egrep '^./'); do \
 		echo "Running go mod tidy in $$dir"; \
-		(cd "$$dir" && rm -f go.sum && go mod tidy); \
+		(cd "$$dir" && go mod tidy) || exit 1; \
 	done
 
 .PHONY: gofmt-all

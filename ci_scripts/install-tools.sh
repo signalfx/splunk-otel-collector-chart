@@ -82,7 +82,7 @@ for tool in chart-testing go kubectl pre-commit skopeo kubeconform; do
 done
 
 # Install the pinned Helm version and use it when installing plugins.
-bash "$SCRIPT_DIR/install-helm.sh"
+bash "$SCRIPT_DIR/install-helm.sh" || exit 1
 export PATH="$(cd "$LOCALBIN" && pwd):$PATH"
 
 bash "$SCRIPT_DIR/install-helm-unittest.sh"
