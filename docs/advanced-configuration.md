@@ -376,10 +376,19 @@ clusterName: my-talos-cluster
 
 The cluster name is not auto-detected on Talos, so `clusterName` is required.
 Control plane collection requires an agent on the control plane node. The chart
-discovers the API server on port `6443` and, with `agent.hostNetwork: true` (the
-default), scrapes the controller manager, scheduler, and kube-proxy on localhost. For custom
-listener addresses or ports, or with host networking disabled, configure receiver
-overrides under `agent.config`.
+discovers the API server on port `6443`. With `agent.hostNetwork: true` (the
+default), it scrapes the controller manager, scheduler, and kube-proxy through
+IPv4 loopback (`127.0.0.1`). This works with Talos's default listeners and with
+listeners bound to `0.0.0.0`. For listeners bound only to a node IP or IPv6
+address, custom ports, or disabled host networking, configure receiver overrides
+under `agent.config`. Functional testing currently uses IPv4.
+
+Etcd runs as a Talos service and is not discovered by
+`agent.controlPlaneMetrics.etcd.enabled` alone. Configure a custom discovery rule
+and target under `agent.config`, with authentication matching your endpoint.
+See the [Talos etcd metrics guide](https://docs.siderolabs.com/kubernetes-guides/monitoring-and-observability/etcd-metrics)
+for listener configuration. [Talos 1.14 moved the default authenticated HTTP metrics endpoint to port `2383`](https://docs.siderolabs.com/talos/v1.14/getting-started/what%27s-new-in-talos#etcd);
+custom `listen-metrics-urls` endpoints are unchanged.
 
 Talos enforces the [`baseline` Pod Security profile](https://docs.siderolabs.com/kubernetes-guides/security/pod-security)
 by default outside `kube-system`. The agent uses host networking, host ports, and
