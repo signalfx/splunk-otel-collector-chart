@@ -380,9 +380,11 @@ discovers the API server on port `6443`. Controller manager, scheduler, and
 kube-proxy metrics listeners must be reachable through their node IPs; Talos's
 default loopback listeners are not reachable at these addresses. Configure:
 
-- `cluster.controllerManager.extraArgs.bind-address` and
-  `cluster.scheduler.extraArgs.bind-address` to a reachable node IP or `0.0.0.0`
-  for IPv4. Their metrics ports are `10257` and `10259`, respectively.
+- `extraArgs.bind-address` in
+  [`KubeControllerManagerConfig`](https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubecontrollermanagerconfig)
+  and [`KubeSchedulerConfig`](https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeschedulerconfig)
+  to a reachable node IP or `0.0.0.0` for IPv4. Their metrics ports are `10257`
+  and `10259`, respectively.
 - Kube-proxy's [`KubeProxyConfig.config.metricsBindAddress`](https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeproxyconfig)
   to `0.0.0.0:10249` for IPv4. Kube-proxy uses a configuration file, so setting
   an extra command-line argument alone is insufficient.

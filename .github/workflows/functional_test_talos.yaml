@@ -55,13 +55,15 @@ jobs:
           mkdir -p "$TALOS_TEST_DIR"
           chmod 700 "$TALOS_TEST_DIR"
           cat > "$TALOS_TEST_DIR/controlplane-patch.yaml" <<'EOF'
-          cluster:
-            controllerManager:
-              extraArgs:
-                bind-address: 0.0.0.0
-            scheduler:
-              extraArgs:
-                bind-address: 0.0.0.0
+          apiVersion: v1alpha1
+          kind: KubeControllerManagerConfig
+          extraArgs:
+            bind-address: 0.0.0.0
+          ---
+          apiVersion: v1alpha1
+          kind: KubeSchedulerConfig
+          extraArgs:
+            bind-address: 0.0.0.0
           ---
           apiVersion: v1alpha1
           kind: KubeProxyConfig
