@@ -261,11 +261,6 @@
         "dbMonitoringEnabled": {
           "description": "Whether query samples and top queries from database receivers are routed to Database Monitoring",
           "type": "boolean"
-        },
-        "infrastructureMonitoringEventsEnabled": {
-          "description": "[DEPRECATED] Send Kubernetes events to Splunk Observability Infrastructure Monitoring. Use clusterReceiver.eventsEnabled instead.",
-          "type": "boolean",
-          "deprecated": true
         }
       },
       "anyOf": [
@@ -796,11 +791,6 @@
         },
         "podAnnotations": {
           "type": "object"
-        },
-        "k8sEventsEnabled": {
-          "description": "[DEPRECATED] Use eventsEnabled instead.",
-          "type": "boolean",
-          "deprecated": true
         },
         "eventsEnabled": {
           "description": "[DEPRECATED] Use k8sObjects instead.",
