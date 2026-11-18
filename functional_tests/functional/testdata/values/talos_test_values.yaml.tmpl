@@ -13,26 +13,11 @@ agent:
   extraVolumes:
     - name: telemetry-output
       emptyDir: {}
-    - name: talos-var
-      hostPath:
-        path: /var
-        type: Directory
   extraVolumeMounts:
     - name: telemetry-output
       mountPath: /splunk-telemetry
-    - name: talos-var
-      mountPath: /hostfs/var
-      readOnly: true
   config:
     receivers:
-      host_metrics:
-        scrapers:
-          filesystem:
-            include_mount_points:
-              mount_points: [/var]
-              match_type: strict
-            # Talos's Docker provisioner bind-mounts /var.
-            include_virtual_filesystems: true
       kubelet_stats:
         # The disposable Docker cluster uses self-signed kubelet serving certificates.
         insecure_skip_verify: true
