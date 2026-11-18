@@ -36,6 +36,19 @@ tests:
       - contains:
           path: spec.template.spec.volumes
           content:
+            name: host-var
+            hostPath:
+              path: /var
+              type: Directory
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: host-var
+            mountPath: /hostfs/var
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
             name: host-etc
             hostPath:
               path: /etc
@@ -107,6 +120,18 @@ tests:
       - equal:
           path: data.relay.config.config.scrape_configs[0].static_configs[0].targets
           value: ['`joinHostPort(endpoint, 6443)`']
+
+  - it: collects filesystem metrics from Talos persistent storage
+    template: configmap-agent.yaml
+    set:
+      distribution: talos
+    postRenderer:
+      cmd: yq
+      args: [eval, '.data.relay |= (from_yaml | .receivers.host_metrics.scrapers.filesystem)', '-']
+    asserts:
+      - equal:
+          path: data.relay.include_mount_points.mount_points
+          value: [/var]
 
   - it: requires an explicit cluster name on Talos
     template: daemonset.yaml

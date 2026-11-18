@@ -4,7 +4,7 @@
 
 This example configures experimental support for Talos Linux 1.14.6 with Kubernetes 1.36.1.
 
-Talos mounts its root filesystem as a read-only squashfs and does not ship
+Talos has a read-only root filesystem and does not ship
 `/usr/lib/os-release`. The preset omits that host path and the Docker-specific
 `/var/lib/docker/containers` path. Container logs are read from `/var/log/pods`.
 

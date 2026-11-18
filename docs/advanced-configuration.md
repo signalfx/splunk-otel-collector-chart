@@ -375,6 +375,7 @@ clusterName: my-talos-cluster
 ```
 
 The cluster name is not auto-detected on Talos, so `clusterName` is required.
+Host filesystem metrics cover `/var`, since Talos's root filesystem is read-only.
 Talos uses self-signed kubelet serving certificates by default. For kubelet metrics,
 configure [trusted serving certificates](https://docs.siderolabs.com/kubernetes-guides/monitoring-and-observability/deploy-metrics-server#option-2-rotate-kubelet-certificates),
 or explicitly set `agent.config.receivers.kubelet_stats.insecure_skip_verify: true`
@@ -420,8 +421,18 @@ helm install splunk-otel-collector splunk-otel-collector/splunk-otel-collector \
 Provide your destination settings in `my-values.yaml`. Restricted-policy warnings
 may still appear; follow your organization's namespace policy.
 
-Talos host service logs use [native log files or forwarding](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/logging-and-telemetry/logging),
-not journald. Configure these separately from Kubernetes container logs.
+With default container log collection, the existing `/var/log` mount can also collect
+[Talos service and kernel logs](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/logging-and-telemetry/logging#forward-logs-for-aggregation):
+
+```yaml
+logsCollection:
+  extraFileLogs:
+    file_log/talos:
+      include: [/var/log/*.log]
+      include_file_path: true
+      resource:
+        com.splunk.sourcetype: talos
+```
 
 ## AKS KubeletStats Receiver
 

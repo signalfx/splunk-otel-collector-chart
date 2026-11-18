@@ -278,6 +278,11 @@ spec:
           name: host-usr-lib-osrelease
           readOnly: true
         {{- end }}
+        {{- if eq .Values.distribution "talos" }}
+        - mountPath: /hostfs/var
+          name: host-var
+          readOnly: true
+        {{- end }}
         {{- end }}
         {{- end }}
         {{- if eq (include "splunk-otel-collector.secretMountRequired" .) "true" }}
@@ -438,6 +443,12 @@ spec:
       - name: host-usr-lib-osrelease
         hostPath:
           path: /usr/lib/os-release
+      {{- end }}
+      {{- if eq .Values.distribution "talos" }}
+      - name: host-var
+        hostPath:
+          path: /var
+          type: Directory
       {{- end }}
       {{- end }}
       {{- end }}
