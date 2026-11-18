@@ -17,6 +17,7 @@ jobs:
     env:
       TALOS_VERSION: v1.14.6
       TALOS_IMAGE: ghcr.io/siderolabs/talos:v1.14.6@sha256:7015cf6be90c17b283d887088872256c3af24299c42d3aa91e5e4f99a8207331
+      KUBERNETES_VERSION: 1.36.1 # Update together with the tested Talos version.
       TALOS_CLUSTER_NAME: splunk-otel-talos-ci
       TALOS_TEST_DIR: /tmp/splunk-otel-talos
       TALOSCONFIG: /tmp/splunk-otel-talos/talosconfig
@@ -48,7 +49,7 @@ jobs:
           sudo mv talosctl-linux-amd64 /usr/local/bin/talosctl
           rm sha256sum.txt
 
-      - name: Create Talos cluster on the newest tested Kubernetes version
+      - name: Create Talos cluster
         run: |
           # https://docs.siderolabs.com/talos/v1.14/platform-specific-installations/local-platforms/github-actions
           sudo modprobe br_netfilter
@@ -70,11 +71,10 @@ jobs:
           config:
             metricsBindAddress: 0.0.0.0:10249
           EOF
-          k8s_version=$(jq -er '.functional_test_v2["k8s-kind-version"] | sort_by(ltrimstr("v") | split(".") | map(tonumber)) | last' ci-matrix.json)
           talosctl cluster create docker \
             --name "$TALOS_CLUSTER_NAME" --state "$TALOS_TEST_DIR/state" \
             --talosconfig-destination "$TALOSCONFIG" \
-            --image "$TALOS_IMAGE" --kubernetes-version "${k8s_version#v}" \
+            --image "$TALOS_IMAGE" --kubernetes-version "$KUBERNETES_VERSION" \
             --config-patch-controlplanes @"$TALOS_TEST_DIR/controlplane-patch.yaml" \
             --workers 1
           kubectl label namespace default pod-security.kubernetes.io/enforce=privileged

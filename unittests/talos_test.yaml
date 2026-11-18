@@ -77,33 +77,36 @@ tests:
             name: checkpoint
             mountPath: /var/addon/splunk/otel_pos
 
-  - it: preserves legacy control plane receiver configuration on Talos
+  - it: discovers the Talos API server on port 6443 with legacy receivers
     template: configmap-agent.yaml
     set:
       distribution: talos
       featureGates.useControlPlaneMetricsHistogramData: false
+    postRenderer:
+      cmd: yq
+      args: [eval, '.data.relay |= (from_yaml | .receivers.receiver_creator.receivers."smartagent/kubernetes-apiserver")', '-']
     asserts:
-      - matchRegex:
-          path: data["relay"]
-          pattern: 'smartagent/kubernetes-apiserver:'
-      - matchRegex:
-          path: data["relay"]
-          pattern: 'smartagent/kubernetes-proxy:'
+      - equal:
+          path: data.relay.rule
+          value: 'type == "pod" && (labels["k8s-app"] == "kube-apiserver" || labels["component"] == "kube-apiserver")'
+      - equal:
+          path: data.relay.config.port
+          value: 6443
 
-  - it: preserves native control plane receivers on Talos by default
+  - it: discovers the Talos API server on port 6443 with native receivers
     template: configmap-agent.yaml
     set:
       distribution: talos
+    postRenderer:
+      cmd: yq
+      args: [eval, '.data.relay |= (from_yaml | .receivers.receiver_creator.receivers."prometheus/kubernetes-apiserver")', '-']
     asserts:
-      - matchRegex:
-          path: data["relay"]
-          pattern: 'prometheus/kubernetes-apiserver:'
-      - matchRegex:
-          path: data["relay"]
-          pattern: 'prometheus/kubernetes-scheduler:'
-      - matchRegex:
-          path: data["relay"]
-          pattern: 'prometheus/kube-controller-manager:'
+      - equal:
+          path: data.relay.rule
+          value: 'type == "pod" && (labels["k8s-app"] == "kube-apiserver" || labels["component"] == "kube-apiserver")'
+      - equal:
+          path: data.relay.config.config.scrape_configs[0].static_configs[0].targets
+          value: ['`joinHostPort(endpoint, 6443)`']
 
   - it: requires an explicit cluster name on Talos
     template: daemonset.yaml

@@ -58,6 +58,10 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
+			if kubeTestEnv == talosTestKubeEnv {
+				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, "host_metrics", 500)
+				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, "file_log", 500)
+			}
 		})
 	default:
 		assert.Failf(t, "failed to run runHostedClusterTests", "no test available for kubeTestEnv %s", kubeTestEnv)

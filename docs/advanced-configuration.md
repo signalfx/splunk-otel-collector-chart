@@ -364,10 +364,10 @@ This value can be omitted if none of the values apply.
 
 ### Talos Linux (experimental)
 
-Talos Linux is an immutable Linux operating system designed for Kubernetes.
-Support is experimental. Set `distribution: talos` to omit the unavailable
-`/usr/lib/os-release` and `/var/lib/docker/containers` host paths. The agent
-continues to collect node metrics and container logs from `/var/log/pods`:
+This experimental configuration is tested with **Talos Linux 1.14.6 and Kubernetes
+1.36.1**. The guidance below uses the Talos 1.14 configuration format.
+Set `distribution: talos` to omit the unavailable `/usr/lib/os-release` path and
+unused Docker log path. Container logs are collected from `/var/log/pods`:
 
 ```yaml
 distribution: talos
@@ -375,32 +375,32 @@ clusterName: my-talos-cluster
 ```
 
 The cluster name is not auto-detected on Talos, so `clusterName` is required.
+Talos uses self-signed kubelet serving certificates by default. For kubelet metrics,
+configure [trusted serving certificates](https://docs.siderolabs.com/kubernetes-guides/monitoring-and-observability/deploy-metrics-server#option-2-rotate-kubelet-certificates),
+or explicitly set `agent.config.receivers.kubelet_stats.insecure_skip_verify: true`
+in your values file according to your security requirements.
+
 Control plane collection requires an agent on the control plane node. The chart
 discovers the API server on port `6443`. Controller manager, scheduler, and
-kube-proxy metrics listeners must be reachable through their node IPs; Talos's
-default loopback listeners are not reachable at these addresses. Configure:
+kube-proxy metrics listeners must be reachable through their node IPs. Patch the
+existing Talos configuration documents, retaining their other fields:
 
 - `extraArgs.bind-address` in
   [`KubeControllerManagerConfig`](https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubecontrollermanagerconfig)
   and [`KubeSchedulerConfig`](https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeschedulerconfig)
-  to a reachable node IP or `0.0.0.0` for IPv4. Their metrics ports are `10257`
-  and `10259`, respectively.
+  to `0.0.0.0` for IPv4. Their metrics ports are `10257` and `10259`, respectively.
 - Kube-proxy's [`KubeProxyConfig.config.metricsBindAddress`](https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeproxyconfig)
-  to `0.0.0.0:10249` for IPv4. Kube-proxy uses a configuration file, so setting
-  an extra command-line argument alone is insufficient.
+  to `0.0.0.0:10249` for IPv4.
 
 For existing clusters, [reapply the generated bootstrap manifests](https://docs.siderolabs.com/kubernetes-guides/advanced-guides/upgrading-kubernetes#bootstrap-manifests)
 after changing kube-proxy configuration.
 Restrict access to these listeners with the [Talos ingress firewall](https://docs.siderolabs.com/talos/v1.14/networking/ingress-firewall).
-Use the appropriate IPv6 listen addresses for IPv6 clusters; functional testing
-currently uses IPv4. For custom metrics ports, configure receiver overrides under
-`agent.config`.
+The tested setup uses IPv4. For custom metrics ports, configure receiver overrides
+under `agent.config`. Under `agent.controlPlaneMetrics`, set
+`controllerManager.enabled`, `scheduler.enabled`, or `proxy.enabled` to `false`
+for components you do not monitor.
 
-Etcd runs as a Talos service and is not discovered by
-`agent.controlPlaneMetrics.etcd.enabled` alone. Configure a custom discovery rule
-and target under `agent.config`, with authentication matching your endpoint.
-See the [Talos etcd metrics guide](https://docs.siderolabs.com/kubernetes-guides/monitoring-and-observability/etcd-metrics)
-for listener configuration.
+For optional etcd metrics, follow [etcd setup for Talos](#talos).
 
 Talos enforces the [`baseline` Pod Security profile](https://docs.siderolabs.com/kubernetes-guides/security/pod-security)
 by default outside `kube-system`. The agent uses host networking, host ports, and
@@ -417,15 +417,11 @@ helm install splunk-otel-collector splunk-otel-collector/splunk-otel-collector \
   --values my-values.yaml
 ```
 
-Provide your destination settings in `my-values.yaml`. Follow your organization's
-policy for granting namespace permissions.
+Provide your destination settings in `my-values.yaml`. Restricted-policy warnings
+may still appear; follow your organization's namespace policy.
 
-[Talos uses native services rather than systemd](https://docs.siderolabs.com/talos/v1.14/learn-more/talos-for-linux-admins#processes-and-services);
-the chart's journald collection is not supported for Talos host service logs.
-This preset does not change kubelet or control plane TLS settings. If your kubelet serving
-certificate is self-signed, configure a trusted serving certificate or explicitly
-set `agent.config.receivers.kubelet_stats.insecure_skip_verify: true` according to
-your security requirements.
+Talos host service logs use [native log files or forwarding](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/logging-and-telemetry/logging),
+not journald. Configure these separately from Kubernetes container logs.
 
 ## AKS KubeletStats Receiver
 
@@ -818,7 +814,7 @@ The default configurations for the control plane receivers can be found in
 
 ### Setting up etcd metrics
 
-etcd exposes metrics on two endpoints. The primary client port (**2379**) requires
+On kubeadm-style clusters, etcd exposes metrics on two endpoints. The primary client port (**2379**) requires
 [mTLS](https://etcd.io/docs/latest/op-guide/security/). Since Kubernetes 1.16, kubeadm also
 configures a dedicated metrics endpoint at **`http://127.0.0.1:2381`** via
 [`--listen-metrics-urls`](https://etcd.io/docs/latest/op-guide/configuration/#--listen-metrics-urls)
@@ -846,6 +842,26 @@ If port 2381 is unavailable, provide client certificates to scrape port 2379 via
 (see below), or reconfigure etcd's
 [`--listen-metrics-urls`](https://etcd.io/docs/latest/op-guide/configuration/#--listen-metrics-urls)
 and set the chart's `port` accordingly.
+
+#### Talos
+
+For Talos 1.14.6, follow the [Talos etcd metrics guide](https://docs.siderolabs.com/kubernetes-guides/monitoring-and-observability/etcd-metrics)
+to configure the HTTP listener on port `2381` and restrict access to it. With the
+default native control plane receivers, use the API-server pod to discover each
+control plane node, because Talos runs etcd outside Kubernetes:
+
+```yaml
+agent:
+  controlPlaneMetrics:
+    etcd:
+      enabled: true
+  config:
+    receivers:
+      receiver_creator:
+        receivers:
+          prometheus/etcd:
+            rule: type == "pod" && labels["component"] == "kube-apiserver"
+```
 
 #### OpenShift / ROSA
 

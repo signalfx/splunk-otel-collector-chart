@@ -2,14 +2,13 @@
 
 ## How to install the collector on Talos Linux (experimental)
 
-This example configures experimental support for Kubernetes on Talos Linux.
+This example configures experimental support for Talos Linux 1.14.6 with Kubernetes 1.36.1.
 
 Talos mounts its root filesystem as a read-only squashfs and does not ship
 `/usr/lib/os-release`. The preset omits that host path and the Docker-specific
 `/var/lib/docker/containers` path. Container logs are read from `/var/log/pods`.
 
-Unlike `gke` and `eks`, the cluster name is not auto-discovered on Talos, so
-`clusterName` must be set.
+Set `clusterName` explicitly; it is not auto-discovered on Talos.
 
 Before installing, create a namespace that allows the agent's host networking,
 host ports, and host paths. See [Talos Linux configuration](../../docs/advanced-configuration.md#talos-linux-experimental)
