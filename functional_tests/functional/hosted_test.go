@@ -4,6 +4,9 @@
 package functional
 
 import (
+	"encoding/json"
+	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -69,6 +72,54 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 	if receivers := controlPlaneReceiversForEnv(kubeTestEnv); len(receivers) > 0 {
 		t.Run("control plane receiver checks", func(t *testing.T) {
 			runControlPlaneReceiverChecks(t, client, receivers)
+		})
+	}
+	if kubeTestEnv == talosTestKubeEnv {
+		t.Run("filesystem metrics", func(t *testing.T) {
+			validateTalosFilesystemMetrics(t, client, kubeConfig)
+		})
+	}
+}
+
+func validateTalosFilesystemMetrics(t *testing.T, client *kubernetes.Clientset, kubeConfig *rest.Config) {
+	t.Helper()
+	pods, err := internal.GetPods(t, client, internal.DefaultNamespace, internal.AgentLabelSelector)
+	require.NoError(t, err)
+	require.NotEmpty(t, pods.Items)
+
+	for _, pod := range pods.Items {
+		t.Run(pod.Name, func(t *testing.T) {
+			filePath := filepath.Join(t.TempDir(), "metrics.json")
+			internal.CopyFileFromPod(t, client, kubeConfig, internal.DefaultNamespace, pod.Name, "otel-collector", "/splunk-telemetry/metrics.json", filePath)
+			file, fileErr := os.Open(filePath)
+			require.NoError(t, fileErr)
+			defer file.Close()
+
+			decoder := json.NewDecoder(file)
+			for {
+				var raw json.RawMessage
+				decodeErr := decoder.Decode(&raw)
+				if errors.Is(decodeErr, io.EOF) || errors.Is(decodeErr, io.ErrUnexpectedEOF) {
+					break // The exporter can be writing the final record during the copy.
+				}
+				require.NoError(t, decodeErr)
+				metrics, unmarshalErr := (&pmetric.JSONUnmarshaler{}).UnmarshalMetrics(raw)
+				require.NoError(t, unmarshalErr)
+
+				for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
+					scopes := metrics.ResourceMetrics().At(i).ScopeMetrics()
+					for j := 0; j < scopes.Len(); j++ {
+						batch := scopes.At(j).Metrics()
+						for k := 0; k < batch.Len(); k++ {
+							metric := batch.At(k)
+							if metric.Name() == "system.filesystem.usage" && metricDataPointsHaveAttrs(metric, "mountpoint", "/var") {
+								return
+							}
+						}
+					}
+				}
+			}
+			t.Fatal("no system.filesystem.usage datapoints for /var")
 		})
 	}
 }

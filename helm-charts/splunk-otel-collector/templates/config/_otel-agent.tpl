@@ -91,11 +91,7 @@ receivers:
         include_mount_points:
           match_type: strict
           mount_points:
-            {{- if eq .Values.distribution "talos" }}
-            - "/var"
-            {{- else }}
             - "/"
-            {{- end }}
       memory:
       network:
       # System load average metrics https://en.wikipedia.org/wiki/Load_(computing)

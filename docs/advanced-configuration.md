@@ -376,10 +376,35 @@ clusterName: my-talos-cluster
 
 The cluster name is not auto-detected on Talos, so `clusterName` is required.
 
-Host filesystem metrics cover the [`EPHEMERAL` filesystem at `/var`](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/storage-and-disk-management/disk-management/system#ephemeral-volume) by default.
+The default filesystem scraper does not emit `system.filesystem.*` metrics on Talos.
+Kubelet node, Pod, and container filesystem metrics remain enabled.
+To collect host filesystem metrics for Talos's [`EPHEMERAL` filesystem at `/var`](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/storage-and-disk-management/disk-management/system#ephemeral-volume),
+add the following values. This gives the agent read access to all of `/var`, including
+etcd data on control-plane nodes.
+
+```yaml
+agent:
+  extraVolumes:
+    - name: host-var
+      hostPath:
+        path: /var
+        type: Directory
+  extraVolumeMounts:
+    - name: host-var
+      mountPath: /hostfs/var
+      readOnly: true
+  config:
+    receivers:
+      host_metrics:
+        scrapers:
+          filesystem:
+            include_mount_points:
+              match_type: strict
+              mount_points: [/var]
+```
+
 For [separate system or workload filesystems](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/storage-and-disk-management/disk-management/layout#disk-layout),
-configure `agent.extraVolumes`, `agent.extraVolumeMounts`, and
-`agent.config.receivers.host_metrics.scrapers.filesystem.include_mount_points` for their mount points.
+mount their host paths and update `include_mount_points` accordingly.
 For Pod-volume metrics exposed by kubelet, add its
 [`volume` metric group](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.164.1/receiver/kubeletstatsreceiver/README.md#metric-groups)
 alongside the existing groups through `agent.config.receivers.kubelet_stats.metric_groups`.

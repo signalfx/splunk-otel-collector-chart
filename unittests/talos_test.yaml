@@ -33,19 +33,10 @@ tests:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: varlibdockercontainers
-      - contains:
-          path: spec.template.spec.volumes
-          content:
-            name: host-var
-            hostPath:
-              path: /var
-              type: Directory
-      - contains:
-          path: spec.template.spec.containers[0].volumeMounts
-          content:
-            name: host-var
-            mountPath: /hostfs/var
-            readOnly: true
+      - notExists:
+          path: spec.template.spec.volumes[?(@.hostPath.path=="/var")]
+      - notExists:
+          path: spec.template.spec.containers[0].volumeMounts[?(@.mountPath=="/hostfs/var")]
       - contains:
           path: spec.template.spec.volumes
           content:
@@ -121,7 +112,7 @@ tests:
           path: data.relay.config.config.scrape_configs[0].static_configs[0].targets
           value: ['`joinHostPort(endpoint, 6443)`']
 
-  - it: collects filesystem metrics from Talos persistent storage
+  - it: retains the default filesystem selection on Talos
     template: configmap-agent.yaml
     set:
       distribution: talos
@@ -131,7 +122,7 @@ tests:
     asserts:
       - equal:
           path: data.relay.include_mount_points.mount_points
-          value: [/var]
+          value: [/]
 
   - it: requires an explicit cluster name on Talos
     template: daemonset.yaml
