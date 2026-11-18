@@ -379,8 +379,8 @@ The cluster name is not auto-detected on Talos, so `clusterName` is required.
 The default filesystem scraper does not emit `system.filesystem.*` metrics on Talos.
 Kubelet node, Pod, and container filesystem metrics remain enabled.
 To collect host filesystem metrics for Talos's [`EPHEMERAL` filesystem at `/var`](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/storage-and-disk-management/disk-management/system#ephemeral-volume),
-add the following values. This gives the agent read access to all of `/var`, including
-etcd data on control-plane nodes.
+add the following values. Mounting `/var` can expose kubelet credentials, Pod service-account
+tokens, and control-plane etcd data to the agent.
 
 ```yaml
 agent:
@@ -404,7 +404,8 @@ agent:
 ```
 
 For [separate system or workload filesystems](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/storage-and-disk-management/disk-management/layout#disk-layout),
-mount their host paths and update `include_mount_points` accordingly.
+update `include_mount_points`. Filesystems mounted under `/var` before the agent starts
+are already visible; mount paths outside `/var` separately.
 For Pod-volume metrics exposed by kubelet, add its
 [`volume` metric group](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.164.1/receiver/kubeletstatsreceiver/README.md#metric-groups)
 alongside the existing groups through `agent.config.receivers.kubelet_stats.metric_groups`.
@@ -415,9 +416,7 @@ or explicitly set `agent.config.receivers.kubelet_stats.insecure_skip_verify: tr
 in your values file according to your security requirements.
 
 Control plane collection requires an agent on the control plane node. The chart
-discovers the API server on port `6443`. With `agent.hostNetwork: true` (default),
-you can keep loopback listeners and [override receiver targets](#using-custom-configurations-for-nonstandard-control-plane-components),
-e.g. `127.0.0.1:10257`. To use the default node-IP targets for controller manager,
+discovers the API server on port `6443`. To use the default node-IP targets for controller manager,
 scheduler, and kube-proxy, patch the existing Talos configuration documents:
 
 - `extraArgs.bind-address` in
@@ -451,8 +450,8 @@ helm install splunk-otel-collector splunk-otel-collector/splunk-otel-collector \
 Provide your destination settings in `my-values.yaml`. Restricted-policy warnings
 may still appear; follow your organization's namespace policy.
 
-To also collect [Talos service and kernel logs](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/logging-and-telemetry/logging#forward-logs-for-aggregation)
-from the existing `/var/log` mount:
+With log collection enabled, add [Talos service and kernel logs](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/logging-and-telemetry/logging#forward-logs-for-aggregation)
+using the existing `/var/log` mount:
 
 ```yaml
 logsCollection:
@@ -809,6 +808,7 @@ end user, collecting metrics from these distributions is not supported.
 * Supported Distributions:
   * kubernetes 1.22 (kops created)
   * openshift v4.9
+  * [Talos Linux (experimental)](#talos-linux-experimental)
 * Unsupported Distributions:
   * aks
   * eks (API server metrics are collected separately, see below)
