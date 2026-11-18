@@ -389,6 +389,8 @@ default loopback listeners are not reachable at these addresses. Configure:
   to `0.0.0.0:10249` for IPv4. Kube-proxy uses a configuration file, so setting
   an extra command-line argument alone is insufficient.
 
+For existing clusters, [reapply the generated bootstrap manifests](https://docs.siderolabs.com/kubernetes-guides/advanced-guides/upgrading-kubernetes#bootstrap-manifests)
+after changing kube-proxy configuration.
 Restrict access to these listeners with the [Talos ingress firewall](https://docs.siderolabs.com/talos/v1.14/networking/ingress-firewall).
 Use the appropriate IPv6 listen addresses for IPv6 clusters; functional testing
 currently uses IPv4. For custom metrics ports, configure receiver overrides under
