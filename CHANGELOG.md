@@ -13,24 +13,13 @@ This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk Op
 - `chart`: Increase the default collection interval for chart-generated infrastructure, control plane, and Collector self-monitoring metrics from 10s to 1m. ([#2705](https://github.com/signalfx/splunk-otel-collector-chart/pull/2705))
   By moving to 1m by default, we reduce the number of data points emitted and therefore the expenditure of data collection.
   You can override these default settings. See [UPGRADING.md](https://github.com/signalfx/splunk-otel-collector-chart/blob/main/UPGRADING.md#01640-to-01650) for instructions.
-  
 
-## [0.165.0] - 2026-11-17
-
-This Splunk OpenTelemetry Collector for Kubernetes release adopts the [Splunk OpenTelemetry Collector v0.165.0](https://github.com/signalfx/splunk-otel-collector/releases/tag/v0.165.0).
-
-### 🛑 Breaking changes 🛑
-
-- `chart`: Increase default collection interval to 1m across all periodical scrapers and receivers ([#2705](https://github.com/signalfx/splunk-otel-collector-chart/pull/2705))
-  By moving to 1m by default, we reduce the number of data points emitted and therefore the expenditure of data collection.
-  You can override these default settings. See UPGRADING.md for instructions.
-  
 
 ### 🚩 Deprecations 🚩
 
 - `clusterReceiver`: Deprecate `splunkObservability.infrastructureMonitoringEventsEnabled` and the `smartagent/kubernetes-events` receiver. ([#2704](https://github.com/signalfx/splunk-otel-collector-chart/pull/2704))
   The option will be removed in a future release. Use `clusterReceiver.eventsEnabled` instead to send Kubernetes events as logs.
-  
+
 
 ### 🚀 New components 🚀
 
