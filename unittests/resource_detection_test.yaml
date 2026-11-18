@@ -637,7 +637,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/events,logs/objects,metrics,metrics/collector"
+          value: "logs,logs/objects,metrics,metrics/collector"
 
   - it: "GUARD — cluster receiver EKS pipeline names"
     set:
@@ -661,7 +661,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/events,logs/objects,metrics,metrics/collector,metrics/histograms"
+          value: "logs,logs/objects,metrics,metrics/collector,metrics/histograms"
 
   - it: "GUARD — cluster receiver pipeline names with enableK8sEntities"
     set:
@@ -687,7 +687,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/events,logs/k8s_entities,logs/objects,metrics,metrics/collector"
+          value: "logs,logs/k8s_entities,logs/objects,metrics,metrics/collector"
 
   - it: "GUARD — gateway pipeline names"
     set:
