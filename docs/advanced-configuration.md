@@ -424,15 +424,11 @@ existing Talos configuration documents, retaining their other fields:
   and [`KubeSchedulerConfig`](https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeschedulerconfig)
   to `0.0.0.0` for IPv4. Their metrics ports are `10257` and `10259`, respectively.
 - Kube-proxy's [`KubeProxyConfig.config.metricsBindAddress`](https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubeproxyconfig)
-  to `0.0.0.0:10249` for IPv4.
+  to `0.0.0.0:10249` for IPv4. On existing clusters,
+  [reapply the bootstrap manifests](https://docs.siderolabs.com/kubernetes-guides/advanced-guides/upgrading-kubernetes#bootstrap-manifests).
 
-For existing clusters, [reapply the generated bootstrap manifests](https://docs.siderolabs.com/kubernetes-guides/advanced-guides/upgrading-kubernetes#bootstrap-manifests)
-after changing kube-proxy configuration.
 Restrict access to these listeners with the [Talos ingress firewall](https://docs.siderolabs.com/talos/v1.14/networking/ingress-firewall).
-The tested setup uses IPv4. For custom metrics ports, configure receiver overrides
-under `agent.config`. Under `agent.controlPlaneMetrics`, set
-`controllerManager.enabled`, `scheduler.enabled`, or `proxy.enabled` to `false`
-for components you do not monitor.
+See [Control Plane metrics](#control-plane-metrics) for receiver overrides and disabling unused components.
 
 For optional etcd metrics, follow [etcd setup for Talos](#talos).
 
@@ -454,8 +450,8 @@ helm install splunk-otel-collector splunk-otel-collector/splunk-otel-collector \
 Provide your destination settings in `my-values.yaml`. Restricted-policy warnings
 may still appear; follow your organization's namespace policy.
 
-With default container log collection, the existing `/var/log` mount can also collect
-[Talos service and kernel logs](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/logging-and-telemetry/logging#forward-logs-for-aggregation):
+To also collect [Talos service and kernel logs](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/logging-and-telemetry/logging#forward-logs-for-aggregation)
+from the existing `/var/log` mount:
 
 ```yaml
 logsCollection:
