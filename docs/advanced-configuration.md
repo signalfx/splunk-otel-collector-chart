@@ -379,8 +379,7 @@ The cluster name is not auto-detected on Talos, so `clusterName` is required.
 The default filesystem scraper does not emit `system.filesystem.*` metrics on Talos.
 Kubelet node, Pod, and container filesystem metrics remain enabled.
 To collect host filesystem metrics for Talos's [`EPHEMERAL` filesystem at `/var`](https://docs.siderolabs.com/talos/v1.14/configure-your-talos-cluster/storage-and-disk-management/disk-management/system#ephemeral-volume),
-add the following values. Mounting `/var` can expose kubelet credentials, Pod service-account
-tokens, and control-plane etcd data to the agent.
+add the following values. This optional configuration gives the agent access to the host's `/var` directory.
 
 ```yaml
 agent:

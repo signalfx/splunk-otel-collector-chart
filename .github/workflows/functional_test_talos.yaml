@@ -5,13 +5,40 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      COLLECTOR_IMAGE:
+        description: 'COLLECTOR_IMAGE: Optional collector image override for Talos functional tests. Must use an approved Splunk collector repository on quay.io.'
+        required: false
+        default: 'quay.io/signalfx/splunk-otel-collector-dev:latest'
+        type: string
 
 permissions:
   contents: read
 
 jobs:
+  collector-image-config:
+    runs-on: ubuntu-24.04
+    outputs:
+      otelcol-image: ${{ steps.config.outputs.otelcol-image }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve collector image
+        id: config
+        uses: ./.github/actions/cloud-test-config
+        with:
+          collector-image: ${{ github.event.inputs.COLLECTOR_IMAGE || '' }}
+          event-name: ${{ github.event_name }}
+          pr-repo-full-name: ${{ github.event.pull_request.head.repo.full_name || '' }}
+          pr-user-login: ${{ github.event.pull_request.user.login || '' }}
+          ref: ${{ github.ref }}
+          repository: ${{ github.repository }}
+
   talos-test:
     name: Talos experimental support
+    needs: collector-image-config
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
@@ -24,6 +51,7 @@ jobs:
       KUBECONFIG: /tmp/splunk-otel-talos/kubeconfig
       HOST_ENDPOINT: 0.0.0.0
       KUBE_TEST_ENV: talos
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
       # Retain failed installations for the diagnostic step; the whole disposable
       # cluster is destroyed after diagnostics on both successful and failed runs.
       SKIP_TEARDOWN: 'true'
