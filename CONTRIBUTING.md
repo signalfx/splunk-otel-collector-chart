@@ -157,7 +157,7 @@ To install yq, follow the [installation instructions](https://github.com/mikefar
 
 To keep local renders consistent with CI, use the Helm 4 version printed by `bash ci_scripts/helm-version.sh`. This reads the `helm.sh/helm/v4` dependency in [functional_tests/go.mod](functional_tests/go.mod).
 
-Run `make install-tools` to install the pinned Helm version into `bin/`. Make targets use this binary automatically. For direct Helm commands, add the repository's `bin/` directory to your `PATH`.
+Run `make install-helm` to install or update the pinned Helm version in `bin/`, or `make install-tools` to install all development tools. Make targets use this binary automatically and fail with an update command if its version does not match. For direct Helm commands, add the repository's `bin/` directory to your `PATH`.
 
 When changing the helm chart the files under `examples/*/rendered_manifests` need to be rebuilt with `make render`. It's strongly recommended to use [pre-commit](https://pre-commit.com/) which will do this automatically for each commit (as well as run some linting).
 

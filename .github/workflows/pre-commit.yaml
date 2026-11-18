@@ -19,6 +19,6 @@ jobs:
     - name: Run pre-commit
       run: |
         pip install pre-commit==4.5.1
-        pre-commit run --all-files
+        pre-commit run --all-files --show-diff-on-failure
       env:
         SKIP: actionlint
