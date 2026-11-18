@@ -415,9 +415,10 @@ or explicitly set `agent.config.receivers.kubelet_stats.insecure_skip_verify: tr
 in your values file according to your security requirements.
 
 Control plane collection requires an agent on the control plane node. The chart
-discovers the API server on port `6443`. Controller manager, scheduler, and
-kube-proxy metrics listeners must be reachable through their node IPs. Patch the
-existing Talos configuration documents, retaining their other fields:
+discovers the API server on port `6443`. With `agent.hostNetwork: true` (default),
+you can keep loopback listeners and [override receiver targets](#using-custom-configurations-for-nonstandard-control-plane-components),
+e.g. `127.0.0.1:10257`. To use the default node-IP targets for controller manager,
+scheduler, and kube-proxy, patch the existing Talos configuration documents:
 
 - `extraArgs.bind-address` in
   [`KubeControllerManagerConfig`](https://docs.siderolabs.com/talos/v1.14/reference/configuration/kubernetes/kubecontrollermanagerconfig)
@@ -428,7 +429,7 @@ existing Talos configuration documents, retaining their other fields:
   [reapply the bootstrap manifests](https://docs.siderolabs.com/kubernetes-guides/advanced-guides/upgrading-kubernetes#bootstrap-manifests).
 
 Restrict access to these listeners with the [Talos ingress firewall](https://docs.siderolabs.com/talos/v1.14/networking/ingress-firewall).
-See [Control Plane metrics](#control-plane-metrics) for receiver overrides and disabling unused components.
+See [Control Plane metrics](#control-plane-metrics) to disable unused components.
 
 For optional etcd metrics, follow [etcd setup for Talos](#talos).
 
