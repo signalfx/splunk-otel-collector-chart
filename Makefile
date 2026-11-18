@@ -124,6 +124,7 @@ TEST_TIMEOUT ?= 75m
 #   make functionaltest
 #   make functionaltest SKIP_SETUP=true SKIP_TEARDOWN=true SKIP_TESTS=true TEARDOWN_BEFORE_SETUP=true SUITE="functional" UPDATE_EXPECTED_RESULTS=true KUBE_TEST_ENV="kind" KUBECONFIG="/path/to/kubeconfig"
 .PHONY: functionaltest
+functionaltest: export OTELCOL_IMAGE ?= quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079
 functionaltest: ## Run functional tests for this Helm chart with optional tags and environment variables
 	@echo "Running functional tests for this helm chart..."
 	cd functional_tests && go test -v -timeout $(TEST_TIMEOUT) ./$(SUITE)/... || exit 1

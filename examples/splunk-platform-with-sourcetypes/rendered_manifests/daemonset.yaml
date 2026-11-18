@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 8571aeffba5fe9530aa312fff10e4159903dfaf08c17e9316e1ae6ad77f76f16
+        checksum/config: c142cfa145816bf7254477a617f273f6bbade7102ac6df9cfc65f86fab0f12b8
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       hostNetwork: true
@@ -73,7 +73,7 @@ spec:
           containerPort: 4318
           hostPort: 4318
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.165.0
+        image: quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079
         imagePullPolicy: IfNotPresent
         securityContext:
           runAsUser: 0

@@ -31,7 +31,7 @@ spec:
         component: otel-collector-agent
         release: default
       annotations:
-        checksum/config: 60574d5b8e5493d711ea30c2701720f8713ebf89df91df1c6980f59377ecb981
+        checksum/config: 0d6c34a754d73fcc8b5ad8fb275bf3c33c80b67c783a1a88d6d736e03dbeb34e
         kubectl.kubernetes.io/default-container: otel-collector
     spec:
       dnsPolicy: ClusterFirstWithHostNet
@@ -81,7 +81,7 @@ spec:
           containerPort: 9411
           hostPort: 9411
           protocol: TCP
-        image: quay.io/signalfx/splunk-otel-collector:0.165.0
+        image: quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079
         imagePullPolicy: IfNotPresent
         securityContext:
           windowsOptions:

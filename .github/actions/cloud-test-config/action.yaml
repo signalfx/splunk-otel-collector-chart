@@ -62,7 +62,7 @@ runs:
           exit 1
         fi
 
-        collector_repo="$COLLECTOR_IMAGE"
+        collector_repo="${COLLECTOR_IMAGE:-quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079}"
         collector_repo="${collector_repo%%@*}"
         image_name="${collector_repo##*/}"
         if [[ "$image_name" == *:* ]]; then
@@ -97,12 +97,9 @@ runs:
             ;;
         esac
 
-        # When COLLECTOR_IMAGE is empty the chart default is used, so leave gke_autopilot_allowed=true.
-        if [[ -n "$COLLECTOR_IMAGE" ]]; then
-          if [[ "$collector_repo" != "quay.io/signalfx/splunk-otel-collector" ]]; then
-            gke_autopilot_allowed=false
-            echo "::notice::GKE Autopilot tests will be skipped because COLLECTOR_IMAGE='${COLLECTOR_IMAGE}' is not the stable quay.io/signalfx/splunk-otel-collector image."
-          fi
+        if [[ "$collector_repo" != "quay.io/signalfx/splunk-otel-collector" ]]; then
+          gke_autopilot_allowed=false
+          echo "::notice::GKE Autopilot tests will be skipped because the effective collector repository '${collector_repo}' is not the stable quay.io/signalfx/splunk-otel-collector image."
         fi
 
         {

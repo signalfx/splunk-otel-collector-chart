@@ -10,7 +10,7 @@ on:
       COLLECTOR_IMAGE:
         description: 'COLLECTOR_IMAGE: Optional collector image override for cloud functional tests. Must use an approved Splunk collector repository on quay.io.'
         required: false
-        default: 'quay.io/signalfx/splunk-otel-collector-dev:latest'
+        default: 'quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079'
         type: string
 
 permissions:

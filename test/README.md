@@ -36,7 +36,7 @@
     export CI_SPLUNK_HOST=$(kubectl get pod splunk --template={{.status.podIP}})
 
     # Use ci_scripts/sck_otel_values.yaml file to deploy sck otel collector
-    # Default image repository: quay.io/signalfx/splunk-otel-collector
+    # Default Collector image: quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079
     helm install ci-sck --set splunkPlatform.index=$CI_INDEX_EVENTS \
     --set splunkPlatform.token=$CI_SPLUNK_HEC_TOKEN \
     --set splunkPlatform.endpoint=https://$CI_SPLUNK_HOST:8088/services/collector \

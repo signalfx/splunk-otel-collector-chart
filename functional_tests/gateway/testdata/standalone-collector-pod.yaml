@@ -34,7 +34,7 @@ spec:
   restartPolicy: OnFailure
   containers:
     - name: otel-collector
-      image: quay.io/signalfx/splunk-otel-collector:latest
+      image: quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079
       args:
         - --config=/etc/otelcol/config.yaml
       volumeMounts:

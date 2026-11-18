@@ -1074,7 +1074,7 @@ service:
     resource:
       attributes:
         - name: service.name
-          value: otel-agent
+          value: otel-agent4
         - name: otelcol.service.mode
           value: agent
         {{- if .Values.environment }}

@@ -15,7 +15,7 @@ inputs:
   otelcol-image:
     description: Override for the collector image reference.
     required: false
-    default: ''
+    default: 'quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079'
   skip-tests:
     description: SKIP_TESTS value for environments that only validate install or upgrade wiring.
     required: false
@@ -54,7 +54,7 @@ runs:
       env:
         HOST_ENDPOINT: 0.0.0.0
         KUBE_TEST_ENV: ${{ inputs.kube-test-env }}
-        OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
+        OTELCOL_IMAGE: ${{ inputs.otelcol-image || 'quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079' }}
         SKIP_TESTS: ${{ inputs.skip-tests }}
         UPGRADE_FROM_VALUES: ${{ inputs.upgrade-from-values }}
         UPGRADE_FROM_CHART_DIR: ${{ inputs.mode == 'upgrade' && 'base/splunk-otel-collector' || '' }}

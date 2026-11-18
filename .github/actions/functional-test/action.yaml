@@ -38,7 +38,7 @@ inputs:
   otelcol-image:
     description: 'Override for the collector image reference (repository[:tag])'
     required: false
-    default: ''
+    default: 'quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079'
   suite:
     description: 'Test suite to run (passed as SUITE= to make functionaltest)'
     required: true
@@ -105,7 +105,7 @@ runs:
       env:
         KUBE_TEST_ENV: kind
         K8S_VERSION: ${{ inputs.k8s-version }}
-        OTELCOL_IMAGE: ${{ inputs.otelcol-image }}
+        OTELCOL_IMAGE: ${{ inputs.otelcol-image || 'quay.io/signalfx/splunk-otel-collector-dev:4d28662740545444ee3274f52fb7b81e1b02b079' }}
         UPDATE_EXPECTED_RESULTS: ${{ inputs.update-expected-results }}
         SUITE: ${{ inputs.suite }}
         EXPECT_COREDNS_IPV6: ${{ inputs.ip-family == 'ipv6' && 'true' || 'false' }}
