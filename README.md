@@ -88,6 +88,7 @@ The Helm chart works with default configurations of the main Kubernetes distribu
 - [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/docs/release-schedule)
   including [GKE Autopilot](docs/advanced-configuration.md#gke-autopilot-support)
 - [Red Hat OpenShift](https://access.redhat.com/support/policy/updates/openshift)
+- [Kubernetes on Talos Linux](docs/advanced-configuration.md#talos-linux-experimental) (experimental)
 
 While this helm chart should work for other Kubernetes distributions, it may
 require additional configurations applied to

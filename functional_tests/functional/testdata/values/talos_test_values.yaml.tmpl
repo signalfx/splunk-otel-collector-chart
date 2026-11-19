@@ -1,0 +1,68 @@
+distribution: talos
+clusterName: ci-talos-cluster
+splunkObservability:
+  realm: test
+  accessToken: test
+  tracesEnabled: false
+splunkPlatform:
+  endpoint: http://127.0.0.1:8088/services/collector/event
+  token: test
+  metricsEnabled: true
+  metricsIndex: test
+agent:
+  extraVolumes:
+    - name: telemetry-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: telemetry-output
+      mountPath: /splunk-telemetry
+  config:
+    receivers:
+      kubelet_stats:
+        # The disposable Docker cluster uses self-signed kubelet serving certificates.
+        insecure_skip_verify: true
+    exporters:
+      file/metrics:
+        path: /splunk-telemetry/metrics.json
+      file/logs:
+        path: /splunk-telemetry/logs.json
+    service:
+      extensions: [file_storage, health_check, headers_setter, k8s_observer, zpages]
+      pipelines:
+        metrics:
+          exporters: [file/metrics]
+        metrics/agent:
+          exporters: [file/metrics]
+        metrics/histograms:
+          exporters: [file/metrics]
+        logs:
+          exporters: [file/logs]
+        logs/entities:
+          exporters: [file/logs]
+clusterReceiver:
+  eventsEnabled: false
+  k8sObjects: []
+  extraVolumes:
+    - name: telemetry-output
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: telemetry-output
+      mountPath: /splunk-telemetry
+  config:
+    receivers:
+      k8s_cluster:
+        metadata_exporters: []
+    exporters:
+      file/metrics:
+        path: /splunk-telemetry/metrics.json
+    service:
+      extensions: [health_check]
+      pipelines:
+        metrics:
+          exporters: [file/metrics]
+        metrics/collector:
+          exporters: [file/metrics]
+operatorcrds:
+  install: false
+operator:
+  enabled: false

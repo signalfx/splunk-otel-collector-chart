@@ -51,21 +51,25 @@ func runHostedClusterTests(t *testing.T, kubeTestEnv string) {
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
 		})
 
-		if kubeTestEnv == rosaTestKubeEnv || kubeTestEnv == gceTestKubeEnv {
-			t.Run("control plane receiver checks", func(t *testing.T) {
-				runControlPlaneReceiverChecks(t, client, controlPlaneReceiversForEnv(kubeTestEnv))
-			})
-		}
-	case autopilotTestKubeEnv:
+	case autopilotTestKubeEnv, talosTestKubeEnv:
 		t.Run("component error logs checks", func(t *testing.T) {
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, 3*time.Minute, 10*time.Second)
 			internal.CheckPodsReady(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, 3*time.Minute, 10*time.Second)
 
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, kubeletstatsReceiverName, 500)
 			internal.CheckComponentHealth(t, client, internal.DefaultNamespace, clusterReceiverLabelSelector, k8sClusterReceiverName, 500)
+			if kubeTestEnv == talosTestKubeEnv {
+				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, "host_metrics", 500)
+				internal.CheckComponentHealth(t, client, internal.DefaultNamespace, internal.AgentLabelSelector, "file_log", 500)
+			}
 		})
 	default:
 		assert.Failf(t, "failed to run runHostedClusterTests", "no test available for kubeTestEnv %s", kubeTestEnv)
+	}
+	if receivers := controlPlaneReceiversForEnv(kubeTestEnv); len(receivers) > 0 {
+		t.Run("control plane receiver checks", func(t *testing.T) {
+			runControlPlaneReceiverChecks(t, client, receivers)
+		})
 	}
 }
 

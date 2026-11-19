@@ -79,6 +79,8 @@ func deployCharts(
 		addChartInfo("rosa_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	case gceTestKubeEnv:
 		addChartInfo("gce_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
+	case talosTestKubeEnv:
+		addChartInfo("talos_test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	default:
 		addChartInfo("test_values.yaml.tmpl", internal.GetDefaultChartOptions())
 	}

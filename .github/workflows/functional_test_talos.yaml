@@ -1,0 +1,141 @@
+name: functional-tests-talos
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      COLLECTOR_IMAGE:
+        description: 'COLLECTOR_IMAGE: Optional collector image override for Talos functional tests. Must use an approved Splunk collector repository on quay.io.'
+        required: false
+        default: 'quay.io/signalfx/splunk-otel-collector-dev:latest'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  collector-image-config:
+    runs-on: ubuntu-24.04
+    outputs:
+      otelcol-image: ${{ steps.config.outputs.otelcol-image }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve collector image
+        id: config
+        uses: ./.github/actions/cloud-test-config
+        with:
+          collector-image: ${{ github.event.inputs.COLLECTOR_IMAGE || '' }}
+          event-name: ${{ github.event_name }}
+          pr-repo-full-name: ${{ github.event.pull_request.head.repo.full_name || '' }}
+          pr-user-login: ${{ github.event.pull_request.user.login || '' }}
+          ref: ${{ github.ref }}
+          repository: ${{ github.repository }}
+
+  talos-test:
+    name: Talos experimental support
+    needs: collector-image-config
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      TALOS_VERSION: v1.14.6
+      TALOS_IMAGE: ghcr.io/siderolabs/talos:v1.14.6@sha256:7015cf6be90c17b283d887088872256c3af24299c42d3aa91e5e4f99a8207331
+      KUBERNETES_VERSION: 1.36.1 # Update together with the tested Talos version.
+      TALOS_CLUSTER_NAME: splunk-otel-talos-ci
+      TALOS_TEST_DIR: /tmp/splunk-otel-talos
+      TALOSCONFIG: /tmp/splunk-otel-talos/talosconfig
+      KUBECONFIG: /tmp/splunk-otel-talos/kubeconfig
+      HOST_ENDPOINT: 0.0.0.0
+      KUBE_TEST_ENV: talos
+      OTELCOL_IMAGE: ${{ needs.collector-image-config.outputs.otelcol-image }}
+      # Retain failed installations for the diagnostic step; the whole disposable
+      # cluster is destroyed after diagnostics on both successful and failed runs.
+      SKIP_TEARDOWN: 'true'
+      SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-helm
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: functional_tests/go.mod
+          cache-dependency-path: '**/go.sum'
+
+      - name: Install pinned Talos CLI
+        run: |
+          curl -fsSL -o talosctl-linux-amd64 "https://github.com/siderolabs/talos/releases/download/${TALOS_VERSION}/talosctl-linux-amd64"
+          curl -fsSL -o sha256sum.txt "https://github.com/siderolabs/talos/releases/download/${TALOS_VERSION}/sha256sum.txt"
+          grep ' talosctl-linux-amd64$' sha256sum.txt | sha256sum --check -
+          chmod +x talosctl-linux-amd64
+          sudo mv talosctl-linux-amd64 /usr/local/bin/talosctl
+          rm sha256sum.txt
+
+      - name: Create Talos cluster
+        run: |
+          # https://docs.siderolabs.com/talos/v1.14/platform-specific-installations/local-platforms/github-actions
+          sudo modprobe br_netfilter
+          mkdir -p "$TALOS_TEST_DIR"
+          chmod 700 "$TALOS_TEST_DIR"
+          cat > "$TALOS_TEST_DIR/controlplane-patch.yaml" <<'EOF'
+          apiVersion: v1alpha1
+          kind: KubeControllerManagerConfig
+          extraArgs:
+            bind-address: 0.0.0.0
+          ---
+          apiVersion: v1alpha1
+          kind: KubeSchedulerConfig
+          extraArgs:
+            bind-address: 0.0.0.0
+          ---
+          apiVersion: v1alpha1
+          kind: KubeProxyConfig
+          config:
+            metricsBindAddress: 0.0.0.0:10249
+          EOF
+          talosctl cluster create docker \
+            --name "$TALOS_CLUSTER_NAME" --state "$TALOS_TEST_DIR/state" \
+            --talosconfig-destination "$TALOSCONFIG" \
+            --image "$TALOS_IMAGE" --kubernetes-version "$KUBERNETES_VERSION" \
+            --config-patch-controlplanes @"$TALOS_TEST_DIR/controlplane-patch.yaml" \
+            --workers 1
+          kubectl label namespace default pod-security.kubernetes.io/enforce=privileged
+
+      - name: Run Talos functional sanity checks
+        run: |
+          make dep-update
+          make functionaltest SUITE=functional TEST_TIMEOUT=20m
+
+      - name: Collect Talos diagnostics
+        if: failure()
+        working-directory: tools
+        run: |
+          ./splunk_kubernetes_debug_info.sh || true
+          mkdir -p "$TALOS_TEST_DIR/diagnostics"
+          for node in controlplane-1 worker-1; do
+            docker logs --tail 1000 "$TALOS_CLUSTER_NAME-$node" > "$TALOS_TEST_DIR/diagnostics/talos-$node.log" 2>&1 || true
+          done
+
+      - name: Upload Talos diagnostics
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: talos-debug-info
+          path: |
+            tools/splunk_kubernetes_debug_info_*
+            ${{ env.TALOS_TEST_DIR }}/diagnostics
+          if-no-files-found: ignore
+          retention-days: 5
+
+      - name: Destroy disposable Talos cluster
+        if: always()
+        run: |
+          if [[ -d "$TALOS_TEST_DIR/state/$TALOS_CLUSTER_NAME" ]]; then
+            talosctl cluster destroy --name "$TALOS_CLUSTER_NAME" --state "$TALOS_TEST_DIR/state"
+          fi

@@ -83,11 +83,11 @@ receivers:
       cpu:
       disk:
       filesystem:
-        # Collect metrics from the root filesystem only to avoid scraping errors since the collector
+        # Collect metrics from a selected filesystem to avoid scraping errors since the collector
         # doesn't have access to all filesystems on the host by default. To collect metrics from
         # other devices, ensure that they are mounted to the collector container using
         # agent.extraVolumeMounts and agent.extraVolumes helm values options and override this list
-        # using agent.config.receivers.host_metrics.filesystem.include_mount_points.mount_points helm value.
+        # using agent.config.receivers.host_metrics.scrapers.filesystem.include_mount_points.mount_points helm value.
         include_mount_points:
           match_type: strict
           mount_points:
@@ -202,9 +202,9 @@ receivers:
       {{- end }}
 
       # Receivers for collecting k8s control plane metrics.
-      # Distributions besides Kubernetes and Openshift are not supported.
+      # Collect from self-managed Kubernetes, including Talos, and OpenShift.
       # Verified with Kubernetes v1.22 and Openshift v4.10.59.
-      {{- if and (or (eq .Values.distribution "openshift") (eq .Values.distribution "")) (not (.Values.featureGates.useControlPlaneMetricsHistogramData)) }}
+      {{- if and (or (eq .Values.distribution "openshift") (eq .Values.distribution "") (eq .Values.distribution "talos")) (not (.Values.featureGates.useControlPlaneMetricsHistogramData)) }}
       # Below, the TLS certificate verification is often skipped because the k8s default certificate is self signed and
       # will fail the verification.
       {{- if .Values.agent.controlPlaneMetrics.coredns.enabled }}
@@ -274,6 +274,8 @@ receivers:
       smartagent/kubernetes-apiserver:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "port" && port == 6443 && pod.labels["app"] == "openshift-kube-apiserver" && pod.labels["apiserver"] == "true"
+        {{- else if eq .Values.distribution "talos" }}
+        rule: type == "pod" && (labels["k8s-app"] == "kube-apiserver" || labels["component"] == "kube-apiserver")
         {{- else }}
         rule: type == "port" && port == 443 && pod.labels["k8s-app"] == "kube-apiserver"
         {{- end }}
@@ -285,6 +287,9 @@ receivers:
           type: kubernetes-apiserver
           useHTTPS: true
           useServiceAccount: true
+          {{- if eq .Values.distribution "talos" }}
+          port: 6443
+          {{- end }}
       {{- end }}
       {{- if .Values.agent.controlPlaneMetrics.proxy.enabled }}
       smartagent/kubernetes-proxy:
@@ -467,6 +472,8 @@ receivers:
       prometheus/kubernetes-apiserver:
         {{- if eq .Values.distribution "openshift" }}
         rule: type == "port" && port == 6443 && pod.labels["app"] == "openshift-kube-apiserver" && pod.labels["apiserver"] == "true"
+        {{- else if eq .Values.distribution "talos" }}
+        rule: type == "pod" && (labels["k8s-app"] == "kube-apiserver" || labels["component"] == "kube-apiserver")
         {{- else }}
         rule: type == "port" && port == 443 && (pod.labels["k8s-app"] == "kube-apiserver" || pod.labels["component"] == "kube-apiserver")
         {{- end }}
@@ -483,7 +490,11 @@ receivers:
                 ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
                 insecure_skip_verify: true
               static_configs:
+                {{- if eq .Values.distribution "talos" }}
+                - targets: ['`joinHostPort(endpoint, 6443)`']
+                {{- else }}
                 - targets: ["`endpoint`"]
+                {{- end }}
               metric_relabel_configs:
                 - source_labels: [__name__]
                   action: keep
