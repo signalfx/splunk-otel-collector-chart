@@ -6,7 +6,7 @@ metadata:
   name: default-obi
   namespace: default
   labels:
-    helm.sh/chart: obi-0.16.1
+    helm.sh/chart: obi-0.16.4
     app.kubernetes.io/name: obi
     app.kubernetes.io/instance: default
     app.kubernetes.io/version: "v1.0.0"
@@ -23,10 +23,10 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: b68e6bbb94a2cbbf7cb9fa36e685194aae5fa4c424f935b947679d413695c0c2
+        checksum/config: 1b1c00b6969728ded113c33910dd85ae7058a6974be3f70a820e094ffdc26dee
         
       labels:
-        helm.sh/chart: obi-0.16.1
+        helm.sh/chart: obi-0.16.4
         app.kubernetes.io/name: obi
         app.kubernetes.io/instance: default
         app.kubernetes.io/version: "v1.0.0"
@@ -35,6 +35,10 @@ spec:
         app.kubernetes.io/component: workload
     spec:
       serviceAccountName: default-obi
+      securityContext:
+        runAsGroup: 0
+        runAsNonRoot: false
+        runAsUser: 0
       hostPID: true
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
