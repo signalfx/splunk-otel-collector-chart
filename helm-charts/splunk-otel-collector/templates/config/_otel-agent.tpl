@@ -4,6 +4,7 @@ The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
 {{- $controlPlaneInterval := .Values.agent.controlPlaneMetrics.scrapeInterval | default .Values.defaultCollectionInterval -}}
+{{- $enrichProfilingMetrics := and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.profilingMetricsEnabled" .) "true") -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "tokenPassthrough" .Values.agent.tokenPassthrough) .) | nindent 2 }}
@@ -804,6 +805,9 @@ processors:
     filter:
       node_from_env_var: K8S_NODE_NAME
 
+  {{- if $enrichProfilingMetrics }}
+  {{- include "splunk-otel-collector.profilingMetricsProcessor" . | nindent 2 }}
+  {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
   {{- include "splunk-otel-collector.k8sAttributesSplunkPlatformMetrics" . | nindent 2 }}
@@ -1325,12 +1329,20 @@ service:
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
+    {{- if $enrichProfilingMetrics }}
+    {{- include "splunk-otel-collector.profilingMetricsPipelines" . | nindent 4 }}
+    {{- end }}
     # Default metrics pipeline.
     metrics:
       receivers:
         - host_metrics
         - kubelet_stats
+        {{- if $enrichProfilingMetrics }}
+        - routing/profiling_metrics
+        - forward/profiling_metrics
+        {{- else }}
         - otlp
+        {{- end }}
         {{- include "splunk-otel-collector.logsToMetricsAgentMetricReceivers" . | nindent 8 }}
         {{- if not .Values.featureGates.useControlPlaneMetricsHistogramData }}
         - receiver_creator

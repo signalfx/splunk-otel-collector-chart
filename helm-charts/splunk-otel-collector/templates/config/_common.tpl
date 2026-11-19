@@ -279,6 +279,59 @@ k8s_attributes/metrics:
         from: pod
 {{- end }}
 
+{{- define "splunk-otel-collector.profilingMetricsEnabled" -}}
+{{- $config := ternary .Values.gateway.config .Values.agent.config .Values.gateway.enabled | default dict -}}
+{{- $service := $config.service | default dict -}}
+{{- $pipelines := $service.pipelines | default dict -}}
+{{- $metrics := $pipelines.metrics | default dict -}}
+{{- /* An explicit receiver list replaces the chart's metrics intake and connector references. */ -}}
+{{- and (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") (not (hasKey $metrics "receivers")) -}}
+{{- end }}
+
+{{- define "splunk-otel-collector.profilingMetricsProcessor" -}}
+k8s_attributes/profiling_metrics:
+  pod_association:
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.uid
+    - sources:
+      - from: resource_attribute
+        name: k8s.pod.ip
+    - sources:
+      - from: resource_attribute
+        name: k8s.namespace.name
+      - from: resource_attribute
+        name: k8s.pod.name
+  extract:
+    metadata: [container.id]
+  {{- if not .Values.gateway.enabled }}
+  filter:
+    node_from_env_var: K8S_NODE_NAME
+  {{- end }}
+{{- end }}
+
+{{- define "splunk-otel-collector.profilingMetricsConnectors" -}}
+routing/profiling_metrics:
+  default_pipelines: [metrics]
+  table:
+    # The Kubernetes processor can fall back to the only container in a pod.
+    # Require an explicit container name before sending metrics through it.
+    - context: resource
+      condition: 'IsString(resource.attributes["k8s.container.name"]) and resource.attributes["k8s.container.name"] != "" and resource.attributes["container.id"] == nil'
+      pipelines: [metrics/profiling_enrichment]
+forward/profiling_metrics: {}
+{{- end }}
+
+{{- define "splunk-otel-collector.profilingMetricsPipelines" -}}
+metrics/profiling_ingest:
+  receivers: [otlp]
+  exporters: [routing/profiling_metrics]
+metrics/profiling_enrichment:
+  receivers: [routing/profiling_metrics]
+  processors: [k8s_attributes/profiling_metrics]
+  exporters: [forward/profiling_metrics]
+{{- end }}
+
 {{/*
 Resource processor for logs manipulations
 */}}

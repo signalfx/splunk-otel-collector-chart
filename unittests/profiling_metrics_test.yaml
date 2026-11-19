@@ -1,0 +1,100 @@
+suite: splunk-otel-collector.profilingMetrics
+values:
+  - ./values/basic.yaml
+templates:
+  - configmap-agent.yaml
+  - configmap-gateway.yaml
+set:
+  splunkObservability.profilingEnabled: true
+postRenderer:
+  cmd: yq
+  args: [eval, 'select(.data.relay != null) | .data.relay |= from_yaml', '-']
+tests:
+  - it: enriches incoming OTLP metrics on the agent without a gateway
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.processors["k8s_attributes/profiling_metrics"].extract.metadata
+          value: [container.id]
+      - equal:
+          path: data.relay.processors["k8s_attributes/profiling_metrics"].filter.node_from_env_var
+          value: K8S_NODE_NAME
+      - equal:
+          path: data.relay.connectors["routing/profiling_metrics"]
+          value:
+            default_pipelines: [metrics]
+            table:
+              - context: resource
+                condition: 'IsString(resource.attributes["k8s.container.name"]) and resource.attributes["k8s.container.name"] != "" and resource.attributes["container.id"] == nil'
+                pipelines: [metrics/profiling_enrichment]
+      - equal:
+          path: data.relay.service.pipelines["metrics/profiling_ingest"]
+          value:
+            receivers: [otlp]
+            exporters: [routing/profiling_metrics]
+      - equal:
+          path: data.relay.service.pipelines["metrics/profiling_enrichment"]
+          value:
+            receivers: [routing/profiling_metrics]
+            processors: [k8s_attributes/profiling_metrics]
+            exporters: [forward/profiling_metrics]
+      - contains:
+          path: data.relay.service.pipelines.metrics.receivers
+          content: forward/profiling_metrics
+
+  - it: leaves enrichment to the gateway when enabled
+    template: configmap-agent.yaml
+    set:
+      gateway.enabled: true
+    asserts:
+      - notExists:
+          path: data.relay.processors["k8s_attributes/profiling_metrics"]
+      - contains:
+          path: data.relay.service.pipelines.metrics.receivers
+          content: otlp
+
+  - it: adds enrichment to the gateway OTLP metrics path
+    template: configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+    asserts:
+      - notExists:
+          path: data.relay.processors["k8s_attributes/profiling_metrics"].filter
+      - equal:
+          path: data.relay.service.pipelines["metrics/profiling_enrichment"].processors
+          value: [k8s_attributes/profiling_metrics]
+      - equal:
+          path: data.relay.service.pipelines.metrics.receivers
+          value: [routing/profiling_metrics, forward/profiling_metrics]
+      - contains:
+          path: data.relay.service.pipelines.metrics.exporters
+          content: signalfx
+
+  - it: leaves metrics enrichment disabled when profiling is off
+    template: configmap-agent.yaml
+    set:
+      splunkObservability.profilingEnabled: false
+    asserts:
+      - notExists:
+          path: data.relay.connectors["routing/profiling_metrics"]
+
+  - it: leaves metrics enrichment disabled when Observability metrics are off
+    template: configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+      splunkObservability.metricsEnabled: false
+    asserts:
+      - notExists:
+          path: data.relay.connectors["routing/profiling_metrics"]
+
+  - it: preserves explicit metrics receiver overrides without dangling connectors
+    template: configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+      gateway.config.service.pipelines.metrics.receivers: [otlp]
+    asserts:
+      - equal:
+          path: data.relay.service.pipelines.metrics.receivers
+          value: [otlp]
+      - notExists:
+          path: data.relay.connectors["routing/profiling_metrics"]

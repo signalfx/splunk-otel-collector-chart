@@ -8,6 +8,7 @@ The values can be overridden in .Values.gateway.config
 {{- $clusterReceiverEntityEvents := and (eq (include "splunk-otel-collector.clusterReceiverThroughGateway" .) "true") (or $useEntityEventsForK8sProperties $k8sEntitiesEnabled) -}}
 {{- $logsPipelineEnabled := (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled)) -}}
 {{- $routeLogs := and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or $logsPipelineEnabled $clusterReceiverEntityEvents (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true")) -}}
+{{- $enrichProfilingMetrics := eq (include "splunk-otel-collector.profilingMetricsEnabled" .) "true" -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
   {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true "tokenPassthrough" .Values.gateway.tokenPassthrough) .) | nindent 2 }}
@@ -58,6 +59,10 @@ receivers:
 # By default k8s_attributes, memory_limiter and batch processors enabled.
 processors:
   {{- include "splunk-otel-collector.k8sAttributesProcessor" . | nindent 2 }}
+
+  {{- if $enrichProfilingMetrics }}
+  {{- include "splunk-otel-collector.profilingMetricsProcessor" . | nindent 2 }}
+  {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformMetricsEnabled" $) "true") }}
   {{- include "splunk-otel-collector.k8sAttributesSplunkPlatformMetrics" . | nindent 2 }}
@@ -177,8 +182,12 @@ exporters:
   {{- include "splunk-otel-collector.splunkPlatformTracesExporter" . | nindent 2 }}
   {{- end }}
 
-{{- if $routeLogs }}
+{{- if or $routeLogs $enrichProfilingMetrics }}
 connectors:
+  {{- if $enrichProfilingMetrics }}
+  {{- include "splunk-otel-collector.profilingMetricsConnectors" . | nindent 2 }}
+  {{- end }}
+  {{- if $routeLogs }}
   # Routing connector to separate entity events from regular logs
   routing/logs:
     {{- /* Must mirror the default logs pipeline's own guard, or unrouted logs go nowhere. */}}
@@ -215,6 +224,7 @@ connectors:
         condition: instrumentation_scope.name == "secureapp"
         pipelines: [logs/secureapp]
       {{- end }}
+  {{- end }}
 {{- end }}
 
 service:
@@ -304,9 +314,16 @@ service:
     {{- end }}
 
     {{- if (eq (include "splunk-otel-collector.metricsEnabled" .) "true") }}
+    {{- if $enrichProfilingMetrics }}
+    {{- include "splunk-otel-collector.profilingMetricsPipelines" . | nindent 4 }}
+    {{- end }}
     # default metrics pipeline
     metrics:
+      {{- if $enrichProfilingMetrics }}
+      receivers: [routing/profiling_metrics, forward/profiling_metrics]
+      {{- else }}
       receivers: [otlp]
+      {{- end }}
       processors:
         - memory_limiter
         - batch
