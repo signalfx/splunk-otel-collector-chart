@@ -49,8 +49,8 @@ resources:
                     k8s.cluster.name: dev-operator
                     k8s.node.name/exists: true
                     os.type: linux
-              name: disk_ops.total
-              type: gauge
+              name: system.disk.operations
+              type: sum
             - datapoints/include:
                 - attributes:
                     cluster_name: ci-k8s-cluster
