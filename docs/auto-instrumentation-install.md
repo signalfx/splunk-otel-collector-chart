@@ -156,12 +156,15 @@ instrumentation.opentelemetry.io/inject-python: "true"
 ```
 
 **.NET:**
-.NET auto-instrumentation uses annotations to set the .NET [Runtime Identifiers](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog).
-Current RIDs: `linux-x64` (default) and `linux-musl-x64`.
+.NET auto-instrumentation supports Linux on amd64 and arm64. The Operator selects the glibc profiler by default on both architectures.
 
 ```yaml
 instrumentation.opentelemetry.io/inject-dotnet: "true"
-instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-x64"
+```
+
+For a musl-based application, such as one running on Alpine Linux, also set the runtime annotation. Use the same value on amd64 and arm64.
+
+```yaml
 instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-musl-x64"
 ```
 
