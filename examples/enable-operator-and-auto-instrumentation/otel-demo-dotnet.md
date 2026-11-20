@@ -70,29 +70,16 @@ kubectl get pods -n dotnet-demo
 
 #### 2.3 Instrument Application by Setting Annotations
 
-When instrumenting your .NET application, specific annotations must be set to correctly of your application.
-This section covers how to instrument a .NET deployment, specifically `dotnet-test`, which is a `linux-x64` runtime environment.
+The Operator uses the runtime annotation to select the profiler for your application's C library. On both amd64 and arm64, `linux-x64` selects glibc and `linux-musl-x64` selects musl.
 
-.NET auto-instrumentation uses annotations to set the [.NET Runtime Identifiers (RIDs)](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog). There are currently two supported RIDs:
-
-1. **linux-x64**:
-   This is the default value and is typically used for most Linux distributions. It can be omitted since it is assumed by default.
-  - Annotation: `instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-x64"`
-
-2. **linux-musl-x64**:
-   This should be used specifically for applications running in environments based on the musl library.
-  - Annotation: `instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-musl-x64"`
-
-**Applying the Auto-Instrumentation Annotations:**
-
-The `dotnet-test` app deployed by the `dotnet-test` deployment is a glibc-based application and uses the linux-x64 runtime environment. Therefore, it is appropriate to apply the following annotation.
+The `dotnet-test` app uses glibc, which is the default. You can optionally set that runtime explicitly.
 
 - Example command:
   ```bash
   kubectl patch deployment dotnet-test -n dotnet-demo -p '{"spec": {"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/otel-dotnet-auto-runtime":"linux-x64"}}}} }'
   ```
 
-Once the runtime environment is specified, the next step is to apply the auto-instrumentation annotation. This enables OpenTelemetry to automatically instrument your application.
+Apply the injection annotation to enable auto-instrumentation.
 
 - For `dotnet-test`, use this command:
   ```bash
@@ -105,7 +92,7 @@ Once the runtime environment is specified, the next step is to apply the auto-in
 - If the chart is not installed in the "default" namespace, modify the annotation value to be "{chart_namespace}/splunk-otel-collector".
 - For troubleshooting purposes, examining the logs located in /var/log/opentelemetry/dotnet within the instrumented pod can provide valuable debugging insights.
 
-Remove the annotations to disable instrumentation:
+Remove the injection annotation to disable instrumentation. If you set the optional runtime annotation, you can remove it as well.
 
 ```bash
 kubectl patch deployment dotnet-test -n dotnet-demo --type=json -p='[{"op": "remove", "path": "/spec/template/metadata/annotations/instrumentation.opentelemetry.io~1otel-dotnet-auto-runtime"}]'
@@ -131,7 +118,7 @@ kubectl describe pod -n dotnet-demo -l app=dotnet-test
 # Status:           Running
 # Init Containers:
 #   opentelemetry-auto-instrumentation-dotnet:
-#     Image:         ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.3.0
+#     Image:         ghcr.io/signalfx/splunk-otel-dotnet/splunk-otel-dotnet:v1.18.0
 #     State:          Terminated
 #       Reason:       Completed
 #       Exit Code:    0
@@ -144,7 +131,7 @@ kubectl describe pod -n dotnet-demo -l app=dotnet-test
 #     OTEL_EXPORTER_OTLP_ENDPOINT:         http://splunk-otel-collector-agent:4318
 #     CORECLR_ENABLE_PROFILING:            1
 #     CORECLR_PROFILER:                    {918728DD-259F-4A6A-AC2B-B85E1B658318}
-#     CORECLR_PROFILER_PATH:               /otel-auto-instrumentation-dotnet/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
+#     CORECLR_PROFILER_PATH:               /otel-auto-instrumentation-dotnet/linux/OpenTelemetry.AutoInstrumentation.Native.so
 #     DOTNET_STARTUP_HOOKS:                /otel-auto-instrumentation-dotnet/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll
 #     DOTNET_ADDITIONAL_DEPS:              /otel-auto-instrumentation-dotnet/AdditionalDeps
 #     OTEL_DOTNET_AUTO_HOME:               /otel-auto-instrumentation-dotnet
@@ -154,7 +141,7 @@ kubectl describe pod -n dotnet-demo -l app=dotnet-test
 #     OTEL_RESOURCE_ATTRIBUTES_POD_NAME:   dotnet-test-8499bc67dc-wkf98 (v1:metadata.name)
 #     OTEL_RESOURCE_ATTRIBUTES_NODE_NAME:   (v1:spec.nodeName)
 #     OTEL_PROPAGATORS:                    tracecontext,baggage,b3
-#     OTEL_RESOURCE_ATTRIBUTES:            splunk.zc.method=splunk-otel-dotnet:v1.3.0,k8s.container.name=dotnet-test,k8s.deployment.name=dotnet-test,k8s.namespace.name=dotnet-demo,k8s.node.name=$(OTEL_RESOURCE_ATTRIBUTES_NODE_NAME),k8s.pod.name=$(OTEL_RESOURCE_ATTRIBUTES_POD_NAME),k8s.replicaset.name=dotnet-test-8499bc67dc,service.version=latest
+#     OTEL_RESOURCE_ATTRIBUTES:            splunk.zc.method=splunk-otel-dotnet:v1.18.0,k8s.container.name=dotnet-test,k8s.deployment.name=dotnet-test,k8s.namespace.name=dotnet-demo,k8s.node.name=$(OTEL_RESOURCE_ATTRIBUTES_NODE_NAME),k8s.pod.name=$(OTEL_RESOURCE_ATTRIBUTES_POD_NAME),k8s.replicaset.name=dotnet-test-8499bc67dc,service.version=latest
 #     Mounts:
 #       /otel-auto-instrumentation-dotnet from opentelemetry-auto-instrumentation-dotnet (rw)
 #       /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-j5wm6 (ro)
