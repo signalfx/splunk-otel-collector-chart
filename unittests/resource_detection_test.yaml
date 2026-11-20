@@ -364,38 +364,6 @@ tests:
           path: data["relay"]
           pattern: "logs:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
 
-  - it: "cluster receiver — logs/events (smartagent) pipeline has only k8s_cluster_name, not full resource_detection (cluster-scoped data)"
-    set:
-      distribution: openshift
-      cloudProvider: aws
-      clusterName: ""
-      splunkObservability:
-        infrastructureMonitoringEventsEnabled: true
-    template: configmap-cluster-receiver.yaml
-    asserts:
-      - notMatchRegex:
-          path: data["relay"]
-          pattern: "logs/events:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection\\n(?:\\s+- .+\\n)*\\s+receivers:"
-      - matchRegex:
-          path: data["relay"]
-          pattern: "logs/events:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
-
-  - it: "cluster receiver — logs/events (smartagent) with explicit clusterName has neither resource_detection nor k8s_cluster_name"
-    set:
-      distribution: openshift
-      cloudProvider: aws
-      clusterName: my-cluster
-      splunkObservability:
-        infrastructureMonitoringEventsEnabled: true
-    template: configmap-cluster-receiver.yaml
-    asserts:
-      - notMatchRegex:
-          path: data["relay"]
-          pattern: "logs/events:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection\\n(?:\\s+- .+\\n)*\\s+receivers:"
-      - notMatchRegex:
-          path: data["relay"]
-          pattern: "logs/events:\\n\\s+exporters:\\n(?:\\s+- .+\\n)+\\s+processors:\\n(?:\\s+- .+\\n)*\\s+- resource_detection/k8s_cluster_name\\n(?:\\s+- .+\\n)*\\s+receivers:"
-
   - it: "cluster receiver — logs/objects with explicit clusterName has neither resource_detection nor resource_detection/k8s_cluster_name"
     set:
       distribution: openshift
@@ -658,8 +626,6 @@ tests:
           - name: pods
             mode: pull
             interval: 60s
-      splunkObservability:
-        infrastructureMonitoringEventsEnabled: true
     template: configmap-cluster-receiver.yaml
     documentIndex: 0
     postRenderer:
@@ -671,7 +637,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/events,logs/objects,metrics,metrics/collector"
+          value: "logs,logs/objects,metrics,metrics/collector"
 
   - it: "GUARD — cluster receiver EKS pipeline names"
     set:
@@ -684,8 +650,6 @@ tests:
           - name: pods
             mode: pull
             interval: 60s
-      splunkObservability:
-        infrastructureMonitoringEventsEnabled: true
     template: configmap-cluster-receiver.yaml
     documentIndex: 0
     postRenderer:
@@ -697,7 +661,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/events,logs/objects,metrics,metrics/collector,metrics/histograms"
+          value: "logs,logs/objects,metrics,metrics/collector,metrics/histograms"
 
   - it: "GUARD — cluster receiver pipeline names with enableK8sEntities"
     set:
@@ -712,8 +676,6 @@ tests:
           - name: pods
             mode: pull
             interval: 60s
-      splunkObservability:
-        infrastructureMonitoringEventsEnabled: true
     template: configmap-cluster-receiver.yaml
     documentIndex: 0
     postRenderer:
@@ -725,7 +687,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/events,logs/k8s_entities,logs/objects,metrics,metrics/collector"
+          value: "logs,logs/k8s_entities,logs/objects,metrics,metrics/collector"
 
   - it: "GUARD — gateway pipeline names"
     set:
