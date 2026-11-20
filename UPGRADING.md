@@ -2,6 +2,17 @@
 
 ## 0.164.0 to 0.165.0
 
+### Breaking: .NET 8 and 9 auto-instrumentation support removed
+
+The default .NET auto-instrumentation image `v1.18.0` adds Linux arm64 support
+and drops .NET 8 and 9. Upgrade applications on those runtimes before adopting
+the new image.
+
+Remove any explicit `CORECLR_PROFILER_PATH` from `instrumentation.spec.dotnet.env`
+and the application environment so the Operator can select the glibc or musl
+profiler. If you upgrade with `--reuse-values`, use `--reset-then-reuse-values`
+to pick up the new chart defaults and review any saved image or profiler overrides.
+
 ### Breaking: scraping period set to 1 minute
 
 The default metrics collection interval increases from `10s` to `1m`, so metrics
