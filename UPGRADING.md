@@ -1,6 +1,6 @@
 # Upgrade guidelines
 
-## 0.164.0 to 0.165.0
+## 0.165.0 to 0.166.0
 
 ### Breaking: .NET 8 and 9 auto-instrumentation support removed
 
@@ -12,6 +12,8 @@ Remove any explicit `CORECLR_PROFILER_PATH` from `instrumentation.spec.dotnet.en
 and the application environment so the Operator can select the glibc or musl
 profiler. If you upgrade with `--reuse-values`, use `--reset-then-reuse-values`
 to pick up the new chart defaults and review any saved image or profiler overrides.
+
+## 0.164.0 to 0.165.0
 
 ### Breaking: scraping period set to 1 minute
 
