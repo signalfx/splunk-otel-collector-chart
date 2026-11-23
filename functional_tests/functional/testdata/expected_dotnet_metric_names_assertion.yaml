@@ -4,5 +4,5 @@ signal: metrics
 resources:
   - scopes:
       - metrics/include:
-          - name: process.runtime.dotnet.gc.collections.count
+          - name: dotnet.gc.collections
             type: gauge
