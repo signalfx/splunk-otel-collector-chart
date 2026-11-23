@@ -162,7 +162,7 @@ instrumentation.opentelemetry.io/inject-python: "true"
 instrumentation.opentelemetry.io/inject-dotnet: "true"
 ```
 
-For a musl-based application, such as one running on Alpine Linux, also set the runtime annotation. Use the same value on amd64 and arm64.
+For a musl-based application, such as one running on Alpine Linux, also set the runtime annotation. Use the same value on x64 and arm64.
 
 ```yaml
 instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-musl-x64"
