@@ -24,6 +24,13 @@ import (
 	"github.com/signalfx/splunk-otel-collector-chart/functional_tests/internal"
 )
 
+const (
+	expectedHostMetricsAssertionFile = "expected_host_metrics_assertion.yaml"
+	hostMetricsTargetMetric          = "system.memory.usage"
+	updateExpectedResultsEnabled     = "true"
+	updateExpectedResultsEnv         = "UPDATE_EXPECTED_RESULTS"
+)
+
 var globalSinks *sinks
 
 type sinks struct {
@@ -316,8 +323,15 @@ func testAgentMetrics(t *testing.T) {
 			"container.memory.usage", kindAgentPodNamePrefix, []string{"container.cpu.usage"})
 	})
 	t.Run("host_metrics", func(t *testing.T) {
-		testAgentMetricsAssertion(t, "expected_host_metrics_assertion.yaml",
-			"system.memory.usage", "", nil)
+		if os.Getenv(updateExpectedResultsEnv) == updateExpectedResultsEnabled {
+			testAgentMetricsAssertion(t, expectedHostMetricsAssertionFile, hostMetricsTargetMetric, "", nil)
+			return
+		}
+
+		assertionFile := filepath.Join(testDir, expectedValuesDir, expectedHostMetricsAssertionFile)
+		require.EventuallyWithT(t, func(tt *assert.CollectT) {
+			assert.NoError(tt, internal.CompareMetricsAgainstAnyBatch(assertionFile, globalSinks.agentMetricsConsumer.AllMetrics()))
+		}, 3*time.Minute, 10*time.Second, "No received metrics batch matched %s", assertionFile)
 	})
 }
 
