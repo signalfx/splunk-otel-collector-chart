@@ -53,7 +53,7 @@ tests:
           path: data.relay.service.pipelines.metrics.exporters
           content: signalfx
 
-  - it: drops malformed or empty resource IDs before applying resource ID precedence
+  - it: drops malformed or empty IDs and gives valid resource IDs precedence
     template: configmap-agent.yaml
     asserts:
       - equal:
@@ -64,7 +64,7 @@ tests:
                 - 'delete_key(resource.attributes, "container.id") where not IsString(resource.attributes["container.id"]) or resource.attributes["container.id"] == ""'
             - context: datapoint
               statements:
-                - 'delete_key(datapoint.attributes, "container.id") where resource.attributes["container.id"] != nil or datapoint.attributes["container.id"] == ""'
+                - 'delete_key(datapoint.attributes, "container.id") where resource.attributes["container.id"] != nil or not IsString(datapoint.attributes["container.id"]) or datapoint.attributes["container.id"] == ""'
 
   - it: preserves sender identity across restart-count resets without a Kubernetes ID lookup
     set:

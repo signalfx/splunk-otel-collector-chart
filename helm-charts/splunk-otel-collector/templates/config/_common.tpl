@@ -299,7 +299,7 @@ transform/profiling_metrics:
     - context: datapoint
       statements:
         # SignalFx combines resource and data-point attributes into the same dimension list.
-        - 'delete_key(datapoint.attributes, "container.id") where resource.attributes["container.id"] != nil or datapoint.attributes["container.id"] == ""'
+        - 'delete_key(datapoint.attributes, "container.id") where resource.attributes["container.id"] != nil or not IsString(datapoint.attributes["container.id"]) or datapoint.attributes["container.id"] == ""'
 {{- end }}
 
 {{- define "splunk-otel-collector.profilingMetricsConnectors" -}}

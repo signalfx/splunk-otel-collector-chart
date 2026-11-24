@@ -14,6 +14,8 @@ spec:
         app: java-test
       annotations:
         instrumentation.opentelemetry.io/inject-java: "true"
+        # Stand in for the sender-supplied ID a separately managed runtime injector sets.
+        resource.opentelemetry.io/container.id: "kind-java-fixture"
     spec:
       automountServiceAccountToken: false
       containers:

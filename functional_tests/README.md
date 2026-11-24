@@ -99,7 +99,7 @@ After building the Helm chart dependencies, run the local OTLP regression test w
 python3 functional_tests/profiling_metrics/verify.py /path/to/otelcol
 ```
 
-The test runs the rendered agent and gateway pipelines with synthetic inputs. It checks conflicting IDs, empty or malformed resource IDs, and points representing two container runs that share a pod UID and restart count.
+The test runs the rendered agent and gateway pipelines with synthetic inputs. It checks conflicting, empty, and malformed IDs and points representing two container runs that share a pod UID and restart count. The automated Kind functional suite checks that Java JVM metrics and CPU and allocation profiling logs carry the same ID supplied by the Java test fixture.
 
 ### Manual Kind restart test
 

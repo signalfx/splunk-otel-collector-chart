@@ -29,6 +29,7 @@ CASES = {
     "point-only-id": (None, "point-id", None, "point-id"),
     "empty-resource-with-point-id": ("", "point-id", None, "point-id"),
     "numeric-resource-with-point-id": (42, "point-id", None, "point-id"),
+    "numeric-point-id": (None, 42, None, None),
     "empty-point-id": (None, "", None, None),
 }
 

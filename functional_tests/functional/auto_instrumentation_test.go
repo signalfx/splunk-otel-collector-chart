@@ -346,38 +346,61 @@ func testPythonMetrics(t *testing.T) {
 // Python does not support memory profiling option.
 
 func testJavaProfiling(t *testing.T) {
-	checkProfilingFromApp(t, "java", "java-test", []string{"cpu", "allocation"})
+	// The Java deployment's resource annotation supplies this ID to both signals.
+	const containerID = "kind-java-fixture"
+	t.Run("JVM metric container ID", func(t *testing.T) {
+		require.Eventuallyf(t, func() bool {
+			return hasJavaMetricContainerID(containerID)
+		}, 3*time.Minute, 5*time.Second, "no java-test jvm.memory.used point with container.id %q", containerID)
+	})
+	checkProfilingFromApp(t, "java", "java-test", []string{"cpu", "allocation"}, containerID)
+}
+
+func hasJavaMetricContainerID(containerID string) bool {
+	for _, metrics := range globalSinks.agentMetricsConsumer.AllMetrics() {
+		for _, resourceMetrics := range metrics.ResourceMetrics().All() {
+			for _, scopeMetrics := range resourceMetrics.ScopeMetrics().All() {
+				for _, metric := range scopeMetrics.Metrics().All() {
+					if metric.Name() == "jvm.memory.used" && metricDataPointsHaveAttrs(metric,
+						"telemetry.sdk.language", "java", "service.name", "java-test", "container.id", containerID) {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
 
 func testNodeJSProfiling(t *testing.T) {
-	checkProfilingFromApp(t, "nodejs", "nodejs-test", []string{"cpu", "allocation"})
+	checkProfilingFromApp(t, "nodejs", "nodejs-test", []string{"cpu", "allocation"}, "")
 }
 
 func testDotNetProfiling(t *testing.T) {
-	checkProfilingFromApp(t, "dotnet", "dotnet-test", []string{"cpu", "allocation"})
+	checkProfilingFromApp(t, "dotnet", "dotnet-test", []string{"cpu", "allocation"}, "")
 }
 
 func testPythonProfiling(t *testing.T) {
-	checkProfilingFromApp(t, "python", "python-test", []string{"cpu"})
+	checkProfilingFromApp(t, "python", "python-test", []string{"cpu"}, "")
 }
 
-func checkProfilingFromApp(t *testing.T, sdkLanguage, serviceName string, profilingTypes []string) {
+func checkProfilingFromApp(t *testing.T, sdkLanguage, serviceName string, profilingTypes []string, containerID string) {
 	lc := globalSinks.logsConsumer
 	label := sdkLanguage + "/" + serviceName
 	for _, pt := range profilingTypes {
 		t.Run(pt, func(t *testing.T) {
 			require.Eventuallyf(t, func() bool {
-				return hasProfilingFromApp(lc, sdkLanguage, serviceName, pt)
+				return hasProfilingFromApp(lc, sdkLanguage, serviceName, pt, containerID)
 			}, 3*time.Minute, 5*time.Second,
-				"no %s profiling logs for %s within timeout", pt, label)
+				"no %s profiling logs for %s within timeout (expected container.id if set: %q)", pt, label, containerID)
 			t.Logf("Received %s profiling logs from %s", pt, label)
 		})
 	}
 }
 
 // hasProfilingFromApp finds a profiling log record matching the given identity
-// and profiling type.
-func hasProfilingFromApp(lc *consumertest.LogsSink, sdkLanguage, serviceName, profilingType string) bool {
+// and profiling type, and the container ID when expected.
+func hasProfilingFromApp(lc *consumertest.LogsSink, sdkLanguage, serviceName, profilingType, containerID string) bool {
 	for _, logs := range lc.AllLogs() {
 		for i := 0; i < logs.ResourceLogs().Len(); i++ {
 			rl := logs.ResourceLogs().At(i)
@@ -390,7 +413,8 @@ func hasProfilingFromApp(lc *consumertest.LogsSink, sdkLanguage, serviceName, pr
 					recAttrs := sl.LogRecords().At(k).Attributes()
 					if hasAttrMatch(recAttrs, "telemetry.sdk.language", sdkLanguage) &&
 						hasAttrMatch(recAttrs, "service.name", serviceName) &&
-						hasAttrMatch(recAttrs, "profiling.data.type", profilingType) {
+						hasAttrMatch(recAttrs, "profiling.data.type", profilingType) &&
+						(containerID == "" || hasAttrMatch(recAttrs, "container.id", containerID)) {
 						return true
 					}
 				}
