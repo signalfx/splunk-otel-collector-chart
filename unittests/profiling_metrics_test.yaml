@@ -53,7 +53,7 @@ tests:
           path: data.relay.service.pipelines.metrics.exporters
           content: signalfx
 
-  - it: drops empty IDs and gives the resource ID precedence over the data-point ID
+  - it: drops malformed or empty resource IDs before applying resource ID precedence
     template: configmap-agent.yaml
     asserts:
       - equal:
@@ -61,7 +61,7 @@ tests:
           value:
             - context: resource
               statements:
-                - 'delete_key(resource.attributes, "container.id") where resource.attributes["container.id"] == ""'
+                - 'delete_key(resource.attributes, "container.id") where not IsString(resource.attributes["container.id"]) or resource.attributes["container.id"] == ""'
             - context: datapoint
               statements:
                 - 'delete_key(datapoint.attributes, "container.id") where resource.attributes["container.id"] != nil or datapoint.attributes["container.id"] == ""'

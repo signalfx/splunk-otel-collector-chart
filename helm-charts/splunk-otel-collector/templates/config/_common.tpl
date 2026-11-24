@@ -295,7 +295,7 @@ transform/profiling_metrics:
     # The restart count can reset and be reused, so only use IDs supplied by the sender.
     - context: resource
       statements:
-        - 'delete_key(resource.attributes, "container.id") where resource.attributes["container.id"] == ""'
+        - 'delete_key(resource.attributes, "container.id") where not IsString(resource.attributes["container.id"]) or resource.attributes["container.id"] == ""'
     - context: datapoint
       statements:
         # SignalFx combines resource and data-point attributes into the same dimension list.

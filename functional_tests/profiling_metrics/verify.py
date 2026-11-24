@@ -28,13 +28,16 @@ CASES = {
     "duplicate-point-id": ("new-id", "new-id", "new-id", None),
     "point-only-id": (None, "point-id", None, "point-id"),
     "empty-resource-with-point-id": ("", "point-id", None, "point-id"),
+    "numeric-resource-with-point-id": (42, "point-id", None, "point-id"),
     "empty-point-id": (None, "", None, None),
 }
 
 
 def attributes(values):
-    return [{"key": key, "value": {"stringValue": value}}
-            for key, value in values.items() if value is not None]
+    return [
+        {"key": key, "value": {"intValue": str(value)} if isinstance(value, int) else {"stringValue": value}}
+        for key, value in values.items() if value is not None
+    ]
 
 
 def input_metrics():
@@ -105,7 +108,7 @@ def check(mode, collector, directory):
                 process.terminate()
 
     def read_attributes(obj):
-        return {attr["key"]: attr["value"].get("stringValue") for attr in obj.get("attributes", [])}
+        return {attr["key"]: next(iter(attr["value"].values()), None) for attr in obj.get("attributes", [])}
 
     received = {}
     for line in output.read_text().splitlines():
