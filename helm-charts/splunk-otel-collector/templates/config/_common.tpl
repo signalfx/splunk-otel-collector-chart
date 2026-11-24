@@ -288,6 +288,16 @@ k8s_attributes/metrics:
 {{- and .Values.splunkObservability.profilingMetricsContainerIdEnabled (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") (not (hasKey $metrics "receivers")) -}}
 {{- end }}
 
+{{- define "splunk-otel-collector.hasCustomContainerID" -}}
+{{- $found := false -}}
+{{- range .Values.extraAttributes.custom -}}
+  {{- if eq .name "container.id" -}}
+    {{- $found = true -}}
+  {{- end -}}
+{{- end -}}
+{{- $found -}}
+{{- end }}
+
 {{- define "splunk-otel-collector.profilingMetricsProcessor" -}}
 transform/profiling_metrics:
   error_mode: ignore

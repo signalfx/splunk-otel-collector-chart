@@ -118,3 +118,82 @@ tests:
           value: [otlp]
       - notExists:
           path: data.relay.connectors["forward/profiling_metrics"]
+
+  - it: ignores a custom container ID for agent metrics
+    template: configmap-agent.yaml
+    set: &customContainerID
+      extraAttributes.custom:
+        - name: container.id
+          value: static-id
+        - name: test.custom
+          value: preserved
+    asserts: &agentCustomContainerIDAssertions
+      - contains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/profiling_metrics
+      - notContains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource
+      - equal:
+          path: data.relay.processors["resource/profiling_metrics"].attributes
+          value:
+            - {action: insert, key: k8s.node.name, value: "${K8S_NODE_NAME}"}
+            - {action: upsert, key: k8s.cluster.name, value: test}
+            - {action: insert, key: test.custom, value: preserved}
+      - contains:
+          path: data.relay.processors.resource.attributes
+          content: {action: insert, key: container.id, value: static-id}
+
+  - it: prevents the agent from stamping a custom container ID before gateway normalization
+    template: configmap-agent.yaml
+    set:
+      <<: *customContainerID
+      gateway.enabled: true
+    asserts: *agentCustomContainerIDAssertions
+
+  - it: ignores a custom container ID for gateway metrics and preserves other attributes
+    template: configmap-gateway.yaml
+    set:
+      <<: *customContainerID
+      gateway.enabled: true
+    asserts:
+      - contains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/profiling_metrics
+      - notContains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/add_custom_attrs
+      - equal:
+          path: data.relay.processors["resource/profiling_metrics"].attributes
+          value:
+            - {action: upsert, key: test.custom, value: preserved}
+      - contains:
+          path: data.relay.processors["resource/add_custom_attrs"].attributes
+          content: {action: upsert, key: container.id, value: static-id}
+
+  - it: skips the gateway custom resource processor when container ID is the only entry
+    template: configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+      extraAttributes.custom:
+        - name: container.id
+          value: static-id
+    asserts:
+      - notContains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/add_custom_attrs
+      - notExists:
+          path: data.relay.processors["resource/profiling_metrics"]
+
+  - it: retains custom container IDs on gateway metrics when the feature is off
+    template: configmap-gateway.yaml
+    set:
+      <<: *customContainerID
+      gateway.enabled: true
+      splunkObservability.profilingMetricsContainerIdEnabled: false
+    asserts:
+      - contains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/add_custom_attrs
+      - notExists:
+          path: data.relay.processors["resource/profiling_metrics"]

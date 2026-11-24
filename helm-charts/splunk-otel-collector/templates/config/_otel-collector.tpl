@@ -9,6 +9,13 @@ The values can be overridden in .Values.gateway.config
 {{- $logsPipelineEnabled := (or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (.Values.splunkObservability.secureAppEnabled)) -}}
 {{- $routeLogs := and (eq (include "splunk-otel-collector.splunkO11yEnabled" .) "true") (or $logsPipelineEnabled $clusterReceiverEntityEvents (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true")) -}}
 {{- $enrichProfilingMetrics := eq (include "splunk-otel-collector.profilingMetricsEnabled" .) "true" -}}
+{{- $preserveMetricContainerID := and $enrichProfilingMetrics (eq (include "splunk-otel-collector.hasCustomContainerID" .) "true") -}}
+{{- $metricsCustomAttributes := list -}}
+{{- range .Values.extraAttributes.custom -}}
+  {{- if ne .name "container.id" -}}
+    {{- $metricsCustomAttributes = append $metricsCustomAttributes . -}}
+  {{- end -}}
+{{- end -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" (merge (dict "forceDirectEndpoint" true) .) | nindent 2 }}
   {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "forceDirectEndpoint" true "tokenPassthrough" .Values.gateway.tokenPassthrough) .) | nindent 2 }}
@@ -104,12 +111,11 @@ processors:
 
   {{- if .Values.extraAttributes.custom }}
   resource/add_custom_attrs:
-    attributes:
-      {{- range .Values.extraAttributes.custom }}
-      - action: upsert
-        value: {{ .value }}
-        key: {{ .name }}
-      {{- end }}
+    {{- include "splunk-otel-collector.gatewayCustomResourceAttributes" .Values.extraAttributes.custom | nindent 4 }}
+  {{- end }}
+  {{- if and $preserveMetricContainerID $metricsCustomAttributes }}
+  resource/profiling_metrics:
+    {{- include "splunk-otel-collector.gatewayCustomResourceAttributes" $metricsCustomAttributes | nindent 4 }}
   {{- end }}
 
   {{- if .Values.environment }}
@@ -333,7 +339,9 @@ service:
         {{- if .Values.clusterName }}
         - resource/add_cluster_name
         {{- end }}
-        {{- if .Values.extraAttributes.custom }}
+        {{- if and $preserveMetricContainerID $metricsCustomAttributes }}
+        - resource/profiling_metrics
+        {{- else if and (not $preserveMetricContainerID) .Values.extraAttributes.custom }}
         - resource/add_custom_attrs
         {{- end }}
         {{/*
@@ -467,4 +475,13 @@ service:
         - splunk_hec/platform_metrics
         {{- end }}
     {{- end }}
+{{- end }}
+
+{{- define "splunk-otel-collector.gatewayCustomResourceAttributes" -}}
+attributes:
+  {{- range . }}
+  - action: upsert
+    value: {{ .value }}
+    key: {{ .name }}
+  {{- end }}
 {{- end }}

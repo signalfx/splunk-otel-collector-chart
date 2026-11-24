@@ -4,7 +4,9 @@ The values can be overridden in .Values.agent.config
 */}}
 {{- define "splunk-otel-collector.agentConfig" -}}
 {{- $controlPlaneInterval := .Values.agent.controlPlaneMetrics.scrapeInterval | default .Values.defaultCollectionInterval -}}
-{{- $enrichProfilingMetrics := and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.profilingMetricsEnabled" .) "true") -}}
+{{- $profilingMetricsEnabled := eq (include "splunk-otel-collector.profilingMetricsEnabled" .) "true" -}}
+{{- $enrichProfilingMetrics := and $profilingMetricsEnabled (not .Values.gateway.enabled) -}}
+{{- $preserveMetricContainerID := and $profilingMetricsEnabled (eq (include "splunk-otel-collector.hasCustomContainerID" .) "true") -}}
 extensions:
   {{- include "splunk-otel-collector.opampExtension" . | nindent 2 }}
   {{- include "splunk-otel-collector.o11yOpAmpHttpForwarderExtension" (merge (dict "tokenPassthrough" .Values.agent.tokenPassthrough) .) | nindent 2 }}
@@ -863,29 +865,11 @@ processors:
         value: {{ .Values.clusterName }}
   {{- end }}
   resource:
-    attributes:
-      - action: insert
-        key: k8s.node.name
-        value: "${K8S_NODE_NAME}"
-      {{- if .Values.clusterName }}
-      - action: upsert
-        key: k8s.cluster.name
-        value: {{ .Values.clusterName }}
-      {{- end }}
-      {{- range .Values.extraAttributes.custom }}
-      - action: insert
-        key: "{{ .name }}"
-        value: "{{ .value }}"
-      {{- end }}
-      {{- if .Values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
-      - key: cluster_name
-        from_attribute: k8s.cluster.name
-        action: upsert
-      {{- if not .Values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
-      - key: k8s.cluster.name
-        action: delete
-      {{- end }}
-      {{- end }}
+    {{- include "splunk-otel-collector.agentResourceAttributes" (dict "values" .Values) | nindent 4 }}
+  {{- if $preserveMetricContainerID }}
+  resource/profiling_metrics:
+    {{- include "splunk-otel-collector.agentResourceAttributes" (dict "values" .Values "preserveContainerID" true) | nindent 4 }}
+  {{- end }}
 
   # Resource attributes specific to the agent itself.
   resource/add_agent_k8s:
@@ -1357,7 +1341,11 @@ service:
         - transform/drop_server_attrs
         {{- end }}
         - resource_detection
+        {{- if $preserveMetricContainerID }}
+        - resource/profiling_metrics
+        {{- else }}
         - resource
+        {{- end }}
         {{/*
         The attribute `deployment.environment.name` is not being set on metrics sent to Splunk Observability because it's already synced as the `sf_environment` property.
         More details: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/signalfxexporter#traces-configuration-correlation-only
@@ -1447,6 +1435,33 @@ service:
         - signalfx/histograms
     {{- end }}
     {{- end }}
+{{- end }}
+{{- define "splunk-otel-collector.agentResourceAttributes" -}}
+attributes:
+  - action: insert
+    key: k8s.node.name
+    value: "${K8S_NODE_NAME}"
+  {{- if .values.clusterName }}
+  - action: upsert
+    key: k8s.cluster.name
+    value: {{ .values.clusterName }}
+  {{- end }}
+  {{- range .values.extraAttributes.custom }}
+  {{- if not (and $.preserveContainerID (eq .name "container.id")) }}
+  - action: insert
+    key: "{{ .name }}"
+    value: "{{ .value }}"
+  {{- end }}
+  {{- end }}
+  {{- if .values.splunkPlatform.fieldNameConvention.renameFieldsSck }}
+  - key: cluster_name
+    from_attribute: k8s.cluster.name
+    action: upsert
+  {{- if not .values.splunkPlatform.fieldNameConvention.keepOtelConvention }}
+  - key: k8s.cluster.name
+    action: delete
+  {{- end }}
+  {{- end }}
 {{- end }}
 {{/*
 Discovery properties for the otel-collector agent
