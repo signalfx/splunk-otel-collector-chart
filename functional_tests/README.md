@@ -101,6 +101,8 @@ python3 functional_tests/profiling_metrics/verify.py /path/to/otelcol
 
 The test runs the rendered agent and gateway pipelines and checks conflicting IDs, empty IDs, and points from two container runs that share a pod UID and restart count.
 
+To verify a separately managed containerd runtime injector, run a Java pod in Kind with the standard agent and this chart option enabled. Compare the `container.id` on a JVM metric such as `jvm.memory.used` with the bare ID in Kubernetes `status.containerStatuses[].containerID`. Restart the Java container within the same pod and repeat the comparison. The pod UID should stay the same and the metric should carry the new container ID. Supply the ID through the runtime injector on both runs so the test exercises the same path as the deployment.
+
 ## Hosted cluster coverage
 
 Hosted functional tests install or upgrade the chart and validate collector
