@@ -254,6 +254,10 @@
           "description": "Whether profiling data is enabled for Splunk Observability",
           "type": "boolean"
         },
+        "profilingMetricsContainerIdEnabled": {
+          "description": "Opt in to container.id enrichment for incoming OTLP metrics when Splunk Observability profiling and metrics are enabled",
+          "type": "boolean"
+        },
         "secureAppEnabled": {
           "description": "Whether Secure Application features are enabled for Splunk Observability",
           "type": "boolean"

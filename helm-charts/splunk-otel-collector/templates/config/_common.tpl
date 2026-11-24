@@ -285,23 +285,22 @@ k8s_attributes/metrics:
 {{- $pipelines := $service.pipelines | default dict -}}
 {{- $metrics := $pipelines.metrics | default dict -}}
 {{- /* An explicit receiver list replaces the chart's metrics intake and connector references. */ -}}
-{{- and (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") (not (hasKey $metrics "receivers")) -}}
+{{- and .Values.splunkObservability.profilingMetricsContainerIdEnabled (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") (not (hasKey $metrics "receivers")) -}}
 {{- end }}
 
 {{- define "splunk-otel-collector.profilingMetricsProcessor" -}}
+transform/profiling_metrics:
+  error_mode: ignore
+  metric_statements:
+    - context: resource
+      statements:
+        - 'delete_key(resource.attributes, "container.id") where resource.attributes["container.id"] == ""'
 k8s_attributes/profiling_metrics:
+  # A restart count identifies a container run within a pod UID. Pod names and IPs can be reused.
   pod_association:
     - sources:
       - from: resource_attribute
         name: k8s.pod.uid
-    - sources:
-      - from: resource_attribute
-        name: k8s.pod.ip
-    - sources:
-      - from: resource_attribute
-        name: k8s.namespace.name
-      - from: resource_attribute
-        name: k8s.pod.name
   extract:
     metadata: [container.id]
   {{- if not .Values.gateway.enabled }}
@@ -314,10 +313,14 @@ k8s_attributes/profiling_metrics:
 routing/profiling_metrics:
   default_pipelines: [metrics]
   table:
-    # The Kubernetes processor can fall back to the only container in a pod.
-    # Require an explicit container name before sending metrics through it.
+    # The Kubernetes processor can infer the only container in a pod or pick the latest run.
+    # Require explicit identity before looking up missing or empty container IDs.
     - context: resource
-      condition: 'IsString(resource.attributes["k8s.container.name"]) and resource.attributes["k8s.container.name"] != "" and resource.attributes["container.id"] == nil'
+      condition: >-
+        IsString(resource.attributes["k8s.pod.uid"]) and resource.attributes["k8s.pod.uid"] != "" and
+        IsString(resource.attributes["k8s.container.name"]) and resource.attributes["k8s.container.name"] != "" and
+        resource.attributes["k8s.container.restart_count"] != nil and
+        (resource.attributes["container.id"] == nil or resource.attributes["container.id"] == "")
       pipelines: [metrics/profiling_enrichment]
 forward/profiling_metrics: {}
 {{- end }}
@@ -328,7 +331,7 @@ metrics/profiling_ingest:
   exporters: [routing/profiling_metrics]
 metrics/profiling_enrichment:
   receivers: [routing/profiling_metrics]
-  processors: [k8s_attributes/profiling_metrics]
+  processors: [transform/profiling_metrics, k8s_attributes/profiling_metrics]
   exporters: [forward/profiling_metrics]
 {{- end }}
 

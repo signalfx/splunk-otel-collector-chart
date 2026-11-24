@@ -6,6 +6,7 @@ templates:
   - configmap-gateway.yaml
 set:
   splunkObservability.profilingEnabled: true
+  splunkObservability.profilingMetricsContainerIdEnabled: true
 postRenderer:
   cmd: yq
   args: [eval, 'select(.data.relay != null) | .data.relay |= from_yaml', '-']
@@ -20,14 +21,6 @@ tests:
           path: data.relay.processors["k8s_attributes/profiling_metrics"].filter.node_from_env_var
           value: K8S_NODE_NAME
       - equal:
-          path: data.relay.connectors["routing/profiling_metrics"]
-          value:
-            default_pipelines: [metrics]
-            table:
-              - context: resource
-                condition: 'IsString(resource.attributes["k8s.container.name"]) and resource.attributes["k8s.container.name"] != "" and resource.attributes["container.id"] == nil'
-                pipelines: [metrics/profiling_enrichment]
-      - equal:
           path: data.relay.service.pipelines["metrics/profiling_ingest"]
           value:
             receivers: [otlp]
@@ -36,7 +29,7 @@ tests:
           path: data.relay.service.pipelines["metrics/profiling_enrichment"]
           value:
             receivers: [routing/profiling_metrics]
-            processors: [k8s_attributes/profiling_metrics]
+            processors: [transform/profiling_metrics, k8s_attributes/profiling_metrics]
             exporters: [forward/profiling_metrics]
       - contains:
           path: data.relay.service.pipelines.metrics.receivers
@@ -62,13 +55,59 @@ tests:
           path: data.relay.processors["k8s_attributes/profiling_metrics"].filter
       - equal:
           path: data.relay.service.pipelines["metrics/profiling_enrichment"].processors
-          value: [k8s_attributes/profiling_metrics]
+          value: [transform/profiling_metrics, k8s_attributes/profiling_metrics]
       - equal:
           path: data.relay.service.pipelines.metrics.receivers
           value: [routing/profiling_metrics, forward/profiling_metrics]
       - contains:
           path: data.relay.service.pipelines.metrics.exporters
           content: signalfx
+
+  - it: routes empty and absent IDs for enrichment while preserving nonempty IDs
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.connectors["routing/profiling_metrics"]
+          value:
+            default_pipelines: [metrics]
+            table:
+              - context: resource
+                condition: >-
+                  IsString(resource.attributes["k8s.pod.uid"]) and resource.attributes["k8s.pod.uid"] != "" and
+                  IsString(resource.attributes["k8s.container.name"]) and resource.attributes["k8s.container.name"] != "" and
+                  resource.attributes["k8s.container.restart_count"] != nil and
+                  (resource.attributes["container.id"] == nil or resource.attributes["container.id"] == "")
+                pipelines: [metrics/profiling_enrichment]
+      - equal:
+          path: data.relay.processors["transform/profiling_metrics"].metric_statements[0].statements
+          value:
+            - 'delete_key(resource.attributes, "container.id") where resource.attributes["container.id"] == ""'
+
+  - it: uses pod UID and requires a restart count before looking up a container run
+    template: configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+    asserts:
+      - equal:
+          path: data.relay.processors["k8s_attributes/profiling_metrics"].pod_association
+          value:
+            - sources:
+                - from: resource_attribute
+                  name: k8s.pod.uid
+      - matchRegex:
+          path: data.relay.connectors["routing/profiling_metrics"].table[0].condition
+          pattern: 'and resource\.attributes\["k8s\.container\.restart_count"\] != nil and'
+
+  - it: leaves metrics enrichment disabled unless explicitly opted in
+    template: configmap-agent.yaml
+    set:
+      splunkObservability.profilingMetricsContainerIdEnabled: false
+    asserts:
+      - notExists:
+          path: data.relay.connectors["routing/profiling_metrics"]
+      - contains:
+          path: data.relay.service.pipelines.metrics.receivers
+          content: otlp
 
   - it: leaves metrics enrichment disabled when profiling is off
     template: configmap-agent.yaml

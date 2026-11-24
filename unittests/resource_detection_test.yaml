@@ -20,6 +20,7 @@ set:
     metricsEnabled: true
     tracesEnabled: true
     profilingEnabled: true
+    profilingMetricsContainerIdEnabled: true
 
 tests:
   - it: "vanilla K8s on AWS — all modes have [env, ec2, system]"
