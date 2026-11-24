@@ -320,7 +320,7 @@ service:
     # default metrics pipeline
     metrics:
       {{- if $enrichProfilingMetrics }}
-      receivers: [routing/profiling_metrics, forward/profiling_metrics]
+      receivers: [forward/profiling_metrics]
       {{- else }}
       receivers: [otlp]
       {{- end }}

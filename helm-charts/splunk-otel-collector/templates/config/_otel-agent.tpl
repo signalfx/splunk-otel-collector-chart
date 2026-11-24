@@ -1338,7 +1338,6 @@ service:
         - host_metrics
         - kubelet_stats
         {{- if $enrichProfilingMetrics }}
-        - routing/profiling_metrics
         - forward/profiling_metrics
         {{- else }}
         - otlp

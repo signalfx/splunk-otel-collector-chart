@@ -292,46 +292,24 @@ k8s_attributes/metrics:
 transform/profiling_metrics:
   error_mode: ignore
   metric_statements:
+    # The restart count can reset and be reused, so only use IDs supplied by the sender.
     - context: resource
       statements:
         - 'delete_key(resource.attributes, "container.id") where resource.attributes["container.id"] == ""'
-k8s_attributes/profiling_metrics:
-  # A restart count identifies a container run within a pod UID. Pod names and IPs can be reused.
-  pod_association:
-    - sources:
-      - from: resource_attribute
-        name: k8s.pod.uid
-  extract:
-    metadata: [container.id]
-  {{- if not .Values.gateway.enabled }}
-  filter:
-    node_from_env_var: K8S_NODE_NAME
-  {{- end }}
+    - context: datapoint
+      statements:
+        # SignalFx combines resource and data-point attributes into the same dimension list.
+        - 'delete_key(datapoint.attributes, "container.id") where resource.attributes["container.id"] != nil or datapoint.attributes["container.id"] == ""'
 {{- end }}
 
 {{- define "splunk-otel-collector.profilingMetricsConnectors" -}}
-routing/profiling_metrics:
-  default_pipelines: [metrics]
-  table:
-    # The Kubernetes processor can infer the only container in a pod or pick the latest run.
-    # Require explicit identity before looking up missing or empty container IDs.
-    - context: resource
-      condition: >-
-        IsString(resource.attributes["k8s.pod.uid"]) and resource.attributes["k8s.pod.uid"] != "" and
-        IsString(resource.attributes["k8s.container.name"]) and resource.attributes["k8s.container.name"] != "" and
-        resource.attributes["k8s.container.restart_count"] != nil and
-        (resource.attributes["container.id"] == nil or resource.attributes["container.id"] == "")
-      pipelines: [metrics/profiling_enrichment]
 forward/profiling_metrics: {}
 {{- end }}
 
 {{- define "splunk-otel-collector.profilingMetricsPipelines" -}}
 metrics/profiling_ingest:
   receivers: [otlp]
-  exporters: [routing/profiling_metrics]
-metrics/profiling_enrichment:
-  receivers: [routing/profiling_metrics]
-  processors: [transform/profiling_metrics, k8s_attributes/profiling_metrics]
+  processors: [transform/profiling_metrics]
   exporters: [forward/profiling_metrics]
 {{- end }}
 

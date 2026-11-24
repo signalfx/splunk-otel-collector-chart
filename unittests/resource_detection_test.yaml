@@ -623,7 +623,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/entities,logs/host,metrics,metrics/agent,metrics/histograms,metrics/profiling_enrichment,metrics/profiling_ingest,traces"
+          value: "logs,logs/entities,logs/host,metrics,metrics/agent,metrics/histograms,metrics/profiling_ingest,traces"
 
   - it: "GUARD — agent pipeline names with secureAppEnabled"
     set:
@@ -646,7 +646,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/entities,logs/host,logs/secureapp,logs/split,metrics,metrics/agent,metrics/histograms,metrics/profiling_enrichment,metrics/profiling_ingest,traces"
+          value: "logs,logs/entities,logs/host,logs/secureapp,logs/split,metrics,metrics/agent,metrics/histograms,metrics/profiling_ingest,traces"
 
   - it: "GUARD — cluster receiver pipeline names"
     set:
@@ -744,7 +744,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/entities,logs/split,metrics,metrics/collector,metrics/profiling_enrichment,metrics/profiling_ingest,traces"
+          value: "logs,logs/entities,logs/split,metrics,metrics/collector,metrics/profiling_ingest,traces"
 
   - it: "GUARD — gateway pipeline names with secureAppEnabled"
     set:
@@ -764,4 +764,4 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/entities,logs/secureapp,logs/split,metrics,metrics/collector,metrics/profiling_enrichment,metrics/profiling_ingest,traces"
+          value: "logs,logs/entities,logs/secureapp,logs/split,metrics,metrics/collector,metrics/profiling_ingest,traces"

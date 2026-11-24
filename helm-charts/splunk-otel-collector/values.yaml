@@ -235,10 +235,10 @@ splunkObservability:
   # If you don't use AlwaysOn Profiling for Splunk APM, you can leave this disabled.
   profilingEnabled: false
 
-  # Opt in to adding container.id to OTLP metrics for profiling correlation.
+  # Opt in to normalizing container.id on OTLP metrics for profiling correlation.
   # Requires profiling, Observability metrics, and the chart's default metrics receivers.
-  # Metrics must identify the pod UID, container name, and container restart count.
-  # The extra dimension changes metric time series and can increase cardinality.
+  # Uses the sender's resource-level ID when present, otherwise its data-point ID.
+  # Changing the exported ID can change metric time series.
   profilingMetricsContainerIdEnabled: false
 
   # Enables Secure Application features

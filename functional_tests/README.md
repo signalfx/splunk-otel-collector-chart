@@ -91,6 +91,16 @@ make functionaltest SUITE=functional
 kind delete cluster --name=kind
 ```
 
+## Profiling metric container IDs
+
+After building the Helm chart dependencies, run the local OTLP regression test with the Collector version pinned by the chart:
+
+```bash
+python3 functional_tests/profiling_metrics/verify.py /path/to/otelcol
+```
+
+The test runs the rendered agent and gateway pipelines and checks conflicting IDs, empty IDs, and points from two container runs that share a pod UID and restart count.
+
 ## Hosted cluster coverage
 
 Hosted functional tests install or upgrade the chart and validate collector
