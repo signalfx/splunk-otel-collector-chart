@@ -20,11 +20,11 @@ tests:
       - contains:
           path: spec.propagators
           content: b3
-      - contains:
+      - notContains:
           path: spec.dotnet.env
+          any: true
           content:
             name: CORECLR_PROFILER_PATH
-            value: /otel-auto-instrumentation-dotnet/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so
       - contains:
           path: spec.dotnet.env
           content:
