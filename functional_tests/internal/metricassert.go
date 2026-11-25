@@ -176,6 +176,26 @@ func AssertMetricNames(t *testing.T, sink *consumertest.MetricsSink, assertionFi
 	}, timeout, interval, "Metric name assertion failed for %s", assertionFile)
 }
 
+// CompareMetricsAgainstAnyBatch succeeds when any individual batch matches the assertion.
+func CompareMetricsAgainstAnyBatch(assertionFile string, batches []pmetric.Metrics) error {
+	if len(batches) == 0 {
+		return fmt.Errorf("no metrics batches received for %s", assertionFile)
+	}
+
+	var comparisonErr error
+	for i := len(batches) - 1; i >= 0; i-- {
+		err := pmetricassert.AssertMetrics(assertionFile, batches[i])
+		if err == nil {
+			return nil
+		}
+		if comparisonErr == nil {
+			comparisonErr = err
+		}
+	}
+
+	return fmt.Errorf("none of %d received metrics batches matched %s; newest batch: %w", len(batches), assertionFile, comparisonErr)
+}
+
 // AssertMetricsSnapshot selects a complete live batch and checks its assertion.
 func AssertMetricsSnapshot(t *testing.T, sink *consumertest.MetricsSink, targetMetric, assertionFile string, timeout, interval time.Duration, opts ...MetricsAssertionOption) {
 	t.Helper()
