@@ -1427,6 +1427,47 @@ autodetect:
   prometheus: true
 ```
 
+### Avoid duplicate scraping with custom Prometheus receivers
+
+When you configure a custom Prometheus receiver under `agent.config.receivers`, consider the deployment
+topology of the Collector. The agent runs as a DaemonSet, with one Collector instance per eligible
+Kubernetes node. If a custom scrape job uses cluster-wide pod discovery without restricting targets to
+the local node, every agent instance scrapes the same application pods.
+
+This can result in duplicate metric collection, inflated aggregations, and unnecessary telemetry ingestion.
+The resulting metric series can differ in agent-specific resource attributes, such as `host.name` and
+`host.id`, causing them to appear as separate time series in the backend.
+
+For scrape jobs that use `kubernetes_sd_configs` with `role: pod`, limit discovery to pods on the
+agent's own node. The chart sets the `K8S_NODE_NAME` environment variable on every agent pod:
+
+```yaml
+scrape_configs:
+  - job_name: my-app
+    kubernetes_sd_configs:
+      - role: pod
+        selectors:
+          - role: pod
+            field: spec.nodeName=${env:K8S_NODE_NAME}
+```
+
+The field selector filters pods at the Kubernetes API, so each agent only watches its own node.
+Alternatively, keep only local targets with a relabel rule:
+
+```yaml
+    relabel_configs:
+      - action: keep
+        source_labels: [__meta_kubernetes_pod_node_name]
+        regex: ${env:K8S_NODE_NAME}
+```
+
+You can also scrape from a single centralized Collector, or use a target allocation mechanism that
+assigns non-overlapping targets to Collector instances.
+
+This guidance applies to custom scrape jobs. The chart's built-in `autodetect.prometheus` uses node-local
+pod discovery to scrape annotated pods. Avoid configuring custom scrape jobs that overlap with targets
+already collected through autodetection.
+
 ## IBM Db2 monitoring
 
 The [splunk-otel-db2](https://github.com/signalfx/splunk-otel-db2) receiver is available as
