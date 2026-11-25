@@ -8,7 +8,7 @@ require (
 	github.com/golangci/golangci-lint/v2 v2.15.0
 	go.opentelemetry.io/build-tools/chloggen v0.30.0
 	golang.org/x/tools v0.53.0
-	golang.org/x/vuln v1.9.0
+	golang.org/x/vuln v1.10.0
 	mvdan.cc/gofumpt v0.12.0
 )
 
