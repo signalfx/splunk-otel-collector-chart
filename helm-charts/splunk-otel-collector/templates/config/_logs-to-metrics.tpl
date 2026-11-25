@@ -438,12 +438,15 @@ sum/logs_to_metrics:
 {{- end -}}
 
 {{/*
-The complete agent connectors section is kept here because the top-level YAML key is shared
-with Secure App routing.
+The agent connectors share one top-level YAML key.
 */}}
 {{- define "splunk-otel-collector.logsToMetricsAgentConnectors" -}}
-{{- if or .Values.splunkObservability.secureAppEnabled (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") (eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true") }}
+{{- $enrichProfilingMetrics := and (not .Values.gateway.enabled) (eq (include "splunk-otel-collector.profilingMetricsEnabled" .) "true") }}
+{{- if or $enrichProfilingMetrics .Values.splunkObservability.secureAppEnabled (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") (eq (include "splunk-otel-collector.logsToMetricsEnabled" .) "true") }}
 connectors:
+  {{- if $enrichProfilingMetrics }}
+  {{- include "splunk-otel-collector.profilingMetricsConnectors" . | nindent 2 }}
+  {{- end }}
   {{- if or .Values.splunkObservability.secureAppEnabled (eq (include "splunk-otel-collector.dbMonitoringEnabled" .) "true") }}
   routing/logs:
     {{- if or (eq (include "splunk-otel-collector.logsEnabled" .) "true") (eq (include "splunk-otel-collector.profilingEnabled" .) "true") }}

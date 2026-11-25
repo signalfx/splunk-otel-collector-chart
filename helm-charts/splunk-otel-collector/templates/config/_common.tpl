@@ -279,6 +279,50 @@ k8s_attributes/metrics:
         from: pod
 {{- end }}
 
+{{- define "splunk-otel-collector.profilingMetricsEnabled" -}}
+{{- $config := ternary .Values.gateway.config .Values.agent.config .Values.gateway.enabled | default dict -}}
+{{- $service := $config.service | default dict -}}
+{{- $pipelines := $service.pipelines | default dict -}}
+{{- $metrics := $pipelines.metrics | default dict -}}
+{{- /* An explicit receiver list replaces the chart's metrics intake and connector references. */ -}}
+{{- and .Values.splunkObservability.profilingMetricsContainerIdEnabled (eq (include "splunk-otel-collector.profilingEnabled" .) "true") (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") (not (hasKey $metrics "receivers")) -}}
+{{- end }}
+
+{{- define "splunk-otel-collector.hasCustomContainerID" -}}
+{{- $found := false -}}
+{{- range .Values.extraAttributes.custom -}}
+  {{- if eq .name "container.id" -}}
+    {{- $found = true -}}
+  {{- end -}}
+{{- end -}}
+{{- $found -}}
+{{- end }}
+
+{{- define "splunk-otel-collector.profilingMetricsProcessor" -}}
+transform/profiling_metrics:
+  error_mode: ignore
+  metric_statements:
+    # The restart count can reset and be reused, so only use IDs supplied by the sender.
+    - context: resource
+      statements:
+        - 'delete_key(resource.attributes, "container.id") where not IsString(resource.attributes["container.id"]) or resource.attributes["container.id"] == ""'
+    - context: datapoint
+      statements:
+        # SignalFx combines resource and data-point attributes into the same dimension list.
+        - 'delete_key(datapoint.attributes, "container.id") where resource.attributes["container.id"] != nil or not IsString(datapoint.attributes["container.id"]) or datapoint.attributes["container.id"] == ""'
+{{- end }}
+
+{{- define "splunk-otel-collector.profilingMetricsConnectors" -}}
+forward/profiling_metrics: {}
+{{- end }}
+
+{{- define "splunk-otel-collector.profilingMetricsPipelines" -}}
+metrics/profiling_ingest:
+  receivers: [otlp]
+  processors: [transform/profiling_metrics]
+  exporters: [forward/profiling_metrics]
+{{- end }}
+
 {{/*
 Resource processor for logs manipulations
 */}}

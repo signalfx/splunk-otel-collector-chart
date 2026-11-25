@@ -1,0 +1,199 @@
+suite: splunk-otel-collector.profilingMetrics
+values:
+  - ./values/basic.yaml
+templates:
+  - configmap-agent.yaml
+  - configmap-gateway.yaml
+set:
+  splunkObservability.profilingEnabled: true
+  splunkObservability.profilingMetricsContainerIdEnabled: true
+postRenderer:
+  cmd: yq
+  args: [eval, 'select(.data.relay != null) | .data.relay |= from_yaml', '-']
+tests:
+  - it: normalizes only incoming OTLP metrics on the agent without a gateway
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.service.pipelines["metrics/profiling_ingest"]
+          value:
+            receivers: [otlp]
+            processors: [transform/profiling_metrics]
+            exporters: [forward/profiling_metrics]
+      - contains:
+          path: data.relay.service.pipelines.metrics.receivers
+          content: forward/profiling_metrics
+
+  - it: leaves normalization to the gateway when enabled
+    template: configmap-agent.yaml
+    set:
+      gateway.enabled: true
+    asserts:
+      - notExists:
+          path: data.relay.processors["transform/profiling_metrics"]
+      - contains:
+          path: data.relay.service.pipelines.metrics.receivers
+          content: otlp
+
+  - it: normalizes the gateway OTLP metrics path
+    template: configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+    asserts:
+      - equal:
+          path: data.relay.service.pipelines["metrics/profiling_ingest"]
+          value:
+            receivers: [otlp]
+            processors: [transform/profiling_metrics]
+            exporters: [forward/profiling_metrics]
+      - equal:
+          path: data.relay.service.pipelines.metrics.receivers
+          value: [forward/profiling_metrics]
+      - contains:
+          path: data.relay.service.pipelines.metrics.exporters
+          content: signalfx
+
+  - it: drops malformed or empty IDs and gives valid resource IDs precedence
+    template: configmap-agent.yaml
+    asserts:
+      - equal:
+          path: data.relay.processors["transform/profiling_metrics"].metric_statements
+          value:
+            - context: resource
+              statements:
+                - 'delete_key(resource.attributes, "container.id") where not IsString(resource.attributes["container.id"]) or resource.attributes["container.id"] == ""'
+            - context: datapoint
+              statements:
+                - 'delete_key(datapoint.attributes, "container.id") where resource.attributes["container.id"] != nil or not IsString(datapoint.attributes["container.id"]) or datapoint.attributes["container.id"] == ""'
+
+  - it: preserves sender identity across restart-count resets without a Kubernetes ID lookup
+    set:
+      gateway.enabled: true
+    template: configmap-gateway.yaml
+    asserts:
+      - notExists:
+          path: data.relay.processors["k8s_attributes/profiling_metrics"]
+      - notExists:
+          path: data.relay.connectors["routing/profiling_metrics"]
+      - equal:
+          path: data.relay.service.pipelines["metrics/profiling_ingest"].processors
+          value: [transform/profiling_metrics]
+
+  - it: leaves metrics normalization disabled unless explicitly opted in
+    template: configmap-agent.yaml
+    set:
+      splunkObservability.profilingMetricsContainerIdEnabled: false
+    asserts:
+      - notExists:
+          path: data.relay.connectors["forward/profiling_metrics"]
+      - contains:
+          path: data.relay.service.pipelines.metrics.receivers
+          content: otlp
+
+  - it: leaves metrics normalization disabled when profiling is off
+    template: configmap-agent.yaml
+    set:
+      splunkObservability.profilingEnabled: false
+    asserts:
+      - notExists:
+          path: data.relay.connectors["forward/profiling_metrics"]
+
+  - it: leaves metrics normalization disabled when Observability metrics are off
+    template: configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+      splunkObservability.metricsEnabled: false
+    asserts:
+      - notExists:
+          path: data.relay.connectors["forward/profiling_metrics"]
+
+  - it: preserves explicit metrics receiver overrides without dangling connectors
+    template: configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+      gateway.config.service.pipelines.metrics.receivers: [otlp]
+    asserts:
+      - equal:
+          path: data.relay.service.pipelines.metrics.receivers
+          value: [otlp]
+      - notExists:
+          path: data.relay.connectors["forward/profiling_metrics"]
+
+  - it: ignores a custom container ID for agent metrics
+    template: configmap-agent.yaml
+    set: &customContainerID
+      extraAttributes.custom:
+        - name: container.id
+          value: static-id
+        - name: test.custom
+          value: preserved
+    asserts: &agentCustomContainerIDAssertions
+      - contains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/profiling_metrics
+      - notContains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource
+      - equal:
+          path: data.relay.processors["resource/profiling_metrics"].attributes
+          value:
+            - {action: insert, key: k8s.node.name, value: "${K8S_NODE_NAME}"}
+            - {action: upsert, key: k8s.cluster.name, value: test}
+            - {action: insert, key: test.custom, value: preserved}
+      - contains:
+          path: data.relay.processors.resource.attributes
+          content: {action: insert, key: container.id, value: static-id}
+
+  - it: prevents the agent from stamping a custom container ID before gateway normalization
+    template: configmap-agent.yaml
+    set:
+      <<: *customContainerID
+      gateway.enabled: true
+    asserts: *agentCustomContainerIDAssertions
+
+  - it: ignores a custom container ID for gateway metrics and preserves other attributes
+    template: configmap-gateway.yaml
+    set:
+      <<: *customContainerID
+      gateway.enabled: true
+    asserts:
+      - contains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/profiling_metrics
+      - notContains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/add_custom_attrs
+      - equal:
+          path: data.relay.processors["resource/profiling_metrics"].attributes
+          value:
+            - {action: upsert, key: test.custom, value: preserved}
+      - contains:
+          path: data.relay.processors["resource/add_custom_attrs"].attributes
+          content: {action: upsert, key: container.id, value: static-id}
+
+  - it: skips the gateway custom resource processor when container ID is the only entry
+    template: configmap-gateway.yaml
+    set:
+      gateway.enabled: true
+      extraAttributes.custom:
+        - name: container.id
+          value: static-id
+    asserts:
+      - notContains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/add_custom_attrs
+      - notExists:
+          path: data.relay.processors["resource/profiling_metrics"]
+
+  - it: retains custom container IDs on gateway metrics when the feature is off
+    template: configmap-gateway.yaml
+    set:
+      <<: *customContainerID
+      gateway.enabled: true
+      splunkObservability.profilingMetricsContainerIdEnabled: false
+    asserts:
+      - contains:
+          path: data.relay.service.pipelines.metrics.processors
+          content: resource/add_custom_attrs
+      - notExists:
+          path: data.relay.processors["resource/profiling_metrics"]

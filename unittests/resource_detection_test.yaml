@@ -20,6 +20,7 @@ set:
     metricsEnabled: true
     tracesEnabled: true
     profilingEnabled: true
+    profilingMetricsContainerIdEnabled: true
 
 tests:
   - it: "vanilla K8s on AWS — all modes have [env, ec2, system]"
@@ -622,7 +623,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/entities,logs/host,metrics,metrics/agent,metrics/histograms,traces"
+          value: "logs,logs/entities,logs/host,metrics,metrics/agent,metrics/histograms,metrics/profiling_ingest,traces"
 
   - it: "GUARD — agent pipeline names with secureAppEnabled"
     set:
@@ -645,7 +646,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/entities,logs/host,logs/secureapp,logs/split,metrics,metrics/agent,metrics/histograms,traces"
+          value: "logs,logs/entities,logs/host,logs/secureapp,logs/split,metrics,metrics/agent,metrics/histograms,metrics/profiling_ingest,traces"
 
   - it: "GUARD — cluster receiver pipeline names"
     set:
@@ -743,7 +744,7 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/entities,logs/split,metrics,metrics/collector,traces"
+          value: "logs,logs/entities,logs/split,metrics,metrics/collector,metrics/profiling_ingest,traces"
 
   - it: "GUARD — gateway pipeline names with secureAppEnabled"
     set:
@@ -763,4 +764,4 @@ tests:
     asserts:
       - equal:
           path: data.relay
-          value: "logs,logs/entities,logs/secureapp,logs/split,metrics,metrics/collector,traces"
+          value: "logs,logs/entities,logs/secureapp,logs/split,metrics,metrics/collector,metrics/profiling_ingest,traces"

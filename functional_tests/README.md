@@ -91,6 +91,22 @@ make functionaltest SUITE=functional
 kind delete cluster --name=kind
 ```
 
+## Profiling metric container IDs
+
+After building the Helm chart dependencies, run the local OTLP regression test with the Collector version pinned by the chart:
+
+```bash
+python3 functional_tests/profiling_metrics/verify.py /path/to/otelcol
+```
+
+The test runs the rendered agent and gateway transforms and resource processors with synthetic inputs. It checks conflicting, empty, and malformed IDs, points representing two container runs that share a pod UID and restart count, and that a static custom attribute cannot replace the sender's ID. The automated Kind functional suite checks that Java JVM metrics and CPU and allocation profiling logs carry the same ID supplied by the Java test fixture.
+
+### Manual Kind restart test
+
+On Kind with containerd 2.3.1, a temporary, separately managed NRI injector supplied the runtime ID to the pinned Splunk Java agent before startup. A local Collector running the rendered metrics pipeline captured `jvm.memory.used`. The same pod kept its UID, its restart count advanced from `0` to `1`, and the exported ID matched the Kubernetes container ID on both runs. This test verified JVM metric export. Live Profiling UI correlation and production injector deployment are separate checks.
+
+To repeat the test, configure the runtime injector for the test Java pod and enable `splunkObservability.profilingEnabled`, `splunkObservability.metricsEnabled`, and `splunkObservability.profilingMetricsContainerIdEnabled`. Compare `container.id` on an exported JVM metric with the bare ID from `status.containerStatuses[].containerID` for the Java container. Restart that container within the same pod and repeat the comparison.
+
 ## Hosted cluster coverage
 
 Hosted functional tests install or upgrade the chart and validate collector
