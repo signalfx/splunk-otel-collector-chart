@@ -84,20 +84,6 @@ receivers:
   k8s_events:
     auth_type: serviceAccount
   {{- end }}
-  {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
-  smartagent/kubernetes-events:
-    type: kubernetes-events
-    alwaysClusterReporter: true
-    whitelistedEvents:
-    - reason: Created
-      involvedObjectKind: Pod
-    - reason: Unhealthy
-      involvedObjectKind: Pod
-    - reason: Failed
-      involvedObjectKind: Pod
-    - reason: FailedCreate
-      involvedObjectKind: Job
-  {{- end }}
   {{- if eq .Values.distribution "eks/fargate" }}
   # dynamically created kubelet_stats receiver to report all Fargate "node" kubelet stats
   # with exception of collector "node's" own since Fargate forbids connection.
@@ -187,14 +173,6 @@ processors:
       - context: datapoint
         statements:
           - merge_histogram_buckets(32, method="limit_buckets")
-  {{- end }}
-
-  {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
-  resource/add_event_k8s:
-    attributes:
-      - action: insert
-        key: kubernetes_cluster
-        value: {{ .Values.clusterName }}
   {{- end }}
 
   {{- if (eq (include "splunk-otel-collector.platformLogsViaOtlpEnabled" .) "true") }}
@@ -297,7 +275,7 @@ processors:
         value: k8scluster
 
 exporters:
-  {{- if or (and (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (not (and $throughGateway $useEntityEventsForK8sProperties))) (eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true") }}
+  {{- if and (eq (include "splunk-otel-collector.o11yMetricsEnabled" $) "true") (not (and $throughGateway $useEntityEventsForK8sProperties)) }}
   signalfx:
     ingest_url: {{ include "splunk-otel-collector.o11yIngestUrl" . }}
     {{- if $throughGateway }}
@@ -582,25 +560,6 @@ service:
       {{- if (eq (include "splunk-otel-collector.splunkO11yEventsEndpointEnabled" .) "true") }}
         - otlp_http/o11y_events
       {{- end }}
-    {{- end }}
-
-    {{- if eq (include "splunk-otel-collector.o11yInfraMonEventsEnabled" .) "true" }}
-    logs/events:
-      receivers:
-        - smartagent/kubernetes-events
-      processors:
-        - memory_limiter
-        - batch
-        {{- if eq (include "splunk-otel-collector.autoDetectClusterName" .) "true" }}
-        - resource_detection/k8s_cluster_name
-        {{- end }}
-        - resource
-        - resource/add_cluster_host
-        {{- if .Values.clusterName }}
-        - resource/add_event_k8s
-        {{- end }}
-      exporters:
-        - signalfx
     {{- end }}
 
     {{- if and (and (hasPrefix "eks" .Values.distribution) .Values.featureGates.enableEKSApiServerMetrics) (eq (include "splunk-otel-collector.o11yMetricsEnabled" .) "true") }}

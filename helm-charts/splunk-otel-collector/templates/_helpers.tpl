@@ -419,17 +419,6 @@ Render gateway service ports using the same filtering rules for all gateway serv
 {{- end -}}
 
 {{/*
-"o11yInfraMonEventsEnabled" helper defines whether Observability Infrastructure monitoring events are enabled
-*/}}
-{{- define "splunk-otel-collector.o11yInfraMonEventsEnabled" -}}
-{{- if eq (toString .Values.clusterReceiver.k8sEventsEnabled) "<nil>" }}
-{{- .Values.splunkObservability.infrastructureMonitoringEventsEnabled }}
-{{- else }}
-{{- .Values.clusterReceiver.k8sEventsEnabled }}
-{{- end }}
-{{- end -}}
-
-{{/*
 Determines whether the k8s events pipeline will be enabled in the k8s cluster receiver config
 */}}
 {{- define "splunk-otel-collector.clusterReceiverEventsPipelineEnabled" -}}
