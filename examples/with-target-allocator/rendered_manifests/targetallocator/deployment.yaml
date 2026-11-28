@@ -6,7 +6,7 @@ metadata:
   namespace: default
   name: default-targetallocator-ta
   labels:
-    helm.sh/chart: targetallocator-0.163.0
+    helm.sh/chart: targetallocator-0.163.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: opentelemetry-target-allocator
     app.kubernetes.io/version: "0.163.0"
@@ -21,9 +21,9 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 32dac9ab6ac90c95cb21df382412bcba8aa0eb9ca7aeed00efa83eb38f766c59
+        checksum/config: 63cccd562561d7483485f96772b2c5b1bc1ade1066952d931707f427253d5bf5
       labels:
-        helm.sh/chart: targetallocator-0.163.0
+        helm.sh/chart: targetallocator-0.163.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/part-of: opentelemetry-target-allocator
         app.kubernetes.io/version: "0.163.0"
